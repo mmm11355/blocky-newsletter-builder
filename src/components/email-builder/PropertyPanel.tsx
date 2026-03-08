@@ -61,14 +61,7 @@ const PropertyPanel = () => {
         )}
 
         {block.type === 'image' && (
-          <>
-            <Field label="URL изображения">
-              <input type="text" value={block.src || ''} onChange={(e) => updBlock({ src: e.target.value })} className="w-full rounded-lg border border-input bg-secondary/50 px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary/50 transition-all" />
-            </Field>
-            <Field label="Alt текст">
-              <input type="text" value={block.alt || ''} onChange={(e) => updBlock({ alt: e.target.value })} className="w-full rounded-lg border border-input bg-secondary/50 px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary/50 transition-all" />
-            </Field>
-          </>
+          <ImageFields src={block.src || ''} alt={block.alt || ''} onUpdate={updBlock} />
         )}
 
         {block.type === 'button' && (
