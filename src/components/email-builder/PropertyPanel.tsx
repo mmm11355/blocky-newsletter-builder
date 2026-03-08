@@ -1,5 +1,6 @@
+import { useRef, useCallback } from 'react';
 import { useEmailBuilder } from '@/context/EmailBuilderContext';
-import { Trash2, ArrowUp, ArrowDown, Settings2 } from 'lucide-react';
+import { Trash2, ArrowUp, ArrowDown, Settings2, Upload, ClipboardPaste } from 'lucide-react';
 
 const PropertyPanel = () => {
   const { getSelectedBlock, updateBlock, updateBlockStyle, deleteBlock, moveBlock, selection } = useEmailBuilder();
@@ -60,14 +61,7 @@ const PropertyPanel = () => {
         )}
 
         {block.type === 'image' && (
-          <>
-            <Field label="URL изображения">
-              <input type="text" value={block.src || ''} onChange={(e) => updBlock({ src: e.target.value })} className="w-full rounded-lg border border-input bg-secondary/50 px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary/50 transition-all" />
-            </Field>
-            <Field label="Alt текст">
-              <input type="text" value={block.alt || ''} onChange={(e) => updBlock({ alt: e.target.value })} className="w-full rounded-lg border border-input bg-secondary/50 px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary/50 transition-all" />
-            </Field>
-          </>
+          <ImageFields src={block.src || ''} alt={block.alt || ''} onUpdate={updBlock} />
         )}
 
         {block.type === 'button' && (
@@ -162,6 +156,83 @@ const PropertyPanel = () => {
         </Section>
       </div>
     </div>
+  );
+};
+
+const fileToDataURL = (file: File): Promise<string> =>
+  new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result as string);
+    reader.readAsDataURL(file);
+  });
+
+const ImageFields: React.FC<{ src: string; alt: string; onUpdate: (u: Record<string, any>) => void }> = ({ src, alt, onUpdate }) => {
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  const handleFile = useCallback(async (file: File) => {
+    if (!file.type.startsWith('image/')) return;
+    const dataUrl = await fileToDataURL(file);
+    onUpdate({ src: dataUrl });
+  }, [onUpdate]);
+
+  const handlePaste = useCallback(async () => {
+    try {
+      const items = await navigator.clipboard.read();
+      for (const item of items) {
+        const imageType = item.types.find(t => t.startsWith('image/'));
+        if (imageType) {
+          const blob = await item.getType(imageType);
+          const dataUrl = await fileToDataURL(new File([blob], 'pasted.png', { type: imageType }));
+          onUpdate({ src: dataUrl });
+          return;
+        }
+        // fallback: try text (URL)
+        if (item.types.includes('text/plain')) {
+          const blob = await item.getType('text/plain');
+          const text = await blob.text();
+          if (text.startsWith('http')) {
+            onUpdate({ src: text });
+            return;
+          }
+        }
+      }
+    } catch {
+      // fallback to clipboard text
+      const text = await navigator.clipboard.readText();
+      if (text.startsWith('http') || text.startsWith('data:')) {
+        onUpdate({ src: text });
+      }
+    }
+  }, [onUpdate]);
+
+  return (
+    <>
+      <Field label="Изображение">
+        <div className="space-y-2">
+          <input type="text" value={src} onChange={(e) => onUpdate({ src: e.target.value })} placeholder="URL изображения" className="w-full rounded-lg border border-input bg-secondary/50 px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary/50 transition-all" />
+          <div className="flex gap-1.5">
+            <button
+              onClick={() => fileRef.current?.click()}
+              className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-secondary text-secondary-foreground hover:bg-secondary/80 text-xs font-medium transition-colors"
+            >
+              <Upload className="h-3.5 w-3.5" />
+              Загрузить
+            </button>
+            <button
+              onClick={handlePaste}
+              className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-secondary text-secondary-foreground hover:bg-secondary/80 text-xs font-medium transition-colors"
+            >
+              <ClipboardPaste className="h-3.5 w-3.5" />
+              Вставить
+            </button>
+          </div>
+          <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={(e) => { if (e.target.files?.[0]) handleFile(e.target.files[0]); }} />
+        </div>
+      </Field>
+      <Field label="Alt текст">
+        <input type="text" value={alt} onChange={(e) => onUpdate({ alt: e.target.value })} className="w-full rounded-lg border border-input bg-secondary/50 px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary/50 transition-all" />
+      </Field>
+    </>
   );
 };
 
