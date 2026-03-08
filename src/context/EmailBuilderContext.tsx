@@ -150,17 +150,17 @@ export const EmailBuilderProvider: React.FC<{ children: React.ReactNode }> = ({ 
   }, []);
 
   const updateGlobalStyle = useCallback((style: Partial<EmailTemplate['globalStyle']>) => {
-    setTemplateState(prev => ({ ...prev, globalStyle: { ...prev.globalStyle, ...style } }));
+    setTemplate(prev => ({ ...prev, globalStyle: { ...prev.globalStyle, ...style } }));
   }, []);
 
   const setTemplateDirectly = useCallback((t: EmailTemplate) => {
-    setTemplateState(t);
+    setTemplate(t);
     setSelection(null);
   }, []);
 
   const addBlockFromSaved = useCallback((rowId: string, cellIndex: number, savedBlock: EmailBlock) => {
     const newBlock = { ...savedBlock, id: crypto.randomUUID() };
-    setTemplateState(prev => ({
+    setTemplate(prev => ({
       ...prev,
       rows: prev.rows.map(r => {
         if (r.id !== rowId) return r;
