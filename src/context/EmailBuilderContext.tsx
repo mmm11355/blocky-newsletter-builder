@@ -25,6 +25,8 @@ interface EmailBuilderContextType {
   updateGlobalStyle: (style: Partial<EmailTemplate['globalStyle']>) => void;
   getSelectedBlock: () => { block: EmailBlock; rowId: string; cellIndex: number } | null;
   generateHTML: () => string;
+  setTemplate: (template: EmailTemplate) => void;
+  addBlockFromSaved: (rowId: string, cellIndex: number, block: EmailBlock) => void;
 }
 
 const EmailBuilderContext = createContext<EmailBuilderContextType | null>(null);
