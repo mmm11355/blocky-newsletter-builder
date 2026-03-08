@@ -1,6 +1,7 @@
 import { useRef, useCallback } from 'react';
 import { useEmailBuilder } from '@/context/EmailBuilderContext';
-import { Trash2, ArrowUp, ArrowDown, Settings2, Upload, ClipboardPaste } from 'lucide-react';
+import { EMAIL_FONTS } from '@/types/email-builder';
+import { Trash2, ArrowUp, ArrowDown, Settings2, Upload, ClipboardPaste, Link } from 'lucide-react';
 
 const PropertyPanel = () => {
   const { getSelectedBlock, updateBlock, updateBlockStyle, deleteBlock, moveBlock, selection } = useEmailBuilder();
@@ -30,11 +31,11 @@ const PropertyPanel = () => {
       <div className="p-4 border-b border-border flex items-center justify-between">
         <div className="flex items-center gap-2">
           <div className="w-2 h-2 rounded-full gradient-primary" />
-          <h3 className="text-sm font-semibold text-foreground">{typeLabels[block.type]}</h3>
+          <h3 className="text-sm font-semibold text-card-foreground">{typeLabels[block.type]}</h3>
         </div>
         <div className="flex gap-0.5">
-          <button onClick={() => moveBlock(rowId, cellIndex, block.id, 'up')} className="p-1.5 rounded-md hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors"><ArrowUp className="h-3.5 w-3.5" /></button>
-          <button onClick={() => moveBlock(rowId, cellIndex, block.id, 'down')} className="p-1.5 rounded-md hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors"><ArrowDown className="h-3.5 w-3.5" /></button>
+          <button onClick={() => moveBlock(rowId, cellIndex, block.id, 'up')} className="p-1.5 rounded-md hover:bg-secondary text-muted-foreground hover:text-secondary-foreground transition-colors"><ArrowUp className="h-3.5 w-3.5" /></button>
+          <button onClick={() => moveBlock(rowId, cellIndex, block.id, 'down')} className="p-1.5 rounded-md hover:bg-secondary text-muted-foreground hover:text-secondary-foreground transition-colors"><ArrowDown className="h-3.5 w-3.5" /></button>
           <button onClick={() => deleteBlock(rowId, cellIndex, block.id)} className="p-1.5 rounded-md hover:bg-destructive hover:text-destructive-foreground text-muted-foreground transition-colors"><Trash2 className="h-3.5 w-3.5" /></button>
         </div>
       </div>
@@ -47,41 +48,58 @@ const PropertyPanel = () => {
               <textarea
                 value={block.content}
                 onChange={(e) => updBlock({ content: e.target.value })}
-                className="w-full rounded-lg border border-input bg-secondary/50 px-3 py-2 text-sm min-h-[80px] resize-y text-foreground focus:outline-none focus:ring-1 focus:ring-primary/50 transition-all"
+                className="w-full rounded-lg border border-input bg-secondary/50 px-3 py-2 text-sm min-h-[80px] resize-y text-card-foreground focus:outline-none focus:ring-1 focus:ring-primary/50 transition-all"
               />
             ) : (
               <input
                 type="text"
                 value={block.content}
                 onChange={(e) => updBlock({ content: e.target.value })}
-                className="w-full rounded-lg border border-input bg-secondary/50 px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary/50 transition-all"
+                className="w-full rounded-lg border border-input bg-secondary/50 px-3 py-2 text-sm text-card-foreground focus:outline-none focus:ring-1 focus:ring-primary/50 transition-all"
               />
             )}
           </Field>
         )}
 
         {block.type === 'image' && (
-          <ImageFields src={block.src || ''} alt={block.alt || ''} onUpdate={updBlock} />
+          <ImageFields src={block.src || ''} alt={block.alt || ''} href={block.href || ''} onUpdate={updBlock} />
         )}
 
         {block.type === 'button' && (
           <Field label="Ссылка (href)">
-            <input type="text" value={block.href || ''} onChange={(e) => updBlock({ href: e.target.value })} className="w-full rounded-lg border border-input bg-secondary/50 px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary/50 transition-all" />
+            <input type="text" value={block.href || ''} onChange={(e) => updBlock({ href: e.target.value })} className="w-full rounded-lg border border-input bg-secondary/50 px-3 py-2 text-sm text-card-foreground focus:outline-none focus:ring-1 focus:ring-primary/50 transition-all" />
           </Field>
+        )}
+
+        {/* Font Family — for heading, text, button */}
+        {(block.type === 'heading' || block.type === 'text' || block.type === 'button') && (
+          <Section title="Шрифт">
+            <Field label="Семейство шрифта" compact>
+              <select
+                value={s.fontFamily}
+                onChange={(e) => upd({ fontFamily: e.target.value })}
+                className="w-full rounded-lg border border-input bg-secondary/50 px-2 py-1.5 text-sm text-card-foreground focus:outline-none focus:ring-1 focus:ring-primary/50"
+              >
+                {EMAIL_FONTS.map(f => (
+                  <option key={f.value} value={f.value}>{f.label}</option>
+                ))}
+              </select>
+            </Field>
+          </Section>
         )}
 
         {/* Typography */}
         <Section title="Типографика">
           <div className="grid grid-cols-2 gap-2">
             <Field label="Размер" compact>
-              <input type="number" value={s.fontSize} onChange={(e) => upd({ fontSize: +e.target.value })} className="w-full rounded-lg border border-input bg-secondary/50 px-2 py-1.5 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary/50" />
+              <input type="number" value={s.fontSize} onChange={(e) => upd({ fontSize: +e.target.value })} className="w-full rounded-lg border border-input bg-secondary/50 px-2 py-1.5 text-sm text-card-foreground focus:outline-none focus:ring-1 focus:ring-primary/50" />
             </Field>
             <Field label="Высота строки" compact>
-              <input type="number" step={0.1} value={s.lineHeight} onChange={(e) => upd({ lineHeight: +e.target.value })} className="w-full rounded-lg border border-input bg-secondary/50 px-2 py-1.5 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary/50" />
+              <input type="number" step={0.1} value={s.lineHeight} onChange={(e) => upd({ lineHeight: +e.target.value })} className="w-full rounded-lg border border-input bg-secondary/50 px-2 py-1.5 text-sm text-card-foreground focus:outline-none focus:ring-1 focus:ring-primary/50" />
             </Field>
           </div>
           <Field label="Жирность" compact>
-            <select value={s.fontWeight} onChange={(e) => upd({ fontWeight: e.target.value })} className="w-full rounded-lg border border-input bg-secondary/50 px-2 py-1.5 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary/50">
+            <select value={s.fontWeight} onChange={(e) => upd({ fontWeight: e.target.value })} className="w-full rounded-lg border border-input bg-secondary/50 px-2 py-1.5 text-sm text-card-foreground focus:outline-none focus:ring-1 focus:ring-primary/50">
               <option value="400">Обычный</option>
               <option value="500">Средний</option>
               <option value="600">Полужирный</option>
@@ -128,7 +146,7 @@ const PropertyPanel = () => {
           <div className="grid grid-cols-2 gap-2">
             {([['paddingTop', '↑ Верх'], ['paddingRight', '→ Право'], ['paddingBottom', '↓ Низ'], ['paddingLeft', '← Лево']] as const).map(([key, label]) => (
               <Field key={key} label={label} compact>
-                <input type="number" value={s[key]} onChange={(e) => upd({ [key]: +e.target.value })} className="w-full rounded-lg border border-input bg-secondary/50 px-2 py-1.5 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary/50" />
+                <input type="number" value={s[key]} onChange={(e) => upd({ [key]: +e.target.value })} className="w-full rounded-lg border border-input bg-secondary/50 px-2 py-1.5 text-sm text-card-foreground focus:outline-none focus:ring-1 focus:ring-primary/50" />
               </Field>
             ))}
           </div>
@@ -138,10 +156,10 @@ const PropertyPanel = () => {
         <Section title="Обводка">
           <div className="grid grid-cols-2 gap-2">
             <Field label="Толщина" compact>
-              <input type="number" value={s.borderWidth} onChange={(e) => upd({ borderWidth: +e.target.value })} className="w-full rounded-lg border border-input bg-secondary/50 px-2 py-1.5 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary/50" />
+              <input type="number" value={s.borderWidth} onChange={(e) => upd({ borderWidth: +e.target.value })} className="w-full rounded-lg border border-input bg-secondary/50 px-2 py-1.5 text-sm text-card-foreground focus:outline-none focus:ring-1 focus:ring-primary/50" />
             </Field>
             <Field label="Радиус" compact>
-              <input type="number" value={s.borderRadius} onChange={(e) => upd({ borderRadius: +e.target.value })} className="w-full rounded-lg border border-input bg-secondary/50 px-2 py-1.5 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary/50" />
+              <input type="number" value={s.borderRadius} onChange={(e) => upd({ borderRadius: +e.target.value })} className="w-full rounded-lg border border-input bg-secondary/50 px-2 py-1.5 text-sm text-card-foreground focus:outline-none focus:ring-1 focus:ring-primary/50" />
             </Field>
           </div>
           <Field label="Цвет обводки" compact>
@@ -166,7 +184,7 @@ const fileToDataURL = (file: File): Promise<string> =>
     reader.readAsDataURL(file);
   });
 
-const ImageFields: React.FC<{ src: string; alt: string; onUpdate: (u: Record<string, any>) => void }> = ({ src, alt, onUpdate }) => {
+const ImageFields: React.FC<{ src: string; alt: string; href: string; onUpdate: (u: Record<string, any>) => void }> = ({ src, alt, href, onUpdate }) => {
   const fileRef = useRef<HTMLInputElement>(null);
 
   const handleFile = useCallback(async (file: File) => {
@@ -186,7 +204,6 @@ const ImageFields: React.FC<{ src: string; alt: string; onUpdate: (u: Record<str
           onUpdate({ src: dataUrl });
           return;
         }
-        // fallback: try text (URL)
         if (item.types.includes('text/plain')) {
           const blob = await item.getType('text/plain');
           const text = await blob.text();
@@ -197,7 +214,6 @@ const ImageFields: React.FC<{ src: string; alt: string; onUpdate: (u: Record<str
         }
       }
     } catch {
-      // fallback to clipboard text
       const text = await navigator.clipboard.readText();
       if (text.startsWith('http') || text.startsWith('data:')) {
         onUpdate({ src: text });
@@ -209,7 +225,7 @@ const ImageFields: React.FC<{ src: string; alt: string; onUpdate: (u: Record<str
     <>
       <Field label="Изображение">
         <div className="space-y-2">
-          <input type="text" value={src} onChange={(e) => onUpdate({ src: e.target.value })} placeholder="URL изображения" className="w-full rounded-lg border border-input bg-secondary/50 px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary/50 transition-all" />
+          <input type="text" value={src} onChange={(e) => onUpdate({ src: e.target.value })} placeholder="URL изображения" className="w-full rounded-lg border border-input bg-secondary/50 px-3 py-2 text-sm text-card-foreground focus:outline-none focus:ring-1 focus:ring-primary/50 transition-all" />
           <div className="flex gap-1.5">
             <button
               onClick={() => fileRef.current?.click()}
@@ -230,7 +246,13 @@ const ImageFields: React.FC<{ src: string; alt: string; onUpdate: (u: Record<str
         </div>
       </Field>
       <Field label="Alt текст">
-        <input type="text" value={alt} onChange={(e) => onUpdate({ alt: e.target.value })} className="w-full rounded-lg border border-input bg-secondary/50 px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary/50 transition-all" />
+        <input type="text" value={alt} onChange={(e) => onUpdate({ alt: e.target.value })} className="w-full rounded-lg border border-input bg-secondary/50 px-3 py-2 text-sm text-card-foreground focus:outline-none focus:ring-1 focus:ring-primary/50 transition-all" />
+      </Field>
+      <Field label="Ссылка при клике">
+        <div className="relative">
+          <Link className="h-3.5 w-3.5 text-muted-foreground absolute left-3 top-1/2 -translate-y-1/2" />
+          <input type="text" value={href} onChange={(e) => onUpdate({ href: e.target.value })} placeholder="https://example.com" className="w-full rounded-lg border border-input bg-secondary/50 pl-8 pr-3 py-2 text-sm text-card-foreground focus:outline-none focus:ring-1 focus:ring-primary/50 transition-all" />
+        </div>
       </Field>
     </>
   );
@@ -246,7 +268,7 @@ const Field: React.FC<{ label: string; compact?: boolean; children: React.ReactN
 const Section: React.FC<{ title: string; children: React.ReactNode }> = ({ title, children }) => (
   <div className="space-y-3">
     <div className="flex items-center gap-2">
-      <h4 className="text-[11px] font-semibold text-foreground/60 uppercase tracking-widest">{title}</h4>
+      <h4 className="text-[11px] font-semibold text-card-foreground/60 uppercase tracking-widest">{title}</h4>
       <div className="flex-1 h-px bg-border" />
     </div>
     {children}

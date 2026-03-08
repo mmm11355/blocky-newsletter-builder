@@ -5,6 +5,7 @@ export interface BlockStyle {
   color: string;
   fontSize: number;
   fontWeight: string;
+  fontFamily: string;
   textAlign: 'left' | 'center' | 'right';
   backgroundColor: string;
   paddingTop: number;
@@ -25,7 +26,7 @@ export interface EmailBlock {
   // for image
   src?: string;
   alt?: string;
-  // for button
+  // for button & image
   href?: string;
 }
 
@@ -55,6 +56,7 @@ export const defaultBlockStyle: BlockStyle = {
   color: '#333333',
   fontSize: 16,
   fontWeight: '400',
+  fontFamily: 'inherit',
   textAlign: 'left',
   backgroundColor: 'transparent',
   paddingTop: 10,
@@ -67,6 +69,23 @@ export const defaultBlockStyle: BlockStyle = {
   lineHeight: 1.5,
 };
 
+export const EMAIL_FONTS = [
+  { label: 'По умолчанию', value: 'inherit' },
+  { label: 'Arial', value: 'Arial, Helvetica, sans-serif' },
+  { label: 'Helvetica', value: "'Helvetica Neue', Helvetica, Arial, sans-serif" },
+  { label: 'Georgia', value: 'Georgia, serif' },
+  { label: 'Times New Roman', value: "'Times New Roman', Times, serif" },
+  { label: 'Verdana', value: 'Verdana, Geneva, sans-serif' },
+  { label: 'Tahoma', value: 'Tahoma, Geneva, sans-serif' },
+  { label: 'Trebuchet MS', value: "'Trebuchet MS', Helvetica, sans-serif" },
+  { label: 'Courier New', value: "'Courier New', Courier, monospace" },
+  { label: 'Roboto', value: "'Roboto', Arial, sans-serif" },
+  { label: 'Open Sans', value: "'Open Sans', Arial, sans-serif" },
+  { label: 'Montserrat', value: "'Montserrat', Arial, sans-serif" },
+  { label: 'Playfair Display', value: "'Playfair Display', Georgia, serif" },
+  { label: 'PT Sans', value: "'PT Sans', Arial, sans-serif" },
+];
+
 export const createBlock = (type: BlockType): EmailBlock => {
   const id = crypto.randomUUID();
   const base = { id, type, style: { ...defaultBlockStyle } };
@@ -77,7 +96,7 @@ export const createBlock = (type: BlockType): EmailBlock => {
     case 'text':
       return { ...base, content: 'Здесь ваш текст. Нажмите чтобы отредактировать.' };
     case 'image':
-      return { ...base, content: '', src: 'https://placehold.co/600x300/e2e8f0/64748b?text=Image', alt: 'Image', style: { ...base.style, textAlign: 'center' } };
+      return { ...base, content: '', src: 'https://placehold.co/600x300/e2e8f0/64748b?text=Image', alt: 'Image', href: '', style: { ...base.style, textAlign: 'center' } };
     case 'button':
       return { ...base, content: 'Нажми меня', href: '#', style: { ...base.style, backgroundColor: '#3b5bdb', color: '#ffffff', textAlign: 'center', paddingTop: 12, paddingBottom: 12, paddingLeft: 24, paddingRight: 24, borderRadius: 6, fontWeight: '600' } };
   }
