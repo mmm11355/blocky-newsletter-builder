@@ -1,5 +1,6 @@
+import { useRef, useCallback } from 'react';
 import { useEmailBuilder } from '@/context/EmailBuilderContext';
-import { Trash2, ArrowUp, ArrowDown, Settings2 } from 'lucide-react';
+import { Trash2, ArrowUp, ArrowDown, Settings2, Upload, ClipboardPaste } from 'lucide-react';
 
 const PropertyPanel = () => {
   const { getSelectedBlock, updateBlock, updateBlockStyle, deleteBlock, moveBlock, selection } = useEmailBuilder();
