@@ -14,7 +14,7 @@ interface Props {
 }
 
 const ArchivePanel: React.FC<Props> = ({ open, onClose }) => {
-  const { template, setTemplate, getSelectedBlock, selection } = useEmailBuilder();
+  const { template, setTemplate, getSelectedBlock, selection, addBlockFromSaved } = useEmailBuilder();
   const [tab, setTab] = useState<'templates' | 'blocks'>('templates');
   const [templates, setTemplates] = useState<SavedTemplate[]>([]);
   const [blocks, setBlocks] = useState<SavedBlock[]>([]);
@@ -73,15 +73,11 @@ const ArchivePanel: React.FC<Props> = ({ open, onClose }) => {
 
   const handleLoadBlock = (saved: SavedBlock) => {
     if (!selection) {
-      toast.error('Сначала выберите ячейку — добавьте строку и кликните на блок');
+      toast.error('Сначала выберите ячейку на канвасе');
       return;
     }
-    // Add the saved block to the currently selected row/cell
-    const { addBlockFromSaved } = useEmailBuilderDirect();
-    if (addBlockFromSaved) {
-      addBlockFromSaved(selection.rowId, selection.cellIndex, saved.block);
-      toast.success(`Блок "${saved.name}" добавлен`);
-    }
+    addBlockFromSaved(selection.rowId, selection.cellIndex, saved.block);
+    toast.success(`Блок "${saved.name}" добавлен`);
   };
 
   const formatDate = (ts: number) => {
@@ -93,10 +89,8 @@ const ArchivePanel: React.FC<Props> = ({ open, onClose }) => {
 
   return (
     <div className="fixed inset-0 z-50 flex">
-      {/* Backdrop */}
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
 
-      {/* Panel */}
       <div className="relative ml-auto w-[420px] max-w-full h-full bg-card border-l border-border flex flex-col animate-in slide-in-from-right duration-300">
         {/* Header */}
         <div className="p-4 border-b border-border flex items-center justify-between shrink-0">
@@ -205,6 +199,9 @@ const ArchivePanel: React.FC<Props> = ({ open, onClose }) => {
                       <p className="text-[11px] text-muted-foreground mt-0.5">{typeLabels[b.block.type] || b.block.type} · {formatDate(b.savedAt)}</p>
                     </div>
                     <div className="flex gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <button onClick={() => handleLoadBlock(b)} className="p-1.5 rounded-md hover:bg-primary/20 text-primary transition-colors" title="Вставить">
+                        <Download className="h-3.5 w-3.5" />
+                      </button>
                       <button onClick={() => handleDeleteBlock(b.id)} className="p-1.5 rounded-md hover:bg-destructive/20 text-destructive transition-colors" title="Удалить">
                         <Trash2 className="h-3.5 w-3.5" />
                       </button>
@@ -229,16 +226,5 @@ const EmptyState: React.FC<{ text: string; sub: string }> = ({ text, sub }) => (
     <p className="text-xs text-muted-foreground mt-1 max-w-[250px]">{sub}</p>
   </div>
 );
-
-// This is a workaround — we can't use hooks conditionally
-const useEmailBuilderDirect = () => {
-  try {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    const ctx = useEmailBuilder();
-    return { addBlockFromSaved: ctx.addBlockFromSaved };
-  } catch {
-    return { addBlockFromSaved: null };
-  }
-};
 
 export default ArchivePanel;
