@@ -4,10 +4,12 @@ import ElementsSidebar from '@/components/email-builder/ElementsSidebar';
 import EmailCanvas from '@/components/email-builder/EmailCanvas';
 import PropertyPanel from '@/components/email-builder/PropertyPanel';
 import ExportDialog from '@/components/email-builder/ExportDialog';
-import { Code2, Mail, Sparkles } from 'lucide-react';
+import ArchivePanel from '@/components/email-builder/ArchivePanel';
+import { Code2, Mail, Archive } from 'lucide-react';
 
 const Index = () => {
   const [exportOpen, setExportOpen] = useState(false);
+  const [archiveOpen, setArchiveOpen] = useState(false);
 
   return (
     <EmailBuilderProvider>
@@ -21,13 +23,22 @@ const Index = () => {
             <span className="font-bold text-foreground text-lg tracking-tight">MailCraft</span>
             <span className="text-xs text-muted-foreground font-medium bg-secondary px-2 py-0.5 rounded-full">beta</span>
           </div>
-          <button
-            onClick={() => setExportOpen(true)}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg gradient-primary text-primary-foreground hover:opacity-90 text-sm font-semibold transition-all glow-primary"
-          >
-            <Code2 className="h-4 w-4" />
-            Экспорт HTML
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setArchiveOpen(true)}
+              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-secondary text-secondary-foreground hover:bg-secondary/80 text-sm font-semibold transition-all"
+            >
+              <Archive className="h-4 w-4" />
+              Архив
+            </button>
+            <button
+              onClick={() => setExportOpen(true)}
+              className="flex items-center gap-2 px-4 py-2 rounded-lg gradient-primary text-primary-foreground hover:opacity-90 text-sm font-semibold transition-all glow-primary"
+            >
+              <Code2 className="h-4 w-4" />
+              Экспорт HTML
+            </button>
+          </div>
         </header>
 
         {/* Main layout */}
@@ -39,6 +50,7 @@ const Index = () => {
       </div>
 
       <ExportDialog open={exportOpen} onClose={() => setExportOpen(false)} />
+      <ArchivePanel open={archiveOpen} onClose={() => setArchiveOpen(false)} />
     </EmailBuilderProvider>
   );
 };
