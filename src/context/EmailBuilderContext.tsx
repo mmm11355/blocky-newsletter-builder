@@ -25,6 +25,8 @@ interface EmailBuilderContextType {
   updateGlobalStyle: (style: Partial<EmailTemplate['globalStyle']>) => void;
   getSelectedBlock: () => { block: EmailBlock; rowId: string; cellIndex: number } | null;
   generateHTML: () => string;
+  setTemplate: (template: EmailTemplate) => void;
+  addBlockFromSaved: (rowId: string, cellIndex: number, block: EmailBlock) => void;
 }
 
 const EmailBuilderContext = createContext<EmailBuilderContextType | null>(null);
@@ -151,6 +153,24 @@ export const EmailBuilderProvider: React.FC<{ children: React.ReactNode }> = ({ 
     setTemplate(prev => ({ ...prev, globalStyle: { ...prev.globalStyle, ...style } }));
   }, []);
 
+  const setTemplateDirectly = useCallback((t: EmailTemplate) => {
+    setTemplate(t);
+    setSelection(null);
+  }, []);
+
+  const addBlockFromSaved = useCallback((rowId: string, cellIndex: number, savedBlock: EmailBlock) => {
+    const newBlock = { ...savedBlock, id: crypto.randomUUID() };
+    setTemplate(prev => ({
+      ...prev,
+      rows: prev.rows.map(r => {
+        if (r.id !== rowId) return r;
+        const cells = r.cells.map((cell, i) => i === cellIndex ? [...cell, newBlock] : cell);
+        return { ...r, cells };
+      }),
+    }));
+    setSelection({ rowId, cellIndex, blockId: newBlock.id });
+  }, []);
+
   const getSelectedBlock = useCallback(() => {
     if (!selection) return null;
     const row = template.rows.find(r => r.id === selection.rowId);
@@ -224,6 +244,7 @@ ${rows.map(renderRow).join('\n')}
       setSelection, addRow, deleteRow, moveRow,
       addBlockToCell, updateBlock, updateBlockStyle, deleteBlock, moveBlock,
       updateRowStyle, updateGlobalStyle, getSelectedBlock, generateHTML,
+      setTemplate: setTemplateDirectly, addBlockFromSaved,
     }}>
       {children}
     </EmailBuilderContext.Provider>
