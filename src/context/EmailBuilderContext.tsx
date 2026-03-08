@@ -244,6 +244,7 @@ ${rows.map(renderRow).join('\n')}
       setSelection, addRow, deleteRow, moveRow,
       addBlockToCell, updateBlock, updateBlockStyle, deleteBlock, moveBlock,
       updateRowStyle, updateGlobalStyle, getSelectedBlock, generateHTML,
+      setTemplate: setTemplateDirectly, addBlockFromSaved,
     }}>
       {children}
     </EmailBuilderContext.Provider>
