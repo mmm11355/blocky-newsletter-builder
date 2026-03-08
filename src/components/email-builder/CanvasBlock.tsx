@@ -22,6 +22,7 @@ const CanvasBlock: React.FC<Props> = ({ block, rowId, cellIndex }) => {
     color: s.color,
     fontSize: s.fontSize,
     fontWeight: s.fontWeight as any,
+    fontFamily: s.fontFamily !== 'inherit' ? s.fontFamily : undefined,
     textAlign: s.textAlign as any,
     backgroundColor: s.backgroundColor,
     padding: `${s.paddingTop}px ${s.paddingRight}px ${s.paddingBottom}px ${s.paddingLeft}px`,
@@ -29,7 +30,7 @@ const CanvasBlock: React.FC<Props> = ({ block, rowId, cellIndex }) => {
     borderRadius: s.borderRadius,
     lineHeight: s.lineHeight,
     cursor: 'pointer',
-    outline: isSelected ? '2px solid hsl(230, 80%, 56%)' : 'none',
+    outline: isSelected ? '2px solid hsl(250 85% 65%)' : 'none',
     outlineOffset: '1px',
     transition: 'outline 0.15s',
   };
@@ -55,11 +56,12 @@ const CanvasBlock: React.FC<Props> = ({ block, rowId, cellIndex }) => {
               color: s.color,
               fontSize: s.fontSize,
               fontWeight: s.fontWeight as any,
+              fontFamily: s.fontFamily !== 'inherit' ? s.fontFamily : undefined,
               padding: '12px 24px',
               borderRadius: s.borderRadius,
               border: `${s.borderWidth}px solid ${s.borderColor}`,
               cursor: 'pointer',
-              outline: isSelected ? '2px solid hsl(230, 80%, 56%)' : 'none',
+              outline: isSelected ? '2px solid hsl(250 85% 65%)' : 'none',
               outlineOffset: '1px',
             }}>
               {block.content}
