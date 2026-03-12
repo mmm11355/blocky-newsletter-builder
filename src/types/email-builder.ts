@@ -17,6 +17,7 @@ export interface BlockStyle {
   borderRadius: number;
   lineHeight: number;
   width: string;
+  mobileWidth: string;
 }
 
 export interface EmailBlock {
@@ -69,6 +70,7 @@ export const defaultBlockStyle: BlockStyle = {
   borderRadius: 0,
   lineHeight: 1.5,
   width: '100%',
+  mobileWidth: '100%',
 };
 
 export const EMAIL_FONTS = [
