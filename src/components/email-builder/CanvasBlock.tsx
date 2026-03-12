@@ -18,6 +18,11 @@ const CanvasBlock: React.FC<Props> = ({ block, rowId, cellIndex }) => {
     setSelection({ rowId, cellIndex, blockId: block.id });
   };
 
+  const wrapperStyle: React.CSSProperties = {
+    width: s.width || '100%',
+    margin: s.textAlign === 'center' ? '0 auto' : s.textAlign === 'right' ? '0 0 0 auto' : undefined,
+  };
+
   const baseStyle: React.CSSProperties = {
     color: s.color,
     fontSize: s.fontSize,
@@ -71,7 +76,7 @@ const CanvasBlock: React.FC<Props> = ({ block, rowId, cellIndex }) => {
     }
   };
 
-  return <>{renderContent()}</>;
+  return <div style={wrapperStyle}>{renderContent()}</div>;
 };
 
 export default CanvasBlock;
