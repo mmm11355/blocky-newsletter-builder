@@ -9,7 +9,7 @@ interface Props {
 }
 
 const CanvasBlock: React.FC<Props> = ({ block, rowId, cellIndex }) => {
-  const { selection, setSelection } = useEmailBuilder();
+  const { selection, setSelection, previewMode } = useEmailBuilder();
   const isSelected = selection?.blockId === block.id;
   const s = block.style;
 
@@ -18,8 +18,11 @@ const CanvasBlock: React.FC<Props> = ({ block, rowId, cellIndex }) => {
     setSelection({ rowId, cellIndex, blockId: block.id });
   };
 
+  const activeWidth = previewMode === 'mobile' ? (s.mobileWidth || '100%') : (s.width || '100%');
+
   const wrapperStyle: React.CSSProperties = {
-    width: s.width || '100%',
+    width: activeWidth,
+    maxWidth: '100%',
     margin: s.textAlign === 'center' ? '0 auto' : s.textAlign === 'right' ? '0 0 0 auto' : undefined,
   };
 

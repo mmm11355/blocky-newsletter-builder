@@ -184,26 +184,49 @@ export const EmailBuilderProvider: React.FC<{ children: React.ReactNode }> = ({ 
 
   const generateHTML = useCallback(() => {
     const { globalStyle, rows } = template;
+    let blockCounter = 0;
+
     const renderBlock = (block: EmailBlock) => {
       const s = block.style;
+      const blockClass = `block-${blockCounter++}`;
       const fontFamilyStr = s.fontFamily !== 'inherit' ? `font-family:${s.fontFamily};` : `font-family:${globalStyle.fontFamily};`;
       const widthStr = s.width && s.width !== '100%' ? `width:${s.width};` : '';
       const marginStr = s.width && s.width !== '100%' ? (s.textAlign === 'center' ? 'margin:0 auto;' : s.textAlign === 'right' ? 'margin:0 0 0 auto;' : '') : '';
-      const baseStyle = `color:${s.color};font-size:${s.fontSize}px;font-weight:${s.fontWeight};text-align:${s.textAlign};background-color:${s.backgroundColor};padding:${s.paddingTop}px ${s.paddingRight}px ${s.paddingBottom}px ${s.paddingLeft}px;border:${s.borderWidth}px solid ${s.borderColor};border-radius:${s.borderRadius}px;line-height:${s.lineHeight};${fontFamilyStr}${widthStr}${marginStr}`;
+      const baseStyle = `color:${s.color};font-size:${s.fontSize}px;font-weight:${s.fontWeight};text-align:${s.textAlign};background-color:${s.backgroundColor};padding:${s.paddingTop}px ${s.paddingRight}px ${s.paddingBottom}px ${s.paddingLeft}px;border:${s.borderWidth}px solid ${s.borderColor};border-radius:${s.borderRadius}px;line-height:${s.lineHeight};${fontFamilyStr}`;
+      const wrapStyle = `${widthStr}${marginStr}max-width:100%;`;
       switch (block.type) {
         case 'heading':
-          return `<div style="${widthStr}${marginStr}"><h1 style="${baseStyle}margin:0;">${block.content}</h1></div>`;
+          return `<div class="${blockClass}" style="${wrapStyle}"><h1 style="${baseStyle}margin:0;">${block.content}</h1></div>`;
         case 'text':
-          return `<div style="${widthStr}${marginStr}"><p style="${baseStyle}margin:0;">${block.content}</p></div>`;
+          return `<div class="${blockClass}" style="${wrapStyle}"><p style="${baseStyle}margin:0;">${block.content}</p></div>`;
         case 'image': {
           const imgTag = `<img src="${block.src}" alt="${block.alt || ''}" style="max-width:100%;height:auto;display:block;margin:0 auto;border-radius:${s.borderRadius}px;" />`;
           const wrapped = block.href ? `<a href="${block.href}" target="_blank" style="text-decoration:none;">${imgTag}</a>` : imgTag;
-          return `<div style="${baseStyle}">${wrapped}</div>`;
+          return `<div class="${blockClass}" style="${baseStyle}${widthStr}${marginStr}max-width:100%;">${wrapped}</div>`;
         }
         case 'button':
-          return `<div style="text-align:${s.textAlign};padding:${s.paddingTop}px ${s.paddingRight}px ${s.paddingBottom}px ${s.paddingLeft}px;${widthStr}${marginStr}"><a href="${block.href || '#'}" style="display:inline-block;background-color:${s.backgroundColor};color:${s.color};font-size:${s.fontSize}px;font-weight:${s.fontWeight};padding:12px 24px;border-radius:${s.borderRadius}px;text-decoration:none;${fontFamilyStr}border:${s.borderWidth}px solid ${s.borderColor};">${block.content}</a></div>`;
+          return `<div class="${blockClass}" style="text-align:${s.textAlign};padding:${s.paddingTop}px ${s.paddingRight}px ${s.paddingBottom}px ${s.paddingLeft}px;${widthStr}${marginStr}max-width:100%;"><a href="${block.href || '#'}" style="display:inline-block;background-color:${s.backgroundColor};color:${s.color};font-size:${s.fontSize}px;font-weight:${s.fontWeight};padding:12px 24px;border-radius:${s.borderRadius}px;text-decoration:none;${fontFamilyStr}border:${s.borderWidth}px solid ${s.borderColor};">${block.content}</a></div>`;
       }
     };
+
+    // Collect mobile width overrides
+    blockCounter = 0;
+    const mobileStyles: string[] = [];
+    rows.forEach(row => {
+      row.cells.forEach(cell => {
+        cell.forEach(block => {
+          const cls = `block-${blockCounter++}`;
+          const mw = block.style.mobileWidth || '100%';
+          if (mw !== (block.style.width || '100%')) {
+            const mobileMargin = block.style.textAlign === 'center' ? 'margin:0 auto!important;' : block.style.textAlign === 'right' ? 'margin:0 0 0 auto!important;' : '';
+            mobileStyles.push(`.${cls}{width:${mw}!important;${mobileMargin}}`);
+          }
+        });
+      });
+    });
+
+    // Reset counter for actual rendering
+    blockCounter = 0;
 
     const renderRow = (row: EmailRow) => {
       const colWidth = Math.floor(100 / row.columns);
@@ -212,6 +235,8 @@ export const EmailBuilderProvider: React.FC<{ children: React.ReactNode }> = ({ 
       ).join('');
       return `<table width="100%" cellpadding="0" cellspacing="0" style="background-color:${row.style.backgroundColor};padding:${row.style.paddingTop}px ${row.style.paddingRight}px ${row.style.paddingBottom}px ${row.style.paddingLeft}px;"><tr>${cellsHTML}</tr></table>`;
     };
+
+    const mobileCSS = mobileStyles.length > 0 ? mobileStyles.join('\n    ') : '';
 
     return `<!DOCTYPE html>
 <html lang="ru">
@@ -225,6 +250,7 @@ export const EmailBuilderProvider: React.FC<{ children: React.ReactNode }> = ({ 
   @media only screen and (max-width:620px){
     .email-container{width:100%!important;max-width:100%!important;}
     table td{display:block!important;width:100%!important;}
+    ${mobileCSS}
   }
 </style>
 </head>

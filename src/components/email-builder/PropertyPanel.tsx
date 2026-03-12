@@ -143,8 +143,31 @@ const PropertyPanel = () => {
 
         {/* Width */}
         <Section title="Размер">
-          <Field label="Ширина блока" compact>
-            <input type="text" value={s.width || '100%'} onChange={(e) => upd({ width: e.target.value })} placeholder="100%, 300px, auto" className="w-full rounded-lg border border-input bg-secondary/50 px-2 py-1.5 text-sm text-card-foreground focus:outline-none focus:ring-1 focus:ring-primary/50" />
+          <Field label="Ширина (десктоп)" compact>
+            <div className="flex items-center gap-2">
+              <input
+                type="range"
+                min={10}
+                max={100}
+                value={parseInt(s.width) || 100}
+                onChange={(e) => upd({ width: `${e.target.value}%` })}
+                className="flex-1 h-2 accent-primary"
+              />
+              <span className="text-xs text-muted-foreground font-mono w-10 text-right">{s.width || '100%'}</span>
+            </div>
+          </Field>
+          <Field label="Ширина (мобильная)" compact>
+            <div className="flex items-center gap-2">
+              <input
+                type="range"
+                min={10}
+                max={100}
+                value={parseInt(s.mobileWidth) || 100}
+                onChange={(e) => upd({ mobileWidth: `${e.target.value}%` })}
+                className="flex-1 h-2 accent-primary"
+              />
+              <span className="text-xs text-muted-foreground font-mono w-10 text-right">{s.mobileWidth || '100%'}</span>
+            </div>
           </Field>
         </Section>
 
