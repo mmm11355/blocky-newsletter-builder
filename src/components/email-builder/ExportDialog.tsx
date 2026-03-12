@@ -16,7 +16,18 @@ const ExportDialog: React.FC<Props> = ({ open, onClose }) => {
   const html = generateHTML();
 
   const handleCopy = async () => {
-    await navigator.clipboard.writeText(html);
+    try {
+      await navigator.clipboard.writeText(html);
+    } catch {
+      const textarea = document.createElement('textarea');
+      textarea.value = html;
+      textarea.style.position = 'fixed';
+      textarea.style.opacity = '0';
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textarea);
+    }
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
