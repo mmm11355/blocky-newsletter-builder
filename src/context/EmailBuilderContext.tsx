@@ -187,19 +187,21 @@ export const EmailBuilderProvider: React.FC<{ children: React.ReactNode }> = ({ 
     const renderBlock = (block: EmailBlock) => {
       const s = block.style;
       const fontFamilyStr = s.fontFamily !== 'inherit' ? `font-family:${s.fontFamily};` : `font-family:${globalStyle.fontFamily};`;
-      const baseStyle = `color:${s.color};font-size:${s.fontSize}px;font-weight:${s.fontWeight};text-align:${s.textAlign};background-color:${s.backgroundColor};padding:${s.paddingTop}px ${s.paddingRight}px ${s.paddingBottom}px ${s.paddingLeft}px;border:${s.borderWidth}px solid ${s.borderColor};border-radius:${s.borderRadius}px;line-height:${s.lineHeight};${fontFamilyStr}`;
+      const widthStr = s.width && s.width !== '100%' ? `width:${s.width};` : '';
+      const marginStr = s.width && s.width !== '100%' ? (s.textAlign === 'center' ? 'margin:0 auto;' : s.textAlign === 'right' ? 'margin:0 0 0 auto;' : '') : '';
+      const baseStyle = `color:${s.color};font-size:${s.fontSize}px;font-weight:${s.fontWeight};text-align:${s.textAlign};background-color:${s.backgroundColor};padding:${s.paddingTop}px ${s.paddingRight}px ${s.paddingBottom}px ${s.paddingLeft}px;border:${s.borderWidth}px solid ${s.borderColor};border-radius:${s.borderRadius}px;line-height:${s.lineHeight};${fontFamilyStr}${widthStr}${marginStr}`;
       switch (block.type) {
         case 'heading':
-          return `<h1 style="${baseStyle}margin:0;">${block.content}</h1>`;
+          return `<div style="${widthStr}${marginStr}"><h1 style="${baseStyle}margin:0;">${block.content}</h1></div>`;
         case 'text':
-          return `<p style="${baseStyle}margin:0;">${block.content}</p>`;
+          return `<div style="${widthStr}${marginStr}"><p style="${baseStyle}margin:0;">${block.content}</p></div>`;
         case 'image': {
           const imgTag = `<img src="${block.src}" alt="${block.alt || ''}" style="max-width:100%;height:auto;display:block;margin:0 auto;border-radius:${s.borderRadius}px;" />`;
           const wrapped = block.href ? `<a href="${block.href}" target="_blank" style="text-decoration:none;">${imgTag}</a>` : imgTag;
           return `<div style="${baseStyle}">${wrapped}</div>`;
         }
         case 'button':
-          return `<div style="text-align:${s.textAlign};padding:${s.paddingTop}px ${s.paddingRight}px ${s.paddingBottom}px ${s.paddingLeft}px;"><a href="${block.href || '#'}" style="display:inline-block;background-color:${s.backgroundColor};color:${s.color};font-size:${s.fontSize}px;font-weight:${s.fontWeight};padding:12px 24px;border-radius:${s.borderRadius}px;text-decoration:none;${fontFamilyStr}border:${s.borderWidth}px solid ${s.borderColor};">${block.content}</a></div>`;
+          return `<div style="text-align:${s.textAlign};padding:${s.paddingTop}px ${s.paddingRight}px ${s.paddingBottom}px ${s.paddingLeft}px;${widthStr}${marginStr}"><a href="${block.href || '#'}" style="display:inline-block;background-color:${s.backgroundColor};color:${s.color};font-size:${s.fontSize}px;font-weight:${s.fontWeight};padding:12px 24px;border-radius:${s.borderRadius}px;text-decoration:none;${fontFamilyStr}border:${s.borderWidth}px solid ${s.borderColor};">${block.content}</a></div>`;
       }
     };
 
