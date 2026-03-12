@@ -141,6 +141,13 @@ const PropertyPanel = () => {
           </div>
         </Section>
 
+        {/* Width */}
+        <Section title="Размер">
+          <Field label="Ширина блока" compact>
+            <input type="text" value={s.width || '100%'} onChange={(e) => upd({ width: e.target.value })} placeholder="100%, 300px, auto" className="w-full rounded-lg border border-input bg-secondary/50 px-2 py-1.5 text-sm text-card-foreground focus:outline-none focus:ring-1 focus:ring-primary/50" />
+          </Field>
+        </Section>
+
         {/* Padding */}
         <Section title="Отступы">
           <div className="grid grid-cols-2 gap-2">

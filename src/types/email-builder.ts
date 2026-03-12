@@ -16,6 +16,7 @@ export interface BlockStyle {
   borderColor: string;
   borderRadius: number;
   lineHeight: number;
+  width: string;
 }
 
 export interface EmailBlock {
@@ -67,6 +68,7 @@ export const defaultBlockStyle: BlockStyle = {
   borderColor: '#cccccc',
   borderRadius: 0,
   lineHeight: 1.5,
+  width: '100%',
 };
 
 export const EMAIL_FONTS = [
