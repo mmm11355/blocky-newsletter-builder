@@ -16,6 +16,7 @@ export interface BlockStyle {
   borderColor: string;
   borderRadius: number;
   lineHeight: number;
+  width: string;
 }
 
 export interface EmailBlock {
