@@ -17,6 +17,7 @@ export interface BlockStyle {
   borderRadius: number;
   lineHeight: number;
   width: string;
+  mobileWidth: string;
 }
 
 export interface EmailBlock {
