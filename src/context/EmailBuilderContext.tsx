@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
-import { EmailTemplate, EmailRow, EmailBlock, BlockType, ColumnLayout, createBlock, createRow, BlockStyle } from '@/types/email-builder';
+import { EmailTemplate, EmailRow, EmailBlock, BlockType, ColumnLayout, createBlock, createRow, BlockStyle, CellStyle } from '@/types/email-builder';
 
 interface Selection {
   rowId: string;
@@ -22,6 +22,7 @@ interface EmailBuilderContextType {
   deleteBlock: (rowId: string, cellIndex: number, blockId: string) => void;
   moveBlock: (rowId: string, cellIndex: number, blockId: string, direction: 'up' | 'down') => void;
   updateRowStyle: (rowId: string, style: Partial<EmailRow['style']>) => void;
+  updateCellStyle: (rowId: string, cellIndex: number, style: Partial<CellStyle>) => void;
   updateGlobalStyle: (style: Partial<EmailTemplate['globalStyle']>) => void;
   getSelectedBlock: () => { block: EmailBlock; rowId: string; cellIndex: number } | null;
   generateHTML: () => string;
@@ -149,6 +150,18 @@ export const EmailBuilderProvider: React.FC<{ children: React.ReactNode }> = ({ 
     }));
   }, []);
 
+  const updateCellStyle = useCallback((rowId: string, cellIndex: number, style: Partial<CellStyle>) => {
+    setTemplate(prev => ({
+      ...prev,
+      rows: prev.rows.map(r => {
+        if (r.id !== rowId) return r;
+        const cellStyles = [...(r.cellStyles || r.cells.map(() => ({ backgroundColor: 'transparent' })))];
+        cellStyles[cellIndex] = { ...cellStyles[cellIndex], ...style };
+        return { ...r, cellStyles };
+      }),
+    }));
+  }, []);
+
   const updateGlobalStyle = useCallback((style: Partial<EmailTemplate['globalStyle']>) => {
     setTemplate(prev => ({ ...prev, globalStyle: { ...prev.globalStyle, ...style } }));
   }, []);
@@ -190,22 +203,21 @@ export const EmailBuilderProvider: React.FC<{ children: React.ReactNode }> = ({ 
       const s = block.style;
       const blockClass = `block-${blockCounter++}`;
       const fontFamilyStr = s.fontFamily !== 'inherit' ? `font-family:${s.fontFamily};` : `font-family:${globalStyle.fontFamily};`;
-      const widthStr = s.width && s.width !== '100%' ? `width:${s.width};` : '';
+      const widthStr = s.width ? `width:${s.width};` : '';
       const marginStr = s.width && s.width !== '100%' ? (s.textAlign === 'center' ? 'margin:0 auto;' : s.textAlign === 'right' ? 'margin:0 0 0 auto;' : '') : '';
       const baseStyle = `color:${s.color};font-size:${s.fontSize}px;font-weight:${s.fontWeight};text-align:${s.textAlign};background-color:${s.backgroundColor};padding:${s.paddingTop}px ${s.paddingRight}px ${s.paddingBottom}px ${s.paddingLeft}px;border:${s.borderWidth}px solid ${s.borderColor};border-radius:${s.borderRadius}px;line-height:${s.lineHeight};${fontFamilyStr}`;
-      const wrapStyle = `${widthStr}${marginStr}max-width:100%;`;
       switch (block.type) {
         case 'heading':
-          return `<div class="${blockClass}" style="${wrapStyle}"><h1 style="${baseStyle}margin:0;">${block.content}</h1></div>`;
+          return `<div class="${blockClass}" style="${widthStr}${marginStr}max-width:100%;"><h1 style="${baseStyle}margin:0;">${block.content}</h1></div>`;
         case 'text':
-          return `<div class="${blockClass}" style="${wrapStyle}"><p style="${baseStyle}margin:0;">${block.content}</p></div>`;
+          return `<div class="${blockClass}" style="${widthStr}${marginStr}max-width:100%;"><p style="${baseStyle}margin:0;">${block.content}</p></div>`;
         case 'image': {
           const imgTag = `<img src="${block.src}" alt="${block.alt || ''}" style="max-width:100%;height:auto;display:block;margin:0 auto;border-radius:${s.borderRadius}px;" />`;
           const wrapped = block.href ? `<a href="${block.href}" target="_blank" style="text-decoration:none;">${imgTag}</a>` : imgTag;
           return `<div class="${blockClass}" style="${baseStyle}${widthStr}${marginStr}max-width:100%;">${wrapped}</div>`;
         }
         case 'button':
-          return `<div class="${blockClass}" style="text-align:${s.textAlign};padding:${s.paddingTop}px ${s.paddingRight}px ${s.paddingBottom}px ${s.paddingLeft}px;${widthStr}${marginStr}max-width:100%;"><a href="${block.href || '#'}" style="display:inline-block;background-color:${s.backgroundColor};color:${s.color};font-size:${s.fontSize}px;font-weight:${s.fontWeight};padding:12px 24px;border-radius:${s.borderRadius}px;text-decoration:none;${fontFamilyStr}border:${s.borderWidth}px solid ${s.borderColor};">${block.content}</a></div>`;
+          return `<div class="${blockClass}" style="text-align:${s.textAlign};${widthStr}${marginStr}max-width:100%;"><a href="${block.href || '#'}" style="display:block;width:100%;box-sizing:border-box;background-color:${s.backgroundColor};color:${s.color};font-size:${s.fontSize}px;font-weight:${s.fontWeight};padding:${s.paddingTop}px ${s.paddingRight}px ${s.paddingBottom}px ${s.paddingLeft}px;border-radius:${s.borderRadius}px;text-decoration:none;text-align:${s.textAlign};${fontFamilyStr}border:${s.borderWidth}px solid ${s.borderColor};line-height:${s.lineHeight};">${block.content}</a></div>`;
       }
     };
 
@@ -225,14 +237,15 @@ export const EmailBuilderProvider: React.FC<{ children: React.ReactNode }> = ({ 
       });
     });
 
-    // Reset counter for actual rendering
     blockCounter = 0;
 
     const renderRow = (row: EmailRow) => {
       const colWidth = Math.floor(100 / row.columns);
-      const cellsHTML = row.cells.map(cell =>
-        `<td style="width:${colWidth}%;vertical-align:top;padding:0;">${cell.map(renderBlock).join('')}</td>`
-      ).join('');
+      const cellsHTML = row.cells.map((cell, ci) => {
+        const cellBg = row.cellStyles?.[ci]?.backgroundColor;
+        const cellBgStyle = cellBg && cellBg !== 'transparent' ? `background-color:${cellBg};` : '';
+        return `<td style="width:${colWidth}%;vertical-align:top;padding:0;${cellBgStyle}">${cell.map(renderBlock).join('')}</td>`;
+      }).join('');
       return `<table width="100%" cellpadding="0" cellspacing="0" style="background-color:${row.style.backgroundColor};padding:${row.style.paddingTop}px ${row.style.paddingRight}px ${row.style.paddingBottom}px ${row.style.paddingLeft}px;"><tr>${cellsHTML}</tr></table>`;
     };
 
@@ -271,7 +284,7 @@ ${rows.map(renderRow).join('\n')}
       template, selection, previewMode, setPreviewMode,
       setSelection, addRow, deleteRow, moveRow,
       addBlockToCell, updateBlock, updateBlockStyle, deleteBlock, moveBlock,
-      updateRowStyle, updateGlobalStyle, getSelectedBlock, generateHTML,
+      updateRowStyle, updateCellStyle, updateGlobalStyle, getSelectedBlock, generateHTML,
       setTemplate: setTemplateDirectly, addBlockFromSaved,
     }}>
       {children}

@@ -4,7 +4,7 @@ import { EMAIL_FONTS } from '@/types/email-builder';
 import { Trash2, ArrowUp, ArrowDown, Settings2, Upload, ClipboardPaste, Link } from 'lucide-react';
 
 const PropertyPanel = () => {
-  const { getSelectedBlock, updateBlock, updateBlockStyle, deleteBlock, moveBlock, selection } = useEmailBuilder();
+  const { getSelectedBlock, updateBlock, updateBlockStyle, deleteBlock, moveBlock, selection, template, updateCellStyle } = useEmailBuilder();
   const selected = getSelectedBlock();
 
   if (!selected || !selection) {
@@ -202,6 +202,45 @@ const PropertyPanel = () => {
             </div>
           </Field>
         </Section>
+
+        {/* Per-column background */}
+        {(() => {
+          const row = template.rows.find(r => r.id === rowId);
+          if (!row || row.columns <= 1) return null;
+          return (
+            <Section title="Фон колонок">
+              <div className="space-y-2">
+                {row.cells.map((_, ci) => {
+                  const cellBg = row.cellStyles?.[ci]?.backgroundColor || 'transparent';
+                  return (
+                    <Field key={ci} label={`Колонка ${ci + 1}`} compact>
+                      <div className="relative">
+                        <input
+                          type="color"
+                          value={cellBg === 'transparent' ? '#ffffff' : cellBg}
+                          onChange={(e) => updateCellStyle(rowId, ci, { backgroundColor: e.target.value })}
+                          className="w-full h-9 rounded-lg border border-input cursor-pointer opacity-0 absolute inset-0"
+                        />
+                        <div className="w-full h-9 rounded-lg border border-input flex items-center gap-2 px-2">
+                          <div className="w-5 h-5 rounded-md border border-border" style={{ backgroundColor: cellBg === 'transparent' ? '#ffffff' : cellBg }} />
+                          <span className="text-xs text-muted-foreground font-mono">{cellBg === 'transparent' ? 'прозрачный' : cellBg}</span>
+                          {cellBg !== 'transparent' && (
+                            <button
+                              onClick={(e) => { e.stopPropagation(); updateCellStyle(rowId, ci, { backgroundColor: 'transparent' }); }}
+                              className="ml-auto text-[10px] text-muted-foreground hover:text-foreground"
+                            >
+                              ✕
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    </Field>
+                  );
+                })}
+              </div>
+            </Section>
+          );
+        })()}
       </div>
     </div>
   );
