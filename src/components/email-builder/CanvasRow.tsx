@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useEmailBuilder } from '@/context/EmailBuilderContext';
 import { EmailRow, BlockType } from '@/types/email-builder';
 import CanvasBlock from './CanvasBlock';
-import { Trash2, ArrowUp, ArrowDown, GripVertical } from 'lucide-react';
+import { Trash2, ArrowUp, ArrowDown } from 'lucide-react';
 
 interface Props {
   row: EmailRow;
@@ -39,7 +39,6 @@ const CanvasRow: React.FC<Props> = ({ row, isMobile }) => {
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
-      {/* Row controls */}
       {hovered && (
         <div className="absolute -left-11 top-1/2 -translate-y-1/2 flex flex-col gap-0.5 z-10">
           <button onClick={() => moveRow(row.id, 'up')} className="p-1.5 rounded-md bg-card border border-border text-muted-foreground hover:text-foreground hover:border-primary/30 transition-colors">
@@ -54,7 +53,6 @@ const CanvasRow: React.FC<Props> = ({ row, isMobile }) => {
         </div>
       )}
 
-      {/* Hover outline */}
       <div className={`transition-all ${hovered ? 'ring-1 ring-primary/30 rounded-sm' : ''}`}>
         <div
           className={`flex ${isMobile ? 'flex-col' : 'flex-row'}`}
@@ -63,31 +61,36 @@ const CanvasRow: React.FC<Props> = ({ row, isMobile }) => {
             padding: `${row.style.paddingTop}px ${row.style.paddingRight}px ${row.style.paddingBottom}px ${row.style.paddingLeft}px`,
           }}
         >
-          {row.cells.map((cell, cellIndex) => (
-            <div
-              key={cellIndex}
-              className={`${isMobile ? 'w-full' : ''} min-h-[60px] transition-all ${hoveredCell === cellIndex ? 'drag-over rounded-md' : ''}`}
-              style={{ width: isMobile ? '100%' : `${100 / row.columns}%` }}
-              onDragOver={(e) => handleDragOver(e, cellIndex)}
-              onDragLeave={handleDragLeave}
-              onDrop={(e) => handleDrop(e, cellIndex)}
-            >
-              {cell.length === 0 ? (
-                <div className="h-full min-h-[60px] border border-dashed border-border/30 rounded-md flex items-center justify-center text-xs text-muted-foreground/50 m-1">
-                  Перетащите сюда
-                </div>
-              ) : (
-                cell.map(block => (
-                  <CanvasBlock
-                    key={block.id}
-                    block={block}
-                    rowId={row.id}
-                    cellIndex={cellIndex}
-                  />
-                ))
-              )}
-            </div>
-          ))}
+          {row.cells.map((cell, cellIndex) => {
+            const cellStyle = row.cellStyles?.[cellIndex];
+            const cellBg = cellStyle?.backgroundColor && cellStyle.backgroundColor !== 'transparent'
+              ? cellStyle.backgroundColor
+              : undefined;
+
+            return (
+              <div
+                key={cellIndex}
+                className={`${isMobile ? 'w-full' : ''} min-h-[60px] transition-all ${hoveredCell === cellIndex ? 'drag-over rounded-md' : ''}`}
+                style={{
+                  width: isMobile ? '100%' : `${100 / row.columns}%`,
+                  backgroundColor: cellBg,
+                }}
+                onDragOver={(e) => handleDragOver(e, cellIndex)}
+                onDragLeave={handleDragLeave}
+                onDrop={(e) => handleDrop(e, cellIndex)}
+              >
+                {cell.length === 0 ? (
+                  <div className="h-full min-h-[60px] border border-dashed border-border/30 rounded-md flex items-center justify-center text-xs text-muted-foreground/50 m-1">
+                    Перетащите сюда
+                  </div>
+                ) : (
+                  cell.map(block => (
+                    <CanvasBlock key={block.id} block={block} rowId={row.id} cellIndex={cellIndex} />
+                  ))
+                )}
+              </div>
+            );
+          })}
         </div>
       </div>
     </div>

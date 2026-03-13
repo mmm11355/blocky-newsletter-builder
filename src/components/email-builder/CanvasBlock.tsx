@@ -57,23 +57,28 @@ const CanvasBlock: React.FC<Props> = ({ block, rowId, cellIndex }) => {
         );
       case 'button':
         return (
-          <div style={{ textAlign: s.textAlign as any, padding: `${s.paddingTop}px ${s.paddingRight}px ${s.paddingBottom}px ${s.paddingLeft}px` }} onClick={handleClick}>
-            <span style={{
-              display: 'inline-block',
+          <div style={{ textAlign: s.textAlign as any }} onClick={handleClick}>
+            <a style={{
+              display: 'block',
+              width: '100%',
+              boxSizing: 'border-box',
               backgroundColor: s.backgroundColor,
               color: s.color,
               fontSize: s.fontSize,
               fontWeight: s.fontWeight as any,
               fontFamily: s.fontFamily !== 'inherit' ? s.fontFamily : undefined,
-              padding: '12px 24px',
+              padding: `${s.paddingTop}px ${s.paddingRight}px ${s.paddingBottom}px ${s.paddingLeft}px`,
               borderRadius: s.borderRadius,
               border: `${s.borderWidth}px solid ${s.borderColor}`,
               cursor: 'pointer',
               outline: isSelected ? '2px solid hsl(250 85% 65%)' : 'none',
               outlineOffset: '1px',
+              textDecoration: 'none',
+              textAlign: s.textAlign as any,
+              lineHeight: s.lineHeight,
             }}>
               {block.content}
-            </span>
+            </a>
           </div>
         );
     }
