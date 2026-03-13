@@ -115,6 +115,7 @@ export const createRow = (columns: ColumnLayout): EmailRow => ({
   id: crypto.randomUUID(),
   columns,
   cells: Array.from({ length: columns }, () => []),
+  cellStyles: Array.from({ length: columns }, () => ({ backgroundColor: 'transparent' })),
   style: {
     backgroundColor: '#ffffff',
     paddingTop: 0,
