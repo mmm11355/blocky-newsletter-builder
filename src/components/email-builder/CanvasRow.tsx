@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useEmailBuilder } from '@/context/EmailBuilderContext';
 import { EmailRow, BlockType } from '@/types/email-builder';
 import CanvasBlock from './CanvasBlock';
-import { Trash2, ArrowUp, ArrowDown } from 'lucide-react';
+import { Trash2, ArrowUp, ArrowDown, GripVertical } from 'lucide-react';
 
 interface Props {
   row: EmailRow;
@@ -10,27 +10,71 @@ interface Props {
 }
 
 const CanvasRow: React.FC<Props> = ({ row, isMobile }) => {
-  const { addBlockToCell, deleteRow, moveRow } = useEmailBuilder();
+  const { addBlockToCell, deleteRow, moveRow, reorderBlock, moveBlockBetweenCells } = useEmailBuilder();
   const [hoveredCell, setHoveredCell] = useState<number | null>(null);
   const [hovered, setHovered] = useState(false);
+  const [dropIndicator, setDropIndicator] = useState<{ cellIndex: number; position: number } | null>(null);
 
   const handleDragOver = (e: React.DragEvent, cellIndex: number) => {
     e.preventDefault();
     e.stopPropagation();
-    setHoveredCell(cellIndex);
+
+    // Check if it's a block move or new block
+    const isMoveBlock = e.dataTransfer.types.includes('moveblock');
+    const isNewBlock = e.dataTransfer.types.includes('blocktype');
+
+    if (isMoveBlock) {
+      // Calculate drop position within cell
+      const cellEl = e.currentTarget as HTMLElement;
+      const children = Array.from(cellEl.querySelectorAll(':scope > [style], :scope > .group\\/block'));
+      const rect = cellEl.getBoundingClientRect();
+      const y = e.clientY - rect.top;
+      
+      let position = row.cells[cellIndex]?.length || 0;
+      for (let i = 0; i < children.length; i++) {
+        const childRect = children[i].getBoundingClientRect();
+        const childMid = childRect.top - rect.top + childRect.height / 2;
+        if (y < childMid) {
+          position = i;
+          break;
+        }
+      }
+      setDropIndicator({ cellIndex, position });
+      e.dataTransfer.dropEffect = 'move';
+    } else if (isNewBlock) {
+      setHoveredCell(cellIndex);
+    }
   };
 
   const handleDragLeave = (e: React.DragEvent) => {
     e.preventDefault();
     setHoveredCell(null);
+    setDropIndicator(null);
   };
 
   const handleDrop = (e: React.DragEvent, cellIndex: number) => {
     e.preventDefault();
     e.stopPropagation();
-    const type = e.dataTransfer.getData('blockType') as BlockType;
-    if (type) addBlockToCell(row.id, cellIndex, type);
+
+    const moveData = e.dataTransfer.getData('moveBlock');
+    if (moveData) {
+      const { rowId: fromRowId, cellIndex: fromCellIndex, blockId } = JSON.parse(moveData);
+      const targetPosition = dropIndicator?.cellIndex === cellIndex ? dropIndicator.position : (row.cells[cellIndex]?.length || 0);
+      
+      if (fromRowId === row.id && fromCellIndex === cellIndex) {
+        // Reorder within same cell
+        reorderBlock(row.id, cellIndex, blockId, targetPosition);
+      } else {
+        // Move between cells (possibly different rows)
+        moveBlockBetweenCells(fromRowId, fromCellIndex, blockId, row.id, cellIndex, targetPosition);
+      }
+    } else {
+      const type = e.dataTransfer.getData('blockType') as BlockType;
+      if (type) addBlockToCell(row.id, cellIndex, type);
+    }
+
     setHoveredCell(null);
+    setDropIndicator(null);
   };
 
   return (
@@ -87,9 +131,17 @@ const CanvasRow: React.FC<Props> = ({ row, isMobile }) => {
                     Перетащите сюда
                   </div>
                 ) : (
-                  cell.map(block => (
-                    <CanvasBlock key={block.id} block={block} rowId={row.id} cellIndex={cellIndex} />
+                  cell.map((block, blockIndex) => (
+                    <React.Fragment key={block.id}>
+                      {dropIndicator?.cellIndex === cellIndex && dropIndicator.position === blockIndex && (
+                        <div className="h-0.5 bg-primary rounded-full mx-2 my-1" />
+                      )}
+                      <CanvasBlock block={block} rowId={row.id} cellIndex={cellIndex} />
+                    </React.Fragment>
                   ))
+                )}
+                {dropIndicator?.cellIndex === cellIndex && dropIndicator.position === cell.length && cell.length > 0 && (
+                  <div className="h-0.5 bg-primary rounded-full mx-2 my-1" />
                 )}
               </div>
             );

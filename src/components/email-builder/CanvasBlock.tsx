@@ -1,6 +1,7 @@
 import React from 'react';
 import { useEmailBuilder } from '@/context/EmailBuilderContext';
 import { EmailBlock } from '@/types/email-builder';
+import { GripVertical } from 'lucide-react';
 
 interface Props {
   block: EmailBlock;
@@ -18,12 +19,19 @@ const CanvasBlock: React.FC<Props> = ({ block, rowId, cellIndex }) => {
     setSelection({ rowId, cellIndex, blockId: block.id });
   };
 
+  const handleDragStart = (e: React.DragEvent) => {
+    e.stopPropagation();
+    e.dataTransfer.setData('moveBlock', JSON.stringify({ rowId, cellIndex, blockId: block.id }));
+    e.dataTransfer.effectAllowed = 'move';
+  };
+
   const activeWidth = previewMode === 'mobile' ? (s.mobileWidth || '100%') : (s.width || '100%');
 
   const wrapperStyle: React.CSSProperties = {
     width: activeWidth,
     maxWidth: '100%',
     margin: s.textAlign === 'center' ? '0 auto' : s.textAlign === 'right' ? '0 0 0 auto' : undefined,
+    position: 'relative',
   };
 
   const baseStyle: React.CSSProperties = {
@@ -38,7 +46,7 @@ const CanvasBlock: React.FC<Props> = ({ block, rowId, cellIndex }) => {
     borderRadius: s.borderRadius,
     lineHeight: s.lineHeight,
     cursor: 'pointer',
-    outline: isSelected ? '2px solid hsl(250 85% 65%)' : 'none',
+    outline: isSelected ? '2px solid hsl(var(--primary))' : 'none',
     outlineOffset: '1px',
     transition: 'outline 0.15s',
   };
@@ -71,7 +79,7 @@ const CanvasBlock: React.FC<Props> = ({ block, rowId, cellIndex }) => {
               borderRadius: s.borderRadius,
               border: `${s.borderWidth}px solid ${s.borderColor}`,
               cursor: 'pointer',
-              outline: isSelected ? '2px solid hsl(250 85% 65%)' : 'none',
+              outline: isSelected ? '2px solid hsl(var(--primary))' : 'none',
               outlineOffset: '1px',
               textDecoration: 'none',
               textAlign: s.textAlign as any,
@@ -84,7 +92,19 @@ const CanvasBlock: React.FC<Props> = ({ block, rowId, cellIndex }) => {
     }
   };
 
-  return <div style={wrapperStyle}>{renderContent()}</div>;
+  return (
+    <div style={wrapperStyle} className="group/block relative">
+      <div
+        draggable
+        onDragStart={handleDragStart}
+        className="absolute -left-5 top-1/2 -translate-y-1/2 opacity-0 group-hover/block:opacity-100 cursor-grab active:cursor-grabbing z-10 p-0.5 rounded bg-muted/80 text-muted-foreground hover:text-foreground transition-opacity"
+        title="Перетащить"
+      >
+        <GripVertical className="h-3.5 w-3.5" />
+      </div>
+      {renderContent()}
+    </div>
+  );
 };
 
 export default CanvasBlock;

@@ -21,6 +21,8 @@ interface EmailBuilderContextType {
   updateBlockStyle: (rowId: string, cellIndex: number, blockId: string, style: Partial<BlockStyle>) => void;
   deleteBlock: (rowId: string, cellIndex: number, blockId: string) => void;
   moveBlock: (rowId: string, cellIndex: number, blockId: string, direction: 'up' | 'down') => void;
+  reorderBlock: (rowId: string, cellIndex: number, blockId: string, newPosition: number) => void;
+  moveBlockBetweenCells: (fromRowId: string, fromCellIndex: number, blockId: string, toRowId: string, toCellIndex: number, position: number) => void;
   updateRowStyle: (rowId: string, style: Partial<EmailRow['style']>) => void;
   updateCellStyle: (rowId: string, cellIndex: number, style: Partial<CellStyle>) => void;
   updateCellGap: (rowId: string, gap: number) => void;
@@ -142,6 +144,56 @@ export const EmailBuilderProvider: React.FC<{ children: React.ReactNode }> = ({ 
         return { ...r, cells };
       }),
     }));
+  }, []);
+
+  const reorderBlock = useCallback((rowId: string, cellIndex: number, blockId: string, newPosition: number) => {
+    setTemplate(prev => ({
+      ...prev,
+      rows: prev.rows.map(r => {
+        if (r.id !== rowId) return r;
+        const cells = r.cells.map((cell, i) => {
+          if (i !== cellIndex) return cell;
+          const idx = cell.findIndex(b => b.id === blockId);
+          if (idx === -1) return cell;
+          const arr = [...cell];
+          const [item] = arr.splice(idx, 1);
+          const insertAt = idx < newPosition ? newPosition - 1 : newPosition;
+          arr.splice(insertAt, 0, item);
+          return arr;
+        });
+        return { ...r, cells };
+      }),
+    }));
+  }, []);
+
+  const moveBlockBetweenCells = useCallback((fromRowId: string, fromCellIndex: number, blockId: string, toRowId: string, toCellIndex: number, position: number) => {
+    setTemplate(prev => {
+      let movedBlock: EmailBlock | null = null;
+      const rows = prev.rows.map(r => {
+        if (r.id !== fromRowId) return r;
+        const cells = r.cells.map((cell, i) => {
+          if (i !== fromCellIndex) return cell;
+          const idx = cell.findIndex(b => b.id === blockId);
+          if (idx === -1) return cell;
+          movedBlock = cell[idx];
+          return cell.filter(b => b.id !== blockId);
+        });
+        return { ...r, cells };
+      });
+      if (!movedBlock) return prev;
+      const finalRows = rows.map(r => {
+        if (r.id !== toRowId) return r;
+        const cells = r.cells.map((cell, i) => {
+          if (i !== toCellIndex) return cell;
+          const arr = [...cell];
+          arr.splice(position, 0, movedBlock!);
+          return arr;
+        });
+        return { ...r, cells };
+      });
+      return { ...prev, rows: finalRows };
+    });
+    setSelection({ rowId: toRowId, cellIndex: toCellIndex, blockId });
   }, []);
 
   const updateRowStyle = useCallback((rowId: string, style: Partial<EmailRow['style']>) => {
@@ -296,6 +348,7 @@ ${rows.map(renderRow).join('\n')}
       template, selection, previewMode, setPreviewMode,
       setSelection, addRow, deleteRow, moveRow,
       addBlockToCell, updateBlock, updateBlockStyle, deleteBlock, moveBlock,
+      reorderBlock, moveBlockBetweenCells,
       updateRowStyle, updateCellStyle, updateCellGap, updateGlobalStyle, getSelectedBlock, generateHTML,
       setTemplate: setTemplateDirectly, addBlockFromSaved,
     }}>
