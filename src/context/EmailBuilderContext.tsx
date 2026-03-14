@@ -348,6 +348,7 @@ ${rows.map(renderRow).join('\n')}
       template, selection, previewMode, setPreviewMode,
       setSelection, addRow, deleteRow, moveRow,
       addBlockToCell, updateBlock, updateBlockStyle, deleteBlock, moveBlock,
+      reorderBlock, moveBlockBetweenCells,
       updateRowStyle, updateCellStyle, updateCellGap, updateGlobalStyle, getSelectedBlock, generateHTML,
       setTemplate: setTemplateDirectly, addBlockFromSaved,
     }}>
