@@ -23,6 +23,7 @@ interface EmailBuilderContextType {
   moveBlock: (rowId: string, cellIndex: number, blockId: string, direction: 'up' | 'down') => void;
   updateRowStyle: (rowId: string, style: Partial<EmailRow['style']>) => void;
   updateCellStyle: (rowId: string, cellIndex: number, style: Partial<CellStyle>) => void;
+  updateCellGap: (rowId: string, gap: number) => void;
   updateGlobalStyle: (style: Partial<EmailTemplate['globalStyle']>) => void;
   getSelectedBlock: () => { block: EmailBlock; rowId: string; cellIndex: number } | null;
   generateHTML: () => string;
