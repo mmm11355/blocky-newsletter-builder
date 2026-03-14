@@ -163,6 +163,13 @@ export const EmailBuilderProvider: React.FC<{ children: React.ReactNode }> = ({ 
     }));
   }, []);
 
+  const updateCellGap = useCallback((rowId: string, gap: number) => {
+    setTemplate(prev => ({
+      ...prev,
+      rows: prev.rows.map(r => r.id === rowId ? { ...r, cellGap: gap } : r),
+    }));
+  }, []);
+
   const updateGlobalStyle = useCallback((style: Partial<EmailTemplate['globalStyle']>) => {
     setTemplate(prev => ({ ...prev, globalStyle: { ...prev.globalStyle, ...style } }));
   }, []);
