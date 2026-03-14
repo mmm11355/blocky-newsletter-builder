@@ -48,6 +48,11 @@ export interface EmailRow {
 
 export interface CellStyle {
   backgroundColor: string;
+  borderRadius: number;
+  paddingTop: number;
+  paddingRight: number;
+  paddingBottom: number;
+  paddingLeft: number;
 }
 
 export interface EmailTemplate {
