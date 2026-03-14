@@ -37,6 +37,7 @@ export interface EmailRow {
   columns: ColumnLayout;
   cells: EmailBlock[][];
   cellStyles: CellStyle[];
+  cellGap: number;
   style: {
     backgroundColor: string;
     paddingTop: number;
