@@ -155,7 +155,7 @@ export const EmailBuilderProvider: React.FC<{ children: React.ReactNode }> = ({ 
       ...prev,
       rows: prev.rows.map(r => {
         if (r.id !== rowId) return r;
-        const cellStyles = [...(r.cellStyles || r.cells.map(() => ({ backgroundColor: 'transparent' })))];
+        const cellStyles = [...(r.cellStyles || r.cells.map(() => ({ backgroundColor: 'transparent', borderRadius: 0, paddingTop: 0, paddingRight: 0, paddingBottom: 0, paddingLeft: 0 })))];
         cellStyles[cellIndex] = { ...cellStyles[cellIndex], ...style };
         return { ...r, cellStyles };
       }),
