@@ -59,6 +59,7 @@ const CanvasRow: React.FC<Props> = ({ row, isMobile }) => {
           style={{
             backgroundColor: row.style.backgroundColor,
             padding: `${row.style.paddingTop}px ${row.style.paddingRight}px ${row.style.paddingBottom}px ${row.style.paddingLeft}px`,
+            gap: `${row.cellGap || 0}px`,
           }}
         >
           {row.cells.map((cell, cellIndex) => {
@@ -74,6 +75,8 @@ const CanvasRow: React.FC<Props> = ({ row, isMobile }) => {
                 style={{
                   width: isMobile ? '100%' : `${100 / row.columns}%`,
                   backgroundColor: cellBg,
+                  borderRadius: cellStyle?.borderRadius ? `${cellStyle.borderRadius}px` : undefined,
+                  padding: cellStyle ? `${cellStyle.paddingTop || 0}px ${cellStyle.paddingRight || 0}px ${cellStyle.paddingBottom || 0}px ${cellStyle.paddingLeft || 0}px` : undefined,
                 }}
                 onDragOver={(e) => handleDragOver(e, cellIndex)}
                 onDragLeave={handleDragLeave}

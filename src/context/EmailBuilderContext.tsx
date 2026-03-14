@@ -249,12 +249,16 @@ export const EmailBuilderProvider: React.FC<{ children: React.ReactNode }> = ({ 
 
     const renderRow = (row: EmailRow) => {
       const colWidth = Math.floor(100 / row.columns);
+      const gap = row.cellGap || 0;
       const cellsHTML = row.cells.map((cell, ci) => {
-        const cellBg = row.cellStyles?.[ci]?.backgroundColor;
+        const cs = row.cellStyles?.[ci];
+        const cellBg = cs?.backgroundColor;
         const cellBgStyle = cellBg && cellBg !== 'transparent' ? `background-color:${cellBg};` : '';
-        return `<td style="width:${colWidth}%;vertical-align:top;padding:0;${cellBgStyle}">${cell.map(renderBlock).join('')}</td>`;
+        const cellBr = cs?.borderRadius ? `border-radius:${cs.borderRadius}px;` : '';
+        const cellPad = cs ? `padding:${cs.paddingTop || 0}px ${cs.paddingRight || 0}px ${cs.paddingBottom || 0}px ${cs.paddingLeft || 0}px;` : '';
+        return `<td style="width:${colWidth}%;vertical-align:top;${cellBgStyle}${cellBr}${cellPad}">${cell.map(renderBlock).join('')}</td>`;
       }).join('');
-      return `<table width="100%" cellpadding="0" cellspacing="0" style="background-color:${row.style.backgroundColor};padding:${row.style.paddingTop}px ${row.style.paddingRight}px ${row.style.paddingBottom}px ${row.style.paddingLeft}px;"><tr>${cellsHTML}</tr></table>`;
+      return `<table width="100%" cellpadding="0" cellspacing="${gap}" style="background-color:${row.style.backgroundColor};padding:${row.style.paddingTop}px ${row.style.paddingRight}px ${row.style.paddingBottom}px ${row.style.paddingLeft}px;border-collapse:separate;border-spacing:${gap}px;"><tr>${cellsHTML}</tr></table>`;
     };
 
     const mobileCSS = mobileStyles.length > 0 ? mobileStyles.join('\n    ') : '';
