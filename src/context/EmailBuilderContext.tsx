@@ -23,6 +23,7 @@ interface EmailBuilderContextType {
   moveBlock: (rowId: string, cellIndex: number, blockId: string, direction: 'up' | 'down') => void;
   updateRowStyle: (rowId: string, style: Partial<EmailRow['style']>) => void;
   updateCellStyle: (rowId: string, cellIndex: number, style: Partial<CellStyle>) => void;
+  updateCellGap: (rowId: string, gap: number) => void;
   updateGlobalStyle: (style: Partial<EmailTemplate['globalStyle']>) => void;
   getSelectedBlock: () => { block: EmailBlock; rowId: string; cellIndex: number } | null;
   generateHTML: () => string;
@@ -155,10 +156,17 @@ export const EmailBuilderProvider: React.FC<{ children: React.ReactNode }> = ({ 
       ...prev,
       rows: prev.rows.map(r => {
         if (r.id !== rowId) return r;
-        const cellStyles = [...(r.cellStyles || r.cells.map(() => ({ backgroundColor: 'transparent' })))];
+        const cellStyles = [...(r.cellStyles || r.cells.map(() => ({ backgroundColor: 'transparent', borderRadius: 0, paddingTop: 0, paddingRight: 0, paddingBottom: 0, paddingLeft: 0 })))];
         cellStyles[cellIndex] = { ...cellStyles[cellIndex], ...style };
         return { ...r, cellStyles };
       }),
+    }));
+  }, []);
+
+  const updateCellGap = useCallback((rowId: string, gap: number) => {
+    setTemplate(prev => ({
+      ...prev,
+      rows: prev.rows.map(r => r.id === rowId ? { ...r, cellGap: gap } : r),
     }));
   }, []);
 
@@ -241,12 +249,16 @@ export const EmailBuilderProvider: React.FC<{ children: React.ReactNode }> = ({ 
 
     const renderRow = (row: EmailRow) => {
       const colWidth = Math.floor(100 / row.columns);
+      const gap = row.cellGap || 0;
       const cellsHTML = row.cells.map((cell, ci) => {
-        const cellBg = row.cellStyles?.[ci]?.backgroundColor;
+        const cs = row.cellStyles?.[ci];
+        const cellBg = cs?.backgroundColor;
         const cellBgStyle = cellBg && cellBg !== 'transparent' ? `background-color:${cellBg};` : '';
-        return `<td style="width:${colWidth}%;vertical-align:top;padding:0;${cellBgStyle}">${cell.map(renderBlock).join('')}</td>`;
+        const cellBr = cs?.borderRadius ? `border-radius:${cs.borderRadius}px;` : '';
+        const cellPad = cs ? `padding:${cs.paddingTop || 0}px ${cs.paddingRight || 0}px ${cs.paddingBottom || 0}px ${cs.paddingLeft || 0}px;` : '';
+        return `<td style="width:${colWidth}%;vertical-align:top;${cellBgStyle}${cellBr}${cellPad}">${cell.map(renderBlock).join('')}</td>`;
       }).join('');
-      return `<table width="100%" cellpadding="0" cellspacing="0" style="background-color:${row.style.backgroundColor};padding:${row.style.paddingTop}px ${row.style.paddingRight}px ${row.style.paddingBottom}px ${row.style.paddingLeft}px;"><tr>${cellsHTML}</tr></table>`;
+      return `<table width="100%" cellpadding="0" cellspacing="${gap}" style="background-color:${row.style.backgroundColor};padding:${row.style.paddingTop}px ${row.style.paddingRight}px ${row.style.paddingBottom}px ${row.style.paddingLeft}px;border-collapse:separate;border-spacing:${gap}px;"><tr>${cellsHTML}</tr></table>`;
     };
 
     const mobileCSS = mobileStyles.length > 0 ? mobileStyles.join('\n    ') : '';
@@ -284,7 +296,7 @@ ${rows.map(renderRow).join('\n')}
       template, selection, previewMode, setPreviewMode,
       setSelection, addRow, deleteRow, moveRow,
       addBlockToCell, updateBlock, updateBlockStyle, deleteBlock, moveBlock,
-      updateRowStyle, updateCellStyle, updateGlobalStyle, getSelectedBlock, generateHTML,
+      updateRowStyle, updateCellStyle, updateCellGap, updateGlobalStyle, getSelectedBlock, generateHTML,
       setTemplate: setTemplateDirectly, addBlockFromSaved,
     }}>
       {children}

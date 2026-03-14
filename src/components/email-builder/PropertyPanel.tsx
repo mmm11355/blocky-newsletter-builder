@@ -4,7 +4,7 @@ import { EMAIL_FONTS } from '@/types/email-builder';
 import { Trash2, ArrowUp, ArrowDown, Settings2, Upload, ClipboardPaste, Link } from 'lucide-react';
 
 const PropertyPanel = () => {
-  const { getSelectedBlock, updateBlock, updateBlockStyle, deleteBlock, moveBlock, selection, template, updateCellStyle } = useEmailBuilder();
+  const { getSelectedBlock, updateBlock, updateBlockStyle, deleteBlock, moveBlock, selection, template, updateCellStyle, updateCellGap } = useEmailBuilder();
   const selected = getSelectedBlock();
 
   if (!selected || !selection) {
@@ -203,38 +203,65 @@ const PropertyPanel = () => {
           </Field>
         </Section>
 
-        {/* Per-column background */}
+        {/* Per-column styles */}
         {(() => {
           const row = template.rows.find(r => r.id === rowId);
           if (!row || row.columns <= 1) return null;
           return (
-            <Section title="Фон колонок">
-              <div className="space-y-2">
+            <Section title="Колонки">
+              <Field label="Отступ между колонками" compact>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="range"
+                    min={0}
+                    max={40}
+                    value={row.cellGap || 0}
+                    onChange={(e) => updateCellGap(rowId, +e.target.value)}
+                    className="flex-1 h-2 accent-primary"
+                  />
+                  <span className="text-xs text-muted-foreground font-mono w-10 text-right">{row.cellGap || 0}px</span>
+                </div>
+              </Field>
+              <div className="space-y-3">
                 {row.cells.map((_, ci) => {
-                  const cellBg = row.cellStyles?.[ci]?.backgroundColor || 'transparent';
+                  const cs = row.cellStyles?.[ci] || { backgroundColor: 'transparent', borderRadius: 0, paddingTop: 0, paddingRight: 0, paddingBottom: 0, paddingLeft: 0 };
                   return (
-                    <Field key={ci} label={`Колонка ${ci + 1}`} compact>
-                      <div className="relative">
-                        <input
-                          type="color"
-                          value={cellBg === 'transparent' ? '#ffffff' : cellBg}
-                          onChange={(e) => updateCellStyle(rowId, ci, { backgroundColor: e.target.value })}
-                          className="w-full h-9 rounded-lg border border-input cursor-pointer opacity-0 absolute inset-0"
-                        />
-                        <div className="w-full h-9 rounded-lg border border-input flex items-center gap-2 px-2">
-                          <div className="w-5 h-5 rounded-md border border-border" style={{ backgroundColor: cellBg === 'transparent' ? '#ffffff' : cellBg }} />
-                          <span className="text-xs text-muted-foreground font-mono">{cellBg === 'transparent' ? 'прозрачный' : cellBg}</span>
-                          {cellBg !== 'transparent' && (
-                            <button
-                              onClick={(e) => { e.stopPropagation(); updateCellStyle(rowId, ci, { backgroundColor: 'transparent' }); }}
-                              className="ml-auto text-[10px] text-muted-foreground hover:text-foreground"
-                            >
-                              ✕
-                            </button>
-                          )}
+                    <div key={ci} className="space-y-2 p-2 rounded-lg bg-secondary/30 border border-border/30">
+                      <span className="text-[11px] font-semibold text-card-foreground/60 uppercase tracking-widest">Колонка {ci + 1}</span>
+                      <Field label="Фон" compact>
+                        <div className="relative">
+                          <input
+                            type="color"
+                            value={cs.backgroundColor === 'transparent' ? '#ffffff' : cs.backgroundColor}
+                            onChange={(e) => updateCellStyle(rowId, ci, { backgroundColor: e.target.value })}
+                            className="w-full h-8 rounded-lg border border-input cursor-pointer opacity-0 absolute inset-0"
+                          />
+                          <div className="w-full h-8 rounded-lg border border-input flex items-center gap-2 px-2">
+                            <div className="w-4 h-4 rounded border border-border" style={{ backgroundColor: cs.backgroundColor === 'transparent' ? '#ffffff' : cs.backgroundColor }} />
+                            <span className="text-xs text-muted-foreground font-mono">{cs.backgroundColor === 'transparent' ? 'прозр.' : cs.backgroundColor}</span>
+                            {cs.backgroundColor !== 'transparent' && (
+                              <button
+                                onClick={(e) => { e.stopPropagation(); updateCellStyle(rowId, ci, { backgroundColor: 'transparent' }); }}
+                                className="ml-auto text-[10px] text-muted-foreground hover:text-foreground"
+                              >✕</button>
+                            )}
+                          </div>
                         </div>
+                      </Field>
+                      <Field label="Закругление" compact>
+                        <div className="flex items-center gap-2">
+                          <input type="range" min={0} max={40} value={cs.borderRadius || 0} onChange={(e) => updateCellStyle(rowId, ci, { borderRadius: +e.target.value })} className="flex-1 h-2 accent-primary" />
+                          <span className="text-xs text-muted-foreground font-mono w-10 text-right">{cs.borderRadius || 0}px</span>
+                        </div>
+                      </Field>
+                      <div className="grid grid-cols-2 gap-1.5">
+                        {([['paddingTop', '↑'], ['paddingRight', '→'], ['paddingBottom', '↓'], ['paddingLeft', '←']] as const).map(([key, icon]) => (
+                          <Field key={key} label={icon} compact>
+                            <input type="number" value={(cs as any)[key] || 0} onChange={(e) => updateCellStyle(rowId, ci, { [key]: +e.target.value })} className="w-full rounded-lg border border-input bg-secondary/50 px-2 py-1 text-xs text-card-foreground focus:outline-none focus:ring-1 focus:ring-primary/50" />
+                          </Field>
+                        ))}
                       </div>
-                    </Field>
+                    </div>
                   );
                 })}
               </div>

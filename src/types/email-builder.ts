@@ -37,6 +37,7 @@ export interface EmailRow {
   columns: ColumnLayout;
   cells: EmailBlock[][];
   cellStyles: CellStyle[];
+  cellGap: number;
   style: {
     backgroundColor: string;
     paddingTop: number;
@@ -48,6 +49,11 @@ export interface EmailRow {
 
 export interface CellStyle {
   backgroundColor: string;
+  borderRadius: number;
+  paddingTop: number;
+  paddingRight: number;
+  paddingBottom: number;
+  paddingLeft: number;
 }
 
 export interface EmailTemplate {
@@ -115,7 +121,8 @@ export const createRow = (columns: ColumnLayout): EmailRow => ({
   id: crypto.randomUUID(),
   columns,
   cells: Array.from({ length: columns }, () => []),
-  cellStyles: Array.from({ length: columns }, () => ({ backgroundColor: 'transparent' })),
+  cellStyles: Array.from({ length: columns }, () => ({ backgroundColor: 'transparent', borderRadius: 0, paddingTop: 0, paddingRight: 0, paddingBottom: 0, paddingLeft: 0 })),
+  cellGap: 0,
   style: {
     backgroundColor: '#ffffff',
     paddingTop: 0,
