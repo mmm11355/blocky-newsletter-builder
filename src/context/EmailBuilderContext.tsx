@@ -21,6 +21,8 @@ interface EmailBuilderContextType {
   updateBlockStyle: (rowId: string, cellIndex: number, blockId: string, style: Partial<BlockStyle>) => void;
   deleteBlock: (rowId: string, cellIndex: number, blockId: string) => void;
   moveBlock: (rowId: string, cellIndex: number, blockId: string, direction: 'up' | 'down') => void;
+  reorderBlock: (rowId: string, cellIndex: number, blockId: string, newPosition: number) => void;
+  moveBlockBetweenCells: (fromRowId: string, fromCellIndex: number, blockId: string, toRowId: string, toCellIndex: number, position: number) => void;
   updateRowStyle: (rowId: string, style: Partial<EmailRow['style']>) => void;
   updateCellStyle: (rowId: string, cellIndex: number, style: Partial<CellStyle>) => void;
   updateCellGap: (rowId: string, gap: number) => void;
