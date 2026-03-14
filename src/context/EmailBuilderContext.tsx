@@ -285,7 +285,7 @@ ${rows.map(renderRow).join('\n')}
       template, selection, previewMode, setPreviewMode,
       setSelection, addRow, deleteRow, moveRow,
       addBlockToCell, updateBlock, updateBlockStyle, deleteBlock, moveBlock,
-      updateRowStyle, updateCellStyle, updateGlobalStyle, getSelectedBlock, generateHTML,
+      updateRowStyle, updateCellStyle, updateCellGap, updateGlobalStyle, getSelectedBlock, generateHTML,
       setTemplate: setTemplateDirectly, addBlockFromSaved,
     }}>
       {children}
