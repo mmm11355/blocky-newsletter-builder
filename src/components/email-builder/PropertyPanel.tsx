@@ -1,6 +1,6 @@
 import { useRef, useCallback } from 'react';
 import { useEmailBuilder } from '@/context/EmailBuilderContext';
-import { EMAIL_FONTS, BulletType } from '@/types/email-builder';
+import { EMAIL_FONTS, BulletType, MenuItem, MenuLayout } from '@/types/email-builder';
 import { Trash2, ArrowUp, ArrowDown, Settings2, Upload, ClipboardPaste, Link, Plus, X } from 'lucide-react';
 
 const PropertyPanel = () => {
