@@ -1,7 +1,7 @@
 import { useRef, useCallback } from 'react';
 import { useEmailBuilder } from '@/context/EmailBuilderContext';
-import { EMAIL_FONTS } from '@/types/email-builder';
-import { Trash2, ArrowUp, ArrowDown, Settings2, Upload, ClipboardPaste, Link } from 'lucide-react';
+import { EMAIL_FONTS, BulletType } from '@/types/email-builder';
+import { Trash2, ArrowUp, ArrowDown, Settings2, Upload, ClipboardPaste, Link, Plus, X } from 'lucide-react';
 
 const PropertyPanel = () => {
   const { getSelectedBlock, updateBlock, updateBlockStyle, deleteBlock, moveBlock, selection, template, updateCellStyle, updateCellGap } = useEmailBuilder();
@@ -24,7 +24,7 @@ const PropertyPanel = () => {
   const upd = (style: Record<string, any>) => updateBlockStyle(rowId, cellIndex, block.id, style);
   const updBlock = (updates: Record<string, any>) => updateBlock(rowId, cellIndex, block.id, updates);
 
-  const typeLabels: Record<string, string> = { heading: 'Заголовок', text: 'Текст', image: 'Изображение', button: 'Кнопка' };
+  const typeLabels: Record<string, string> = { heading: 'Заголовок', text: 'Текст', image: 'Изображение', button: 'Кнопка', list: 'Список' };
 
   return (
     <div className="w-72 bg-card border-l border-border h-full overflow-y-auto scrollbar-thin">
@@ -59,6 +59,16 @@ const PropertyPanel = () => {
               />
             )}
           </Field>
+        )}
+
+        {/* List Items */}
+        {block.type === 'list' && (
+          <ListFields
+            items={block.listItems || []}
+            bulletStyle={block.bulletStyle || { type: 'disc', color: '#333333', size: 16, fontWeight: '400', customIcon: '', offsetX: 0, offsetY: 0 }}
+            onUpdateItems={(listItems) => updBlock({ listItems })}
+            onUpdateBullet={(bulletStyle) => updBlock({ bulletStyle })}
+          />
         )}
 
         {block.type === 'image' && (
@@ -370,5 +380,132 @@ const Section: React.FC<{ title: string; children: React.ReactNode }> = ({ title
     {children}
   </div>
 );
+
+import type { ListBulletStyle } from '@/types/email-builder';
+
+const ListFields: React.FC<{
+  items: string[];
+  bulletStyle: ListBulletStyle;
+  onUpdateItems: (items: string[]) => void;
+  onUpdateBullet: (bs: ListBulletStyle) => void;
+}> = ({ items, bulletStyle, onUpdateItems, onUpdateBullet }) => {
+  const iconFileRef = useRef<HTMLInputElement>(null);
+  const bs = bulletStyle;
+
+  const updateItem = (index: number, value: string) => {
+    const newItems = [...items];
+    newItems[index] = value;
+    onUpdateItems(newItems);
+  };
+  const addItem = () => onUpdateItems([...items, 'Новый пункт']);
+  const removeItem = (index: number) => onUpdateItems(items.filter((_, i) => i !== index));
+
+  const handleIconFile = useCallback(async (file: File) => {
+    if (!file.type.startsWith('image/')) return;
+    const reader = new FileReader();
+    reader.onload = () => onUpdateBullet({ ...bs, customIcon: reader.result as string, type: 'custom' });
+    reader.readAsDataURL(file);
+  }, [bs, onUpdateBullet]);
+
+  return (
+    <>
+      <Section title="Пункты списка">
+        <div className="space-y-1.5">
+          {items.map((item, i) => (
+            <div key={i} className="flex items-center gap-1">
+              <input
+                type="text"
+                value={item}
+                onChange={(e) => updateItem(i, e.target.value)}
+                className="flex-1 rounded-lg border border-input bg-secondary/50 px-2 py-1.5 text-sm text-card-foreground focus:outline-none focus:ring-1 focus:ring-primary/50"
+              />
+              <button onClick={() => removeItem(i)} className="p-1 rounded hover:bg-destructive hover:text-destructive-foreground text-muted-foreground transition-colors">
+                <X className="h-3.5 w-3.5" />
+              </button>
+            </div>
+          ))}
+          <button onClick={addItem} className="w-full flex items-center justify-center gap-1.5 py-1.5 rounded-lg bg-secondary text-secondary-foreground hover:bg-secondary/80 text-xs font-medium transition-colors">
+            <Plus className="h-3.5 w-3.5" /> Добавить пункт
+          </button>
+        </div>
+      </Section>
+
+      <Section title="Маркер">
+        <Field label="Тип маркера" compact>
+          <select
+            value={bs.type}
+            onChange={(e) => onUpdateBullet({ ...bs, type: e.target.value as BulletType })}
+            className="w-full rounded-lg border border-input bg-secondary/50 px-2 py-1.5 text-sm text-card-foreground focus:outline-none focus:ring-1 focus:ring-primary/50"
+          >
+            <option value="disc">● Точка</option>
+            <option value="check">✓ Галочка</option>
+            <option value="number">1. Цифры</option>
+            <option value="custom">🖼 Своя иконка</option>
+          </select>
+        </Field>
+
+        {bs.type === 'custom' && (
+          <Field label="Иконка маркера" compact>
+            <div className="space-y-1.5">
+              <input type="text" value={bs.customIcon} onChange={(e) => onUpdateBullet({ ...bs, customIcon: e.target.value })} placeholder="URL изображения" className="w-full rounded-lg border border-input bg-secondary/50 px-2 py-1.5 text-sm text-card-foreground focus:outline-none focus:ring-1 focus:ring-primary/50" />
+              <button
+                onClick={() => iconFileRef.current?.click()}
+                className="w-full flex items-center justify-center gap-1.5 py-1.5 rounded-lg bg-secondary text-secondary-foreground hover:bg-secondary/80 text-xs font-medium transition-colors"
+              >
+                <Upload className="h-3.5 w-3.5" /> Загрузить иконку
+              </button>
+              <input ref={iconFileRef} type="file" accept="image/*" className="hidden" onChange={(e) => { if (e.target.files?.[0]) handleIconFile(e.target.files[0]); }} />
+              {bs.customIcon && (
+                <div className="flex items-center gap-2 p-2 rounded-lg bg-secondary/30 border border-border/30">
+                  <img src={bs.customIcon} alt="" className="w-6 h-6 object-contain" />
+                  <span className="text-xs text-muted-foreground flex-1 truncate">Иконка загружена</span>
+                </div>
+              )}
+            </div>
+          </Field>
+        )}
+
+        <div className="grid grid-cols-2 gap-2">
+          <Field label="Цвет" compact>
+            <div className="relative">
+              <input type="color" value={bs.color} onChange={(e) => onUpdateBullet({ ...bs, color: e.target.value })} className="w-full h-8 rounded-lg border border-input cursor-pointer opacity-0 absolute inset-0" />
+              <div className="w-full h-8 rounded-lg border border-input flex items-center gap-2 px-2">
+                <div className="w-4 h-4 rounded border border-border" style={{ backgroundColor: bs.color }} />
+                <span className="text-xs text-muted-foreground font-mono">{bs.color}</span>
+              </div>
+            </div>
+          </Field>
+          <Field label="Размер" compact>
+            <input type="number" value={bs.size} onChange={(e) => onUpdateBullet({ ...bs, size: +e.target.value })} className="w-full rounded-lg border border-input bg-secondary/50 px-2 py-1.5 text-sm text-card-foreground focus:outline-none focus:ring-1 focus:ring-primary/50" />
+          </Field>
+        </div>
+
+        <Field label="Жирность" compact>
+          <select value={bs.fontWeight} onChange={(e) => onUpdateBullet({ ...bs, fontWeight: e.target.value })} className="w-full rounded-lg border border-input bg-secondary/50 px-2 py-1.5 text-sm text-card-foreground focus:outline-none focus:ring-1 focus:ring-primary/50">
+            <option value="400">Обычный</option>
+            <option value="500">Средний</option>
+            <option value="600">Полужирный</option>
+            <option value="700">Жирный</option>
+          </select>
+        </Field>
+
+        <div className="grid grid-cols-2 gap-2">
+          <Field label="Сдвиг X" compact>
+            <div className="flex items-center gap-2">
+              <input type="range" min={-20} max={20} value={bs.offsetX} onChange={(e) => onUpdateBullet({ ...bs, offsetX: +e.target.value })} className="flex-1 h-2 accent-primary" />
+              <span className="text-xs text-muted-foreground font-mono w-8 text-right">{bs.offsetX}</span>
+            </div>
+          </Field>
+          <Field label="Сдвиг Y" compact>
+            <div className="flex items-center gap-2">
+              <input type="range" min={-20} max={20} value={bs.offsetY} onChange={(e) => onUpdateBullet({ ...bs, offsetY: +e.target.value })} className="flex-1 h-2 accent-primary" />
+              <span className="text-xs text-muted-foreground font-mono w-8 text-right">{bs.offsetY}</span>
+            </div>
+          </Field>
+        </div>
+      </Section>
+    </>
+  );
+};
 
 export default PropertyPanel;
