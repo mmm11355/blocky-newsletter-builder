@@ -51,6 +51,13 @@ export interface EmailBlock {
   // for list
   listItems?: string[];
   bulletStyle?: ListBulletStyle;
+  // for menu
+  menuItems?: MenuItem[];
+  menuLayout?: MenuLayout;
+  menuLogoSrc?: string;
+  menuLogoWidth?: number;
+  menuLogoHref?: string;
+  menuGap?: number;
 }
 
 export interface EmailRow {
