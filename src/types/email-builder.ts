@@ -128,6 +128,13 @@ export const createBlock = (type: BlockType): EmailBlock => {
       return { ...base, content: '', src: 'https://placehold.co/600x300/e2e8f0/64748b?text=Image', alt: 'Image', href: '', style: { ...base.style, textAlign: 'center' } };
     case 'button':
       return { ...base, content: 'Нажми меня', href: '#', style: { ...base.style, backgroundColor: '#3b5bdb', color: '#ffffff', textAlign: 'center', paddingTop: 12, paddingBottom: 12, paddingLeft: 24, paddingRight: 24, borderRadius: 6, fontWeight: '600' } };
+    case 'list':
+      return {
+        ...base,
+        content: '',
+        listItems: ['Первый пункт', 'Второй пункт', 'Третий пункт'],
+        bulletStyle: { type: 'disc', color: '#333333', size: 16, fontWeight: '400', customIcon: '', offsetX: 0, offsetY: 0 },
+      };
   }
 };
 
