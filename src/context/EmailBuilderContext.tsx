@@ -296,6 +296,22 @@ export const EmailBuilderProvider: React.FC<{ children: React.ReactNode }> = ({ 
           }).join('');
           return `<div class="${blockClass}" style="${baseStyle}${widthStr}${marginStr}max-width:100%;margin:0;">${items}</div>`;
         }
+        case 'menu': {
+          const menuLayout = block.menuLayout || 'horizontal';
+          const isH = menuLayout === 'horizontal';
+          const gap = block.menuGap || 16;
+          const alignMap: Record<string, string> = { center: 'center', right: 'flex-end', left: 'flex-start' };
+          const justify = alignMap[s.textAlign] || 'flex-start';
+          const logoHtml = block.menuLogoSrc
+            ? (block.menuLogoHref
+              ? `<a href="${block.menuLogoHref}" target="_blank" style="text-decoration:none;flex-shrink:0;"><img src="${block.menuLogoSrc}" alt="Logo" style="width:${block.menuLogoWidth || 120}px;height:auto;" /></a>`
+              : `<img src="${block.menuLogoSrc}" alt="Logo" style="width:${block.menuLogoWidth || 120}px;height:auto;flex-shrink:0;" />`)
+            : '';
+          const linksHtml = (block.menuItems || []).map(item =>
+            `<a href="${item.href || '#'}" target="_blank" style="color:${s.color};font-size:${s.fontSize}px;font-weight:${s.fontWeight};text-decoration:none;white-space:nowrap;${s.fontFamily !== 'inherit' ? `font-family:${s.fontFamily};` : ''}">${item.label}</a>`
+          ).join('');
+          return `<div class="${blockClass}" style="${baseStyle}${widthStr}${marginStr}max-width:100%;margin:0;"><div style="display:flex;flex-direction:${isH ? 'row' : 'column'};align-items:${isH ? 'center' : justify};justify-content:${justify};gap:${gap}px;flex-wrap:wrap;">${logoHtml}${linksHtml}</div></div>`;
+        }
       }
     };
 

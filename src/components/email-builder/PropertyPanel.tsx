@@ -1,6 +1,6 @@
 import { useRef, useCallback } from 'react';
 import { useEmailBuilder } from '@/context/EmailBuilderContext';
-import { EMAIL_FONTS, BulletType } from '@/types/email-builder';
+import { EMAIL_FONTS, BulletType, MenuItem, MenuLayout } from '@/types/email-builder';
 import { Trash2, ArrowUp, ArrowDown, Settings2, Upload, ClipboardPaste, Link, Plus, X } from 'lucide-react';
 
 const PropertyPanel = () => {
@@ -24,7 +24,7 @@ const PropertyPanel = () => {
   const upd = (style: Record<string, any>) => updateBlockStyle(rowId, cellIndex, block.id, style);
   const updBlock = (updates: Record<string, any>) => updateBlock(rowId, cellIndex, block.id, updates);
 
-  const typeLabels: Record<string, string> = { heading: 'Заголовок', text: 'Текст', image: 'Изображение', button: 'Кнопка', list: 'Список' };
+  const typeLabels: Record<string, string> = { heading: 'Заголовок', text: 'Текст', image: 'Изображение', button: 'Кнопка', list: 'Список', menu: 'Меню' };
 
   return (
     <div className="w-72 bg-card border-l border-border h-full overflow-y-auto scrollbar-thin">
@@ -68,6 +68,19 @@ const PropertyPanel = () => {
             bulletStyle={block.bulletStyle || { type: 'disc', color: '#333333', size: 16, fontWeight: '400', customIcon: '', offsetX: 0, offsetY: 0 }}
             onUpdateItems={(listItems) => updBlock({ listItems })}
             onUpdateBullet={(bulletStyle) => updBlock({ bulletStyle })}
+          />
+        )}
+
+        {/* Menu Items */}
+        {block.type === 'menu' && (
+          <MenuFields
+            items={block.menuItems || []}
+            layout={block.menuLayout || 'horizontal'}
+            logoSrc={block.menuLogoSrc || ''}
+            logoWidth={block.menuLogoWidth || 120}
+            logoHref={block.menuLogoHref || '#'}
+            gap={block.menuGap || 16}
+            onUpdate={updBlock}
           />
         )}
 
@@ -504,6 +517,112 @@ const ListFields: React.FC<{
           </Field>
         </div>
       </Section>
+    </>
+  );
+};
+
+const MenuFields: React.FC<{
+  items: MenuItem[];
+  layout: MenuLayout;
+  logoSrc: string;
+  logoWidth: number;
+  logoHref: string;
+  gap: number;
+  onUpdate: (u: Record<string, any>) => void;
+}> = ({ items, layout, logoSrc, logoWidth, logoHref, gap, onUpdate }) => {
+  const logoFileRef = useRef<HTMLInputElement>(null);
+
+  const handleLogoFile = useCallback(async (file: File) => {
+    if (!file.type.startsWith('image/')) return;
+    const dataUrl = await fileToDataURL(file);
+    onUpdate({ menuLogoSrc: dataUrl });
+  }, [onUpdate]);
+
+  const updateItem = (index: number, field: keyof MenuItem, value: string) => {
+    const newItems = [...items];
+    newItems[index] = { ...newItems[index], [field]: value };
+    onUpdate({ menuItems: newItems });
+  };
+  const addItem = () => {
+    if (items.length >= 5) return;
+    onUpdate({ menuItems: [...items, { label: 'Пункт', href: '#' }] });
+  };
+  const removeItem = (index: number) => onUpdate({ menuItems: items.filter((_, i) => i !== index) });
+
+  return (
+    <>
+      <Section title="Ориентация">
+        <div className="flex gap-1">
+          {(['horizontal', 'vertical'] as const).map(l => (
+            <button key={l} onClick={() => onUpdate({ menuLayout: l })} className={`flex-1 py-1.5 text-xs rounded-lg font-medium transition-all ${layout === l ? 'gradient-primary text-primary-foreground shadow-sm' : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'}`}>
+              {l === 'horizontal' ? 'Горизонтально' : 'Вертикально'}
+            </button>
+          ))}
+        </div>
+      </Section>
+
+      <Section title="Логотип">
+        <Field label="Изображение" compact>
+          <div className="space-y-1.5">
+            <input type="text" value={logoSrc} onChange={(e) => onUpdate({ menuLogoSrc: e.target.value })} placeholder="URL логотипа" className="w-full rounded-lg border border-input bg-secondary/50 px-2 py-1.5 text-sm text-card-foreground focus:outline-none focus:ring-1 focus:ring-primary/50" />
+            <button onClick={() => logoFileRef.current?.click()} className="w-full flex items-center justify-center gap-1.5 py-1.5 rounded-lg bg-secondary text-secondary-foreground hover:bg-secondary/80 text-xs font-medium transition-colors">
+              <Upload className="h-3.5 w-3.5" /> Загрузить
+            </button>
+            <input ref={logoFileRef} type="file" accept="image/*" className="hidden" onChange={(e) => { if (e.target.files?.[0]) handleLogoFile(e.target.files[0]); }} />
+            {logoSrc && (
+              <div className="flex items-center gap-2 p-2 rounded-lg bg-secondary/30 border border-border/30">
+                <img src={logoSrc} alt="" className="h-6 object-contain" />
+                <span className="text-xs text-muted-foreground flex-1 truncate">Лого загружено</span>
+                <button onClick={() => onUpdate({ menuLogoSrc: '' })} className="text-muted-foreground hover:text-foreground"><X className="h-3 w-3" /></button>
+              </div>
+            )}
+          </div>
+        </Field>
+        {logoSrc && (
+          <>
+            <Field label="Ширина лого" compact>
+              <div className="flex items-center gap-2">
+                <input type="range" min={30} max={300} value={logoWidth} onChange={(e) => onUpdate({ menuLogoWidth: +e.target.value })} className="flex-1 h-2 accent-primary" />
+                <span className="text-xs text-muted-foreground font-mono w-10 text-right">{logoWidth}px</span>
+              </div>
+            </Field>
+            <Field label="Ссылка лого" compact>
+              <input type="text" value={logoHref} onChange={(e) => onUpdate({ menuLogoHref: e.target.value })} placeholder="https://" className="w-full rounded-lg border border-input bg-secondary/50 px-2 py-1.5 text-sm text-card-foreground focus:outline-none focus:ring-1 focus:ring-primary/50" />
+            </Field>
+          </>
+        )}
+      </Section>
+
+      <Section title="Пункты меню">
+        <div className="space-y-2">
+          {items.map((item, i) => (
+            <div key={i} className="space-y-1 p-2 rounded-lg bg-secondary/30 border border-border/30">
+              <div className="flex items-center gap-1">
+                <input type="text" value={item.label} onChange={(e) => updateItem(i, 'label', e.target.value)} placeholder="Название" className="flex-1 rounded-lg border border-input bg-secondary/50 px-2 py-1 text-sm text-card-foreground focus:outline-none focus:ring-1 focus:ring-primary/50" />
+                <button onClick={() => removeItem(i)} className="p-1 rounded hover:bg-destructive hover:text-destructive-foreground text-muted-foreground transition-colors">
+                  <X className="h-3.5 w-3.5" />
+                </button>
+              </div>
+              <div className="relative">
+                <Link className="h-3 w-3 text-muted-foreground absolute left-2 top-1/2 -translate-y-1/2" />
+                <input type="text" value={item.href} onChange={(e) => updateItem(i, 'href', e.target.value)} placeholder="https://" className="w-full rounded-lg border border-input bg-secondary/50 pl-7 pr-2 py-1 text-xs text-card-foreground focus:outline-none focus:ring-1 focus:ring-primary/50" />
+              </div>
+            </div>
+          ))}
+          {items.length < 5 && (
+            <button onClick={addItem} className="w-full flex items-center justify-center gap-1.5 py-1.5 rounded-lg bg-secondary text-secondary-foreground hover:bg-secondary/80 text-xs font-medium transition-colors">
+              <Plus className="h-3.5 w-3.5" /> Добавить пункт
+            </button>
+          )}
+        </div>
+      </Section>
+
+      <Field label="Отступ между элементами" compact>
+        <div className="flex items-center gap-2">
+          <input type="range" min={4} max={40} value={gap} onChange={(e) => onUpdate({ menuGap: +e.target.value })} className="flex-1 h-2 accent-primary" />
+          <span className="text-xs text-muted-foreground font-mono w-10 text-right">{gap}px</span>
+        </div>
+      </Field>
     </>
   );
 };

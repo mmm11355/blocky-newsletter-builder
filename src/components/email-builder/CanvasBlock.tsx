@@ -125,6 +125,32 @@ const CanvasBlock: React.FC<Props> = ({ block, rowId, cellIndex }) => {
             ))}
           </div>
         );
+      case 'menu': {
+        const layout = block.menuLayout || 'horizontal';
+        const gap = block.menuGap || 16;
+        const isHorizontal = layout === 'horizontal';
+        return (
+          <div style={{ ...baseStyle, margin: 0 }} onClick={handleClick}>
+            <div style={{
+              display: 'flex',
+              flexDirection: isHorizontal ? 'row' : 'column',
+              alignItems: isHorizontal ? 'center' : (s.textAlign === 'center' ? 'center' : s.textAlign === 'right' ? 'flex-end' : 'flex-start'),
+              justifyContent: s.textAlign === 'center' ? 'center' : s.textAlign === 'right' ? 'flex-end' : 'flex-start',
+              gap,
+              flexWrap: 'wrap',
+            }}>
+              {block.menuLogoSrc && (
+                <img src={block.menuLogoSrc} alt="Logo" style={{ width: block.menuLogoWidth || 120, height: 'auto', flexShrink: 0 }} />
+              )}
+              {(block.menuItems || []).map((item, i) => (
+                <a key={i} style={{ color: s.color, fontSize: s.fontSize, fontWeight: s.fontWeight as any, textDecoration: 'none', whiteSpace: 'nowrap' }}>
+                  {item.label}
+                </a>
+              ))}
+            </div>
+          </div>
+        );
+      }
     }
   };
 

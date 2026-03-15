@@ -1,4 +1,11 @@
-export type BlockType = 'heading' | 'text' | 'image' | 'button' | 'list';
+export type BlockType = 'heading' | 'text' | 'image' | 'button' | 'list' | 'menu';
+
+export interface MenuItem {
+  label: string;
+  href: string;
+}
+
+export type MenuLayout = 'horizontal' | 'vertical';
 export type BulletType = 'disc' | 'check' | 'number' | 'custom';
 
 export interface ListBulletStyle {
@@ -44,6 +51,13 @@ export interface EmailBlock {
   // for list
   listItems?: string[];
   bulletStyle?: ListBulletStyle;
+  // for menu
+  menuItems?: MenuItem[];
+  menuLayout?: MenuLayout;
+  menuLogoSrc?: string;
+  menuLogoWidth?: number;
+  menuLogoHref?: string;
+  menuGap?: number;
 }
 
 export interface EmailRow {
@@ -134,6 +148,22 @@ export const createBlock = (type: BlockType): EmailBlock => {
         content: '',
         listItems: ['Первый пункт', 'Второй пункт', 'Третий пункт'],
         bulletStyle: { type: 'disc', color: '#333333', size: 16, fontWeight: '400', customIcon: '', offsetX: 0, offsetY: 0 },
+      };
+    case 'menu':
+      return {
+        ...base,
+        content: '',
+        menuItems: [
+          { label: 'Главная', href: '#' },
+          { label: 'О нас', href: '#' },
+          { label: 'Контакты', href: '#' },
+        ],
+        menuLayout: 'horizontal' as MenuLayout,
+        menuLogoSrc: '',
+        menuLogoWidth: 120,
+        menuLogoHref: '#',
+        menuGap: 16,
+        style: { ...base.style, textAlign: 'center', paddingTop: 12, paddingBottom: 12 },
       };
   }
 };
