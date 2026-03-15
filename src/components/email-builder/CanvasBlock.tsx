@@ -51,6 +51,31 @@ const CanvasBlock: React.FC<Props> = ({ block, rowId, cellIndex }) => {
     transition: 'outline 0.15s',
   };
 
+  const renderBullet = (index: number) => {
+    const bs = block.bulletStyle;
+    if (!bs) return null;
+    const bulletContainerStyle: React.CSSProperties = {
+      display: 'inline-flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginRight: 8,
+      position: 'relative',
+      left: bs.offsetX,
+      top: bs.offsetY,
+      flexShrink: 0,
+    };
+    if (bs.type === 'custom' && bs.customIcon) {
+      return <span style={bulletContainerStyle}><img src={bs.customIcon} alt="" style={{ width: bs.size, height: bs.size }} /></span>;
+    }
+    if (bs.type === 'check') {
+      return <span style={{ ...bulletContainerStyle, color: bs.color, fontSize: bs.size, fontWeight: bs.fontWeight as any }}>✓</span>;
+    }
+    if (bs.type === 'number') {
+      return <span style={{ ...bulletContainerStyle, color: bs.color, fontSize: bs.size, fontWeight: bs.fontWeight as any }}>{index + 1}.</span>;
+    }
+    return <span style={{ ...bulletContainerStyle, color: bs.color, fontSize: bs.size, fontWeight: bs.fontWeight as any }}>•</span>;
+  };
+
   const renderContent = () => {
     switch (block.type) {
       case 'heading':
@@ -87,6 +112,17 @@ const CanvasBlock: React.FC<Props> = ({ block, rowId, cellIndex }) => {
             }}>
               {block.content}
             </a>
+          </div>
+        );
+      case 'list':
+        return (
+          <div style={{ ...baseStyle, margin: 0 }} onClick={handleClick}>
+            {(block.listItems || []).map((item, i) => (
+              <div key={i} style={{ display: 'flex', alignItems: 'flex-start', marginBottom: i < (block.listItems?.length || 0) - 1 ? 6 : 0 }}>
+                {renderBullet(i)}
+                <span>{item}</span>
+              </div>
+            ))}
           </div>
         );
     }
