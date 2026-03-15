@@ -1,4 +1,4 @@
-import { Type, Image, Heading1, MousePointerClick, Columns2, Columns3, LayoutList, GripVertical, List } from 'lucide-react';
+import { Type, Image, Heading1, MousePointerClick, Columns2, Columns3, LayoutList, GripVertical, List, Menu } from 'lucide-react';
 import { useEmailBuilder } from '@/context/EmailBuilderContext';
 import { BlockType, ColumnLayout } from '@/types/email-builder';
 
