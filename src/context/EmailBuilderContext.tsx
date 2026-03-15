@@ -278,6 +278,24 @@ export const EmailBuilderProvider: React.FC<{ children: React.ReactNode }> = ({ 
         }
         case 'button':
           return `<div class="${blockClass}" style="text-align:${s.textAlign};${widthStr}${marginStr}max-width:100%;"><a href="${block.href || '#'}" style="display:block;width:100%;box-sizing:border-box;background-color:${s.backgroundColor};color:${s.color};font-size:${s.fontSize}px;font-weight:${s.fontWeight};padding:${s.paddingTop}px ${s.paddingRight}px ${s.paddingBottom}px ${s.paddingLeft}px;border-radius:${s.borderRadius}px;text-decoration:none;text-align:${s.textAlign};${fontFamilyStr}border:${s.borderWidth}px solid ${s.borderColor};line-height:${s.lineHeight};">${block.content}</a></div>`;
+        case 'list': {
+          const bs = block.bulletStyle || { type: 'disc', color: '#333333', size: 16, fontWeight: '400', customIcon: '', offsetX: 0, offsetY: 0 };
+          const items = (block.listItems || []).map((item, i) => {
+            let bulletHtml = '';
+            const bulletStyle = `color:${bs.color};font-size:${bs.size}px;font-weight:${bs.fontWeight};margin-right:8px;position:relative;left:${bs.offsetX}px;top:${bs.offsetY}px;flex-shrink:0;`;
+            if (bs.type === 'custom' && bs.customIcon) {
+              bulletHtml = `<span style="${bulletStyle}display:inline-flex;align-items:center;"><img src="${bs.customIcon}" alt="" style="width:${bs.size}px;height:${bs.size}px;" /></span>`;
+            } else if (bs.type === 'check') {
+              bulletHtml = `<span style="${bulletStyle}">✓</span>`;
+            } else if (bs.type === 'number') {
+              bulletHtml = `<span style="${bulletStyle}">${i + 1}.</span>`;
+            } else {
+              bulletHtml = `<span style="${bulletStyle}">•</span>`;
+            }
+            return `<div style="display:flex;align-items:flex-start;${i < (block.listItems?.length || 0) - 1 ? 'margin-bottom:6px;' : ''}">${bulletHtml}<span>${item}</span></div>`;
+          }).join('');
+          return `<div class="${blockClass}" style="${baseStyle}${widthStr}${marginStr}max-width:100%;margin:0;">${items}</div>`;
+        }
       }
     };
 
