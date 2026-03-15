@@ -1,4 +1,15 @@
-export type BlockType = 'heading' | 'text' | 'image' | 'button';
+export type BlockType = 'heading' | 'text' | 'image' | 'button' | 'list';
+export type BulletType = 'disc' | 'check' | 'number' | 'custom';
+
+export interface ListBulletStyle {
+  type: BulletType;
+  color: string;
+  size: number;
+  fontWeight: string;
+  customIcon: string; // URL for custom icon/image
+  offsetX: number; // horizontal offset
+  offsetY: number; // vertical offset
+}
 export type ColumnLayout = 1 | 2 | 3;
 
 export interface BlockStyle {
