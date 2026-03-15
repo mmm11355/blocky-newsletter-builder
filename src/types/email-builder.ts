@@ -41,6 +41,9 @@ export interface EmailBlock {
   alt?: string;
   // for button & image
   href?: string;
+  // for list
+  listItems?: string[];
+  bulletStyle?: ListBulletStyle;
 }
 
 export interface EmailRow {
