@@ -312,7 +312,6 @@ export const EmailBuilderProvider: React.FC<{ children: React.ReactNode }> = ({ 
           ).join('');
           return `<div class="${blockClass}" style="${baseStyle}${widthStr}${marginStr}max-width:100%;margin:0;"><div style="display:flex;flex-direction:${isH ? 'row' : 'column'};align-items:${isH ? 'center' : justify};justify-content:${justify};gap:${gap}px;flex-wrap:wrap;">${logoHtml}${linksHtml}</div></div>`;
         }
-        }
       }
     };
 
