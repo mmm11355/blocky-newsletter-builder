@@ -1,4 +1,11 @@
-export type BlockType = 'heading' | 'text' | 'image' | 'button' | 'list';
+export type BlockType = 'heading' | 'text' | 'image' | 'button' | 'list' | 'menu';
+
+export interface MenuItem {
+  label: string;
+  href: string;
+}
+
+export type MenuLayout = 'horizontal' | 'vertical';
 export type BulletType = 'disc' | 'check' | 'number' | 'custom';
 
 export interface ListBulletStyle {
