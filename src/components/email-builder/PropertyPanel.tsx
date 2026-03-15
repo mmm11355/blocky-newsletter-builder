@@ -71,6 +71,19 @@ const PropertyPanel = () => {
           />
         )}
 
+        {/* Menu Items */}
+        {block.type === 'menu' && (
+          <MenuFields
+            items={block.menuItems || []}
+            layout={block.menuLayout || 'horizontal'}
+            logoSrc={block.menuLogoSrc || ''}
+            logoWidth={block.menuLogoWidth || 120}
+            logoHref={block.menuLogoHref || '#'}
+            gap={block.menuGap || 16}
+            onUpdate={updBlock}
+          />
+        )}
+
         {block.type === 'image' && (
           <ImageFields src={block.src || ''} alt={block.alt || ''} href={block.href || ''} onUpdate={updBlock} />
         )}
