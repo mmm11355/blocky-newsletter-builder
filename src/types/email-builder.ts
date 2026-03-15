@@ -149,6 +149,22 @@ export const createBlock = (type: BlockType): EmailBlock => {
         listItems: ['Первый пункт', 'Второй пункт', 'Третий пункт'],
         bulletStyle: { type: 'disc', color: '#333333', size: 16, fontWeight: '400', customIcon: '', offsetX: 0, offsetY: 0 },
       };
+    case 'menu':
+      return {
+        ...base,
+        content: '',
+        menuItems: [
+          { label: 'Главная', href: '#' },
+          { label: 'О нас', href: '#' },
+          { label: 'Контакты', href: '#' },
+        ],
+        menuLayout: 'horizontal' as MenuLayout,
+        menuLogoSrc: '',
+        menuLogoWidth: 120,
+        menuLogoHref: '#',
+        menuGap: 16,
+        style: { ...base.style, textAlign: 'center', paddingTop: 12, paddingBottom: 12 },
+      };
   }
 };
 
