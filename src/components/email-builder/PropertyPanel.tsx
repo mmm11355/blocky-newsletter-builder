@@ -61,6 +61,16 @@ const PropertyPanel = () => {
           </Field>
         )}
 
+        {/* List Items */}
+        {block.type === 'list' && (
+          <ListFields
+            items={block.listItems || []}
+            bulletStyle={block.bulletStyle || { type: 'disc', color: '#333333', size: 16, fontWeight: '400', customIcon: '', offsetX: 0, offsetY: 0 }}
+            onUpdateItems={(listItems) => updBlock({ listItems })}
+            onUpdateBullet={(bulletStyle) => updBlock({ bulletStyle })}
+          />
+        )}
+
         {block.type === 'image' && (
           <ImageFields src={block.src || ''} alt={block.alt || ''} href={block.href || ''} onUpdate={updBlock} />
         )}
