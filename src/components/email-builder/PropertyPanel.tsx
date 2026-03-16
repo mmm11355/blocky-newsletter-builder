@@ -4,7 +4,7 @@ import { EMAIL_FONTS, BulletType, MenuItem, MenuLayout } from '@/types/email-bui
 import { Trash2, ArrowUp, ArrowDown, Settings2, Upload, ClipboardPaste, Link, Plus, X } from 'lucide-react';
 
 const PropertyPanel = () => {
-  const { getSelectedBlock, updateBlock, updateBlockStyle, deleteBlock, moveBlock, selection, template, updateCellStyle, updateCellGap } = useEmailBuilder();
+  const { getSelectedBlock, updateBlock, updateBlockStyle, deleteBlock, moveBlock, selection, template, updateCellStyle, updateCellGap, updateRowMobileStack } = useEmailBuilder();
   const selected = getSelectedBlock();
 
   if (!selected || !selection) {
