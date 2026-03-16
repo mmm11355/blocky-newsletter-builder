@@ -117,7 +117,7 @@ const CanvasRow: React.FC<Props> = ({ row, isMobile }) => {
                 key={cellIndex}
                 className={`${isMobile ? 'w-full' : ''} min-h-[60px] transition-all ${hoveredCell === cellIndex ? 'drag-over rounded-md' : ''}`}
                 style={{
-                  width: isMobile ? '100%' : `${100 / row.columns}%`,
+                  width: (isMobile && row.mobileStack !== false) ? '100%' : `${100 / row.columns}%`,
                   backgroundColor: cellBg,
                   borderRadius: cellStyle?.borderRadius ? `${cellStyle.borderRadius}px` : undefined,
                   padding: cellStyle ? `${cellStyle.paddingTop || 0}px ${cellStyle.paddingRight || 0}px ${cellStyle.paddingBottom || 0}px ${cellStyle.paddingLeft || 0}px` : undefined,
