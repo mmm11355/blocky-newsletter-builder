@@ -391,7 +391,7 @@ ${rows.map(renderRow).join('\n')}
       setSelection, addRow, deleteRow, moveRow,
       addBlockToCell, updateBlock, updateBlockStyle, deleteBlock, moveBlock,
       reorderBlock, moveBlockBetweenCells,
-      updateRowStyle, updateCellStyle, updateCellGap, updateGlobalStyle, getSelectedBlock, generateHTML,
+      updateRowStyle, updateCellStyle, updateCellGap, updateRowMobileStack, updateGlobalStyle, getSelectedBlock, generateHTML,
       setTemplate: setTemplateDirectly, addBlockFromSaved,
     }}>
       {children}
