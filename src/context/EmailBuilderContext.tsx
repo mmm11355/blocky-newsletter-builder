@@ -26,6 +26,7 @@ interface EmailBuilderContextType {
   updateRowStyle: (rowId: string, style: Partial<EmailRow['style']>) => void;
   updateCellStyle: (rowId: string, cellIndex: number, style: Partial<CellStyle>) => void;
   updateCellGap: (rowId: string, gap: number) => void;
+  updateRowMobileStack: (rowId: string, mobileStack: boolean) => void;
   updateGlobalStyle: (style: Partial<EmailTemplate['globalStyle']>) => void;
   getSelectedBlock: () => { block: EmailBlock; rowId: string; cellIndex: number } | null;
   generateHTML: () => string;
@@ -222,6 +223,13 @@ export const EmailBuilderProvider: React.FC<{ children: React.ReactNode }> = ({ 
     }));
   }, []);
 
+  const updateRowMobileStack = useCallback((rowId: string, mobileStack: boolean) => {
+    setTemplate(prev => ({
+      ...prev,
+      rows: prev.rows.map(r => r.id === rowId ? { ...r, mobileStack } : r),
+    }));
+  }, []);
+
   const updateGlobalStyle = useCallback((style: Partial<EmailTemplate['globalStyle']>) => {
     setTemplate(prev => ({ ...prev, globalStyle: { ...prev.globalStyle, ...style } }));
   }, []);
@@ -344,7 +352,8 @@ export const EmailBuilderProvider: React.FC<{ children: React.ReactNode }> = ({ 
         const cellPad = cs ? `padding:${cs.paddingTop || 0}px ${cs.paddingRight || 0}px ${cs.paddingBottom || 0}px ${cs.paddingLeft || 0}px;` : '';
         return `<td style="width:${colWidth}%;vertical-align:top;${cellBgStyle}${cellBr}${cellPad}">${cell.map(renderBlock).join('')}</td>`;
       }).join('');
-      return `<table width="100%" cellpadding="0" cellspacing="${gap}" style="background-color:${row.style.backgroundColor};padding:${row.style.paddingTop}px ${row.style.paddingRight}px ${row.style.paddingBottom}px ${row.style.paddingLeft}px;border-collapse:separate;border-spacing:${gap}px;"><tr>${cellsHTML}</tr></table>`;
+      const stackClass = (row.mobileStack !== false && row.columns > 1) ? ' mobile-stack' : '';
+      return `<table width="100%" cellpadding="0" cellspacing="${gap}" class="${stackClass}" style="background-color:${row.style.backgroundColor};padding:${row.style.paddingTop}px ${row.style.paddingRight}px ${row.style.paddingBottom}px ${row.style.paddingLeft}px;border-collapse:separate;border-spacing:${gap}px;"><tr>${cellsHTML}</tr></table>`;
     };
 
     const mobileCSS = mobileStyles.length > 0 ? mobileStyles.join('\n    ') : '';
@@ -360,7 +369,7 @@ export const EmailBuilderProvider: React.FC<{ children: React.ReactNode }> = ({ 
   body{margin:0;padding:0;background-color:${globalStyle.backgroundColor};font-family:${globalStyle.fontFamily};}
   @media only screen and (max-width:620px){
     .email-container{width:100%!important;max-width:100%!important;}
-    table td{display:block!important;width:100%!important;}
+    .mobile-stack td{display:block!important;width:100%!important;}
     ${mobileCSS}
   }
 </style>
@@ -383,7 +392,7 @@ ${rows.map(renderRow).join('\n')}
       setSelection, addRow, deleteRow, moveRow,
       addBlockToCell, updateBlock, updateBlockStyle, deleteBlock, moveBlock,
       reorderBlock, moveBlockBetweenCells,
-      updateRowStyle, updateCellStyle, updateCellGap, updateGlobalStyle, getSelectedBlock, generateHTML,
+      updateRowStyle, updateCellStyle, updateCellGap, updateRowMobileStack, updateGlobalStyle, getSelectedBlock, generateHTML,
       setTemplate: setTemplateDirectly, addBlockFromSaved,
     }}>
       {children}

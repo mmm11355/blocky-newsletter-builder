@@ -4,7 +4,7 @@ import { EMAIL_FONTS, BulletType, MenuItem, MenuLayout } from '@/types/email-bui
 import { Trash2, ArrowUp, ArrowDown, Settings2, Upload, ClipboardPaste, Link, Plus, X } from 'lucide-react';
 
 const PropertyPanel = () => {
-  const { getSelectedBlock, updateBlock, updateBlockStyle, deleteBlock, moveBlock, selection, template, updateCellStyle, updateCellGap } = useEmailBuilder();
+  const { getSelectedBlock, updateBlock, updateBlockStyle, deleteBlock, moveBlock, selection, template, updateCellStyle, updateCellGap, updateRowMobileStack } = useEmailBuilder();
   const selected = getSelectedBlock();
 
   if (!selected || !selection) {
@@ -232,6 +232,22 @@ const PropertyPanel = () => {
           if (!row || row.columns <= 1) return null;
           return (
             <Section title="Колонки">
+              <Field label="Мобильная версия" compact>
+                <div className="flex gap-1">
+                  <button
+                    onClick={() => updateRowMobileStack(rowId, true)}
+                    className={`flex-1 py-1.5 text-xs rounded-lg font-medium transition-all ${row.mobileStack !== false ? 'gradient-primary text-primary-foreground shadow-sm' : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'}`}
+                  >
+                    В 1 колонку
+                  </button>
+                  <button
+                    onClick={() => updateRowMobileStack(rowId, false)}
+                    className={`flex-1 py-1.5 text-xs rounded-lg font-medium transition-all ${row.mobileStack === false ? 'gradient-primary text-primary-foreground shadow-sm' : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'}`}
+                  >
+                    Оставить колонки
+                  </button>
+                </div>
+              </Field>
               <Field label="Отступ между колонками" compact>
                 <div className="flex items-center gap-2">
                   <input
