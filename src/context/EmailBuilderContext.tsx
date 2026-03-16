@@ -368,7 +368,7 @@ export const EmailBuilderProvider: React.FC<{ children: React.ReactNode }> = ({ 
   body{margin:0;padding:0;background-color:${globalStyle.backgroundColor};font-family:${globalStyle.fontFamily};}
   @media only screen and (max-width:620px){
     .email-container{width:100%!important;max-width:100%!important;}
-    table td{display:block!important;width:100%!important;}
+    .mobile-stack td{display:block!important;width:100%!important;}
     ${mobileCSS}
   }
 </style>
