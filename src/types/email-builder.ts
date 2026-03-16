@@ -66,6 +66,7 @@ export interface EmailRow {
   cells: EmailBlock[][];
   cellStyles: CellStyle[];
   cellGap: number;
+  mobileStack: boolean;
   style: {
     backgroundColor: string;
     paddingTop: number;
