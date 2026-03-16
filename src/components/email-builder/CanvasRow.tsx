@@ -99,7 +99,7 @@ const CanvasRow: React.FC<Props> = ({ row, isMobile }) => {
 
       <div className={`transition-all ${hovered ? 'ring-1 ring-primary/30 rounded-sm' : ''}`}>
         <div
-          className={`flex ${isMobile ? 'flex-col' : 'flex-row'}`}
+          className={`flex ${isMobile && row.mobileStack !== false ? 'flex-col' : 'flex-row'}`}
           style={{
             backgroundColor: row.style.backgroundColor,
             padding: `${row.style.paddingTop}px ${row.style.paddingRight}px ${row.style.paddingBottom}px ${row.style.paddingLeft}px`,
