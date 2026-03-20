@@ -30,7 +30,10 @@ const CanvasBlock: React.FC<Props> = ({ block, rowId, cellIndex }) => {
   const wrapperStyle: React.CSSProperties = {
     width: activeWidth,
     maxWidth: '100%',
-    margin: s.textAlign === 'center' ? '0 auto' : s.textAlign === 'right' ? '0 0 0 auto' : undefined,
+    marginTop: s.marginTop || 0,
+    marginRight: s.textAlign === 'center' ? 'auto' : s.textAlign === 'right' ? 0 : (s.marginRight || 0),
+    marginBottom: s.marginBottom || 0,
+    marginLeft: s.textAlign === 'center' ? 'auto' : s.textAlign === 'right' ? 'auto' : (s.marginLeft || 0),
     position: 'relative',
   };
 
