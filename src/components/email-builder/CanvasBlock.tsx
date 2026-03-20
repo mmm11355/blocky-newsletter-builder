@@ -113,7 +113,7 @@ const CanvasBlock: React.FC<Props> = ({ block, rowId, cellIndex }) => {
               textAlign: s.textAlign as any,
               lineHeight: s.lineHeight,
             }}>
-              {block.content}
+              <span dangerouslySetInnerHTML={{ __html: block.content }} />
             </a>
           </div>
         );
