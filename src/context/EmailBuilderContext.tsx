@@ -273,9 +273,11 @@ export const EmailBuilderProvider: React.FC<{ children: React.ReactNode }> = ({ 
       const fontFamilyStr = s.fontFamily !== 'inherit' ? `font-family:${s.fontFamily};` : `font-family:${globalStyle.fontFamily};`;
       const widthStr = s.width ? `width:${s.width};` : '';
       const marginStr = s.width && s.width !== '100%' ? (s.textAlign === 'center' ? 'margin:0 auto;' : s.textAlign === 'right' ? 'margin:0 0 0 auto;' : '') : '';
+      const outerMargin = (s.marginTop || s.marginRight || s.marginBottom || s.marginLeft) ? `margin:${s.marginTop || 0}px ${s.marginRight || 0}px ${s.marginBottom || 0}px ${s.marginLeft || 0}px;` : '';
       const bgStr = s.backgroundColor && s.backgroundColor !== 'transparent' ? `background-color:${s.backgroundColor};` : '';
       const borderStr = s.borderWidth > 0 ? `border:${s.borderWidth}px solid ${s.borderColor};` : '';
       const baseStyle = `color:${s.color};font-size:${s.fontSize}px;font-weight:${s.fontWeight};text-align:${s.textAlign};${bgStr}padding:${s.paddingTop}px ${s.paddingRight}px ${s.paddingBottom}px ${s.paddingLeft}px;${borderStr}border-radius:${s.borderRadius}px;line-height:${s.lineHeight};${fontFamilyStr}`;
+      const wrapStyle = `${widthStr}${outerMargin || marginStr}`;
 
       switch (block.type) {
         case 'heading':
