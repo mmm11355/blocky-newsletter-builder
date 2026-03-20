@@ -30,6 +30,10 @@ export interface BlockStyle {
   paddingRight: number;
   paddingBottom: number;
   paddingLeft: number;
+  marginTop: number;
+  marginRight: number;
+  marginBottom: number;
+  marginLeft: number;
   borderWidth: number;
   borderColor: string;
   borderRadius: number;
