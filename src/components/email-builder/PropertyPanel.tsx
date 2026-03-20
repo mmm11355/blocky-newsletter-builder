@@ -195,9 +195,20 @@ const PropertyPanel = () => {
         </Section>
 
         {/* Padding */}
-        <Section title="Отступы">
+        <Section title="Внутренние отступы">
           <div className="grid grid-cols-2 gap-2">
             {([['paddingTop', '↑ Верх'], ['paddingRight', '→ Право'], ['paddingBottom', '↓ Низ'], ['paddingLeft', '← Лево']] as const).map(([key, label]) => (
+              <Field key={key} label={label} compact>
+                <input type="number" value={s[key]} onChange={(e) => upd({ [key]: +e.target.value })} className="w-full rounded-lg border border-input bg-secondary/50 px-2 py-1.5 text-sm text-card-foreground focus:outline-none focus:ring-1 focus:ring-primary/50" />
+              </Field>
+            ))}
+          </div>
+        </Section>
+
+        {/* Margin */}
+        <Section title="Внешние отступы">
+          <div className="grid grid-cols-2 gap-2">
+            {([['marginTop', '↑ Верх'], ['marginRight', '→ Право'], ['marginBottom', '↓ Низ'], ['marginLeft', '← Лево']] as const).map(([key, label]) => (
               <Field key={key} label={label} compact>
                 <input type="number" value={s[key]} onChange={(e) => upd({ [key]: +e.target.value })} className="w-full rounded-lg border border-input bg-secondary/50 px-2 py-1.5 text-sm text-card-foreground focus:outline-none focus:ring-1 focus:ring-primary/50" />
               </Field>
