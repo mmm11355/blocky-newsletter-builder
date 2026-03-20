@@ -82,9 +82,9 @@ const CanvasBlock: React.FC<Props> = ({ block, rowId, cellIndex }) => {
   const renderContent = () => {
     switch (block.type) {
       case 'heading':
-        return <h1 style={{ ...baseStyle, margin: 0 }} onClick={handleClick}>{block.content}</h1>;
+        return <h1 style={{ ...baseStyle, margin: 0 }} onClick={handleClick} dangerouslySetInnerHTML={{ __html: block.content }} />;
       case 'text':
-        return <p style={{ ...baseStyle, margin: 0 }} onClick={handleClick}>{block.content}</p>;
+        return <p style={{ ...baseStyle, margin: 0 }} onClick={handleClick} dangerouslySetInnerHTML={{ __html: block.content }} />;
       case 'image':
         return (
           <div style={baseStyle} onClick={handleClick}>
