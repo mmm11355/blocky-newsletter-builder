@@ -30,6 +30,10 @@ export interface BlockStyle {
   paddingRight: number;
   paddingBottom: number;
   paddingLeft: number;
+  marginTop: number;
+  marginRight: number;
+  marginBottom: number;
+  marginLeft: number;
   borderWidth: number;
   borderColor: string;
   borderRadius: number;
@@ -105,6 +109,10 @@ export const defaultBlockStyle: BlockStyle = {
   paddingRight: 10,
   paddingBottom: 10,
   paddingLeft: 10,
+  marginTop: 0,
+  marginRight: 0,
+  marginBottom: 0,
+  marginLeft: 0,
   borderWidth: 0,
   borderColor: '#cccccc',
   borderRadius: 0,

@@ -273,24 +273,26 @@ export const EmailBuilderProvider: React.FC<{ children: React.ReactNode }> = ({ 
       const fontFamilyStr = s.fontFamily !== 'inherit' ? `font-family:${s.fontFamily};` : `font-family:${globalStyle.fontFamily};`;
       const widthStr = s.width ? `width:${s.width};` : '';
       const marginStr = s.width && s.width !== '100%' ? (s.textAlign === 'center' ? 'margin:0 auto;' : s.textAlign === 'right' ? 'margin:0 0 0 auto;' : '') : '';
+      const outerMargin = (s.marginTop || s.marginRight || s.marginBottom || s.marginLeft) ? `margin:${s.marginTop || 0}px ${s.marginRight || 0}px ${s.marginBottom || 0}px ${s.marginLeft || 0}px;` : '';
       const bgStr = s.backgroundColor && s.backgroundColor !== 'transparent' ? `background-color:${s.backgroundColor};` : '';
       const borderStr = s.borderWidth > 0 ? `border:${s.borderWidth}px solid ${s.borderColor};` : '';
       const baseStyle = `color:${s.color};font-size:${s.fontSize}px;font-weight:${s.fontWeight};text-align:${s.textAlign};${bgStr}padding:${s.paddingTop}px ${s.paddingRight}px ${s.paddingBottom}px ${s.paddingLeft}px;${borderStr}border-radius:${s.borderRadius}px;line-height:${s.lineHeight};${fontFamilyStr}`;
+      const wrapStyle = `${widthStr}${outerMargin || marginStr}`;
 
       switch (block.type) {
         case 'heading':
-          return `<table role="presentation" cellpadding="0" cellspacing="0" border="0" class="${blockClass}" width="100%" style="${widthStr}${marginStr}"><tr><td><h1 style="${baseStyle}margin:0;mso-line-height-rule:exactly;">${block.content}</h1></td></tr></table>`;
+          return `<table role="presentation" cellpadding="0" cellspacing="0" border="0" class="${blockClass}" width="100%" style="${wrapStyle}"><tr><td><h1 style="${baseStyle}margin:0;mso-line-height-rule:exactly;">${block.content}</h1></td></tr></table>`;
         case 'text':
-          return `<table role="presentation" cellpadding="0" cellspacing="0" border="0" class="${blockClass}" width="100%" style="${widthStr}${marginStr}"><tr><td><p style="${baseStyle}margin:0;mso-line-height-rule:exactly;">${block.content}</p></td></tr></table>`;
+          return `<table role="presentation" cellpadding="0" cellspacing="0" border="0" class="${blockClass}" width="100%" style="${wrapStyle}"><tr><td><p style="${baseStyle}margin:0;mso-line-height-rule:exactly;">${block.content}</p></td></tr></table>`;
         case 'image': {
           const imgWidth = s.width && s.width !== '100%' ? s.width.replace('px', '').replace('%', '') : '100%';
           const imgTag = `<img src="${block.src}" alt="${block.alt || ''}" width="${imgWidth}" style="max-width:100%;height:auto;display:block;border:0;outline:none;border-radius:${s.borderRadius}px;${s.textAlign === 'center' ? 'margin:0 auto;' : ''}" />`;
           const wrapped = block.href ? `<a href="${block.href}" target="_blank" style="text-decoration:none;border:0;">${imgTag}</a>` : imgTag;
-          return `<table role="presentation" cellpadding="0" cellspacing="0" border="0" class="${blockClass}" width="100%" style="${widthStr}${marginStr}"><tr><td style="padding:${s.paddingTop}px ${s.paddingRight}px ${s.paddingBottom}px ${s.paddingLeft}px;text-align:${s.textAlign};">${wrapped}</td></tr></table>`;
+          return `<table role="presentation" cellpadding="0" cellspacing="0" border="0" class="${blockClass}" width="100%" style="${wrapStyle}"><tr><td style="padding:${s.paddingTop}px ${s.paddingRight}px ${s.paddingBottom}px ${s.paddingLeft}px;text-align:${s.textAlign};">${wrapped}</td></tr></table>`;
         }
         case 'button': {
           const btnAlign = s.textAlign === 'center' ? 'center' : s.textAlign === 'right' ? 'right' : 'left';
-          return `<table role="presentation" cellpadding="0" cellspacing="0" border="0" class="${blockClass}" width="100%" style="${widthStr}${marginStr}"><tr><td align="${btnAlign}" style="padding:4px 0;">
+          return `<table role="presentation" cellpadding="0" cellspacing="0" border="0" class="${blockClass}" width="100%" style="${wrapStyle}"><tr><td align="${btnAlign}" style="padding:4px 0;">
 <!--[if mso]><v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="${block.href || '#'}" style="height:auto;v-text-anchor:middle;width:auto;" arcsize="${Math.round(s.borderRadius / 40 * 100)}%" strokecolor="${s.borderColor}" fillcolor="${s.backgroundColor}"><w:anchorlock/><center style="color:${s.color};font-family:${s.fontFamily !== 'inherit' ? s.fontFamily : globalStyle.fontFamily};font-size:${s.fontSize}px;font-weight:${s.fontWeight};">${block.content}</center></v:roundrect><![endif]-->
 <!--[if !mso]><!--><a href="${block.href || '#'}" target="_blank" style="display:inline-block;background-color:${s.backgroundColor};color:${s.color};font-size:${s.fontSize}px;font-weight:${s.fontWeight};padding:${s.paddingTop}px ${s.paddingRight}px ${s.paddingBottom}px ${s.paddingLeft}px;border-radius:${s.borderRadius}px;text-decoration:none;text-align:center;${fontFamilyStr}${borderStr}line-height:${s.lineHeight};mso-hide:all;">${block.content}</a><!--<![endif]-->
 </td></tr></table>`;
@@ -311,7 +313,7 @@ export const EmailBuilderProvider: React.FC<{ children: React.ReactNode }> = ({ 
             }
             return `<tr>${bulletHtml}<td style="color:${s.color};font-size:${s.fontSize}px;line-height:${s.lineHeight};${fontFamilyStr}padding-bottom:${i < (block.listItems?.length || 0) - 1 ? '6' : '0'}px;">${item}</td></tr>`;
           }).join('');
-          return `<table role="presentation" cellpadding="0" cellspacing="0" border="0" class="${blockClass}" width="100%" style="${widthStr}${marginStr}"><tr><td style="${baseStyle}"><table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">${items}</table></td></tr></table>`;
+          return `<table role="presentation" cellpadding="0" cellspacing="0" border="0" class="${blockClass}" width="100%" style="${wrapStyle}"><tr><td style="${baseStyle}"><table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">${items}</table></td></tr></table>`;
         }
         case 'menu': {
           const menuLayout = block.menuLayout || 'horizontal';
@@ -328,14 +330,14 @@ export const EmailBuilderProvider: React.FC<{ children: React.ReactNode }> = ({ 
           ).join('');
 
           if (isH) {
-            return `<table role="presentation" cellpadding="0" cellspacing="0" border="0" class="${blockClass}" width="100%" style="${widthStr}${marginStr}"><tr><td style="${baseStyle}" align="${btnAlign}"><table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr>${logoHtml}${linksHtml}</tr></table></td></tr></table>`;
+            return `<table role="presentation" cellpadding="0" cellspacing="0" border="0" class="${blockClass}" width="100%" style="${wrapStyle}"><tr><td style="${baseStyle}" align="${btnAlign}"><table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr>${logoHtml}${linksHtml}</tr></table></td></tr></table>`;
           } else {
             const allItems = [];
             if (logoHtml) allItems.push(`<tr>${logoHtml}</tr>`);
             (block.menuItems || []).forEach((item, i) => {
               allItems.push(`<tr><td style="padding:${i > 0 ? gap / 2 : 0}px 0 ${i < (block.menuItems?.length || 0) - 1 ? gap / 2 : 0}px 0;"><a href="${item.href || '#'}" target="_blank" style="color:${s.color};font-size:${s.fontSize}px;font-weight:${s.fontWeight};text-decoration:none;white-space:nowrap;${fontFamilyStr}">${item.label}</a></td></tr>`);
             });
-            return `<table role="presentation" cellpadding="0" cellspacing="0" border="0" class="${blockClass}" width="100%" style="${widthStr}${marginStr}"><tr><td style="${baseStyle}" align="${btnAlign}"><table role="presentation" cellpadding="0" cellspacing="0" border="0">${allItems.join('')}</table></td></tr></table>`;
+            return `<table role="presentation" cellpadding="0" cellspacing="0" border="0" class="${blockClass}" width="100%" style="${wrapStyle}"><tr><td style="${baseStyle}" align="${btnAlign}"><table role="presentation" cellpadding="0" cellspacing="0" border="0">${allItems.join('')}</table></td></tr></table>`;
           }
         }
       }

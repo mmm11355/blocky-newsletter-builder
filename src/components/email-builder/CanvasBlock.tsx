@@ -30,7 +30,10 @@ const CanvasBlock: React.FC<Props> = ({ block, rowId, cellIndex }) => {
   const wrapperStyle: React.CSSProperties = {
     width: activeWidth,
     maxWidth: '100%',
-    margin: s.textAlign === 'center' ? '0 auto' : s.textAlign === 'right' ? '0 0 0 auto' : undefined,
+    marginTop: s.marginTop || 0,
+    marginRight: s.textAlign === 'center' ? 'auto' : s.textAlign === 'right' ? 0 : (s.marginRight || 0),
+    marginBottom: s.marginBottom || 0,
+    marginLeft: s.textAlign === 'center' ? 'auto' : s.textAlign === 'right' ? 'auto' : (s.marginLeft || 0),
     position: 'relative',
   };
 
@@ -79,9 +82,9 @@ const CanvasBlock: React.FC<Props> = ({ block, rowId, cellIndex }) => {
   const renderContent = () => {
     switch (block.type) {
       case 'heading':
-        return <h1 style={{ ...baseStyle, margin: 0 }} onClick={handleClick}>{block.content}</h1>;
+        return <h1 style={{ ...baseStyle, margin: 0 }} onClick={handleClick} dangerouslySetInnerHTML={{ __html: block.content }} />;
       case 'text':
-        return <p style={{ ...baseStyle, margin: 0 }} onClick={handleClick}>{block.content}</p>;
+        return <p style={{ ...baseStyle, margin: 0 }} onClick={handleClick} dangerouslySetInnerHTML={{ __html: block.content }} />;
       case 'image':
         return (
           <div style={baseStyle} onClick={handleClick}>
@@ -110,7 +113,7 @@ const CanvasBlock: React.FC<Props> = ({ block, rowId, cellIndex }) => {
               textAlign: s.textAlign as any,
               lineHeight: s.lineHeight,
             }}>
-              {block.content}
+              <span dangerouslySetInnerHTML={{ __html: block.content }} />
             </a>
           </div>
         );

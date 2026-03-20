@@ -1,7 +1,7 @@
-import { useRef, useCallback } from 'react';
+import { useRef, useCallback, useState } from 'react';
 import { useEmailBuilder } from '@/context/EmailBuilderContext';
 import { EMAIL_FONTS, BulletType, MenuItem, MenuLayout } from '@/types/email-builder';
-import { Trash2, ArrowUp, ArrowDown, Settings2, Upload, ClipboardPaste, Link, Plus, X } from 'lucide-react';
+import { Trash2, ArrowUp, ArrowDown, Settings2, Upload, ClipboardPaste, Link, Plus, X, Bold, Palette } from 'lucide-react';
 
 const PropertyPanel = () => {
   const { getSelectedBlock, updateBlock, updateBlockStyle, deleteBlock, moveBlock, selection, template, updateCellStyle, updateCellGap, updateRowMobileStack } = useEmailBuilder();
@@ -41,24 +41,9 @@ const PropertyPanel = () => {
       </div>
 
       <div className="p-4 space-y-5">
-        {/* Content */}
+        {/* Content with rich text */}
         {(block.type === 'heading' || block.type === 'text' || block.type === 'button') && (
-          <Field label="Контент">
-            {block.type === 'text' ? (
-              <textarea
-                value={block.content}
-                onChange={(e) => updBlock({ content: e.target.value })}
-                className="w-full rounded-lg border border-input bg-secondary/50 px-3 py-2 text-sm min-h-[80px] resize-y text-card-foreground focus:outline-none focus:ring-1 focus:ring-primary/50 transition-all"
-              />
-            ) : (
-              <input
-                type="text"
-                value={block.content}
-                onChange={(e) => updBlock({ content: e.target.value })}
-                className="w-full rounded-lg border border-input bg-secondary/50 px-3 py-2 text-sm text-card-foreground focus:outline-none focus:ring-1 focus:ring-primary/50 transition-all"
-              />
-            )}
-          </Field>
+          <RichTextField content={block.content} onChange={(content) => updBlock({ content })} multiline={block.type === 'text'} />
         )}
 
         {/* List Items */}
@@ -195,9 +180,20 @@ const PropertyPanel = () => {
         </Section>
 
         {/* Padding */}
-        <Section title="Отступы">
+        <Section title="Внутренние отступы">
           <div className="grid grid-cols-2 gap-2">
             {([['paddingTop', '↑ Верх'], ['paddingRight', '→ Право'], ['paddingBottom', '↓ Низ'], ['paddingLeft', '← Лево']] as const).map(([key, label]) => (
+              <Field key={key} label={label} compact>
+                <input type="number" value={s[key]} onChange={(e) => upd({ [key]: +e.target.value })} className="w-full rounded-lg border border-input bg-secondary/50 px-2 py-1.5 text-sm text-card-foreground focus:outline-none focus:ring-1 focus:ring-primary/50" />
+              </Field>
+            ))}
+          </div>
+        </Section>
+
+        {/* Margin */}
+        <Section title="Внешние отступы">
+          <div className="grid grid-cols-2 gap-2">
+            {([['marginTop', '↑ Верх'], ['marginRight', '→ Право'], ['marginBottom', '↓ Низ'], ['marginLeft', '← Лево']] as const).map(([key, label]) => (
               <Field key={key} label={label} compact>
                 <input type="number" value={s[key]} onChange={(e) => upd({ [key]: +e.target.value })} className="w-full rounded-lg border border-input bg-secondary/50 px-2 py-1.5 text-sm text-card-foreground focus:outline-none focus:ring-1 focus:ring-primary/50" />
               </Field>
@@ -409,6 +405,72 @@ const Section: React.FC<{ title: string; children: React.ReactNode }> = ({ title
     {children}
   </div>
 );
+
+const RichTextField: React.FC<{ content: string; onChange: (content: string) => void; multiline?: boolean }> = ({ content, onChange, multiline }) => {
+  const editorRef = useRef<HTMLDivElement>(null);
+  const [showColorPicker, setShowColorPicker] = useState(false);
+
+  const execCmd = (cmd: string, value?: string) => {
+    editorRef.current?.focus();
+    document.execCommand(cmd, false, value);
+    if (editorRef.current) {
+      onChange(editorRef.current.innerHTML);
+    }
+  };
+
+  const handleInput = () => {
+    if (editorRef.current) {
+      onChange(editorRef.current.innerHTML);
+    }
+  };
+
+  return (
+    <Field label="Контент">
+      <div className="space-y-1.5">
+        <div className="flex items-center gap-1 p-1 rounded-lg bg-secondary/50 border border-input">
+          <button
+            type="button"
+            onMouseDown={(e) => { e.preventDefault(); execCmd('bold'); }}
+            className="p-1.5 rounded hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors"
+            title="Жирный"
+          >
+            <Bold className="h-3.5 w-3.5" />
+          </button>
+          <div className="relative">
+            <button
+              type="button"
+              onMouseDown={(e) => { e.preventDefault(); setShowColorPicker(!showColorPicker); }}
+              className="p-1.5 rounded hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors"
+              title="Цвет текста"
+            >
+              <Palette className="h-3.5 w-3.5" />
+            </button>
+            {showColorPicker && (
+              <div className="absolute top-full left-0 mt-1 z-20 p-2 rounded-lg bg-card border border-border shadow-lg">
+                <input
+                  type="color"
+                  defaultValue="#ff0000"
+                  onChange={(e) => { execCmd('foreColor', e.target.value); setShowColorPicker(false); }}
+                  className="w-8 h-8 cursor-pointer border-0"
+                />
+              </div>
+            )}
+          </div>
+        </div>
+        <div
+          ref={editorRef}
+          contentEditable
+          suppressContentEditableWarning
+          dangerouslySetInnerHTML={{ __html: content }}
+          onInput={handleInput}
+          onBlur={handleInput}
+          className={`w-full rounded-lg border border-input bg-secondary/50 px-3 py-2 text-sm text-card-foreground focus:outline-none focus:ring-1 focus:ring-primary/50 transition-all ${multiline ? 'min-h-[80px]' : 'min-h-[36px]'}`}
+          style={{ whiteSpace: multiline ? 'pre-wrap' : 'nowrap', overflowX: multiline ? undefined : 'auto' }}
+        />
+      </div>
+    </Field>
+  );
+};
 
 import type { ListBulletStyle } from '@/types/email-builder';
 
