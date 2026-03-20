@@ -41,24 +41,9 @@ const PropertyPanel = () => {
       </div>
 
       <div className="p-4 space-y-5">
-        {/* Content */}
+        {/* Content with rich text */}
         {(block.type === 'heading' || block.type === 'text' || block.type === 'button') && (
-          <Field label="Контент">
-            {block.type === 'text' ? (
-              <textarea
-                value={block.content}
-                onChange={(e) => updBlock({ content: e.target.value })}
-                className="w-full rounded-lg border border-input bg-secondary/50 px-3 py-2 text-sm min-h-[80px] resize-y text-card-foreground focus:outline-none focus:ring-1 focus:ring-primary/50 transition-all"
-              />
-            ) : (
-              <input
-                type="text"
-                value={block.content}
-                onChange={(e) => updBlock({ content: e.target.value })}
-                className="w-full rounded-lg border border-input bg-secondary/50 px-3 py-2 text-sm text-card-foreground focus:outline-none focus:ring-1 focus:ring-primary/50 transition-all"
-              />
-            )}
-          </Field>
+          <RichTextField content={block.content} onChange={(content) => updBlock({ content })} multiline={block.type === 'text'} />
         )}
 
         {/* List Items */}
