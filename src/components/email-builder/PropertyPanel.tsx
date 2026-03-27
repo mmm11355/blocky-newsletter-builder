@@ -69,6 +69,78 @@ const NumberInput: React.FC<{
   );
 };
 
+// Компонент выбора цвета с палитрой
+const ColorPicker: React.FC<{
+  value: string;
+  onChange: (color: string) => void;
+  label?: string;
+}> = ({ value, onChange, label }) => {
+  const [showPicker, setShowPicker] = useState(false);
+  
+  const presetColors = [
+    '#000000', '#434343', '#666666', '#999999', '#b7b7b7', '#cccccc', '#d9d9d9', '#efefef', '#f3f3f3', '#ffffff',
+    '#980000', '#ff0000', '#ff9900', '#ffff00', '#00ff00', '#00ffff', '#4a86e8', '#0000ff', '#9900ff', '#ff00ff',
+    '#e6b8af', '#f4cccc', '#fce5cd', '#fff2cc', '#d9ead3', '#d0e0e3', '#c9daf8', '#cfe2f3', '#d9d2e9', '#ead1dc',
+    '#dd7e6b', '#ea9999', '#f9cb9c', '#ffe599', '#b6d7a8', '#a2c4c9', '#b4a7d6', '#9fc5e8', '#b4a7d6', '#d5a6bd',
+    '#cc4125', '#e06666', '#f6b26b', '#ffd966', '#93c47d', '#76a5af', '#8e7cc3', '#6fa8dc', '#8e7cc3', '#c27ba0',
+    '#a61c00', '#cc0000', '#e69138', '#f1c232', '#6aa84f', '#45818e', '#674ea7', '#3d85c6', '#674ea7', '#a64d79',
+    '#85200c', '#990000', '#b45f06', '#bf9000', '#38761d', '#134f5c', '#351c75', '#0b5394', '#351c75', '#741b47',
+    '#5b0f00', '#660000', '#783f04', '#7f6000', '#274e13', '#0c343d', '#1c1a47', '#073763', '#1c1a47', '#4c1130',
+  ];
+
+  return (
+    <div className="space-y-1">
+      {label && <label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wide">{label}</label>}
+      <div className="relative">
+        <button
+          onClick={() => setShowPicker(!showPicker)}
+          className="w-full h-9 rounded-lg border border-input flex items-center gap-2 px-2 hover:bg-secondary/50 transition-colors"
+        >
+          <div className="w-5 h-5 rounded-md border border-border shadow-sm" style={{ backgroundColor: value }} />
+          <span className="text-xs text-muted-foreground font-mono flex-1">{value}</span>
+        </button>
+        
+        {showPicker && (
+          <>
+            <div className="fixed inset-0 z-40" onClick={() => setShowPicker(false)} />
+            <div className="absolute top-full left-0 right-0 mt-1 p-2 bg-card border border-border rounded-lg shadow-xl z-50">
+              <div className="grid grid-cols-10 gap-1 mb-2">
+                {presetColors.map((color) => (
+                  <button
+                    key={color}
+                    onClick={() => {
+                      onChange(color);
+                      setShowPicker(false);
+                    }}
+                    className="w-full aspect-square rounded border border-border/50 hover:scale-110 hover:z-10 transition-transform"
+                    style={{ backgroundColor: color }}
+                    title={color}
+                  />
+                ))}
+              </div>
+              <div className="flex items-center gap-2 pt-2 border-t border-border">
+                <input
+                  type="color"
+                  value={value === 'transparent' ? '#ffffff' : value}
+                  onChange={(e) => onChange(e.target.value)}
+                  className="w-8 h-8 rounded cursor-pointer"
+                />
+                <input
+                  type="text"
+                  value={value}
+                  onChange={(e) => onChange(e.target.value)}
+                  className="flex-1 rounded border border-input bg-secondary/50 px-2 py-1 text-xs font-mono"
+                  placeholder="#000000"
+                />
+              </div>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+};
+
 const PropertyPanel = () => {
   const { getSelectedBlock, updateBlock, updateBlockStyle, deleteBlock, moveBlock, selection, template, updateCellStyle, updateCellGap, updateRowMobileStack } = useEmailBuilder();
   const selected = getSelectedBlock();
@@ -249,34 +321,18 @@ const PropertyPanel = () => {
         
         {/* Colors */}
         <Section title="Цвета">
-          <div className="grid grid-cols-2 gap-2">
-            <Field label="Текст" compact>
-              <div className="relative">
-                <input 
-                  type="color" 
-                  value={s.color} 
-                  onChange={(e) => upd({ color: e.target.value })} 
-                  className="w-full h-9 rounded-lg border border-input cursor-pointer opacity-0 absolute inset-0" 
-                />
-                <div className="w-full h-9 rounded-lg border border-input flex items-center gap-2 px-2">
-                  <div className="w-5 h-5 rounded-md border border-border" style={{ backgroundColor: s.color }} />
-                  <span className="text-xs text-muted-foreground font-mono">{s.color}</span>
-                </div>
-              </div>
+          <div className="grid grid-cols-1 gap-2">
+            <Field label="Цвет текста" compact>
+              <ColorPicker 
+                value={s.color} 
+                onChange={(color) => upd({ color })}
+              />
             </Field>
-            <Field label="Фон" compact>
-              <div className="relative">
-                <input 
-                  type="color" 
-                  value={s.backgroundColor === 'transparent' ? '#ffffff' : s.backgroundColor} 
-                  onChange={(e) => upd({ backgroundColor: e.target.value })} 
-                  className="w-full h-9 rounded-lg border border-input cursor-pointer opacity-0 absolute inset-0" 
-                />
-                <div className="w-full h-9 rounded-lg border border-input flex items-center gap-2 px-2">
-                  <div className="w-5 h-5 rounded-md border border-border" style={{ backgroundColor: s.backgroundColor === 'transparent' ? '#ffffff' : s.backgroundColor }} />
-                  <span className="text-xs text-muted-foreground font-mono">{s.backgroundColor === 'transparent' ? '#fff' : s.backgroundColor}</span>
-                </div>
-              </div>
+            <Field label="Цвет фона" compact>
+              <ColorPicker 
+                value={s.backgroundColor === 'transparent' ? '#ffffff' : s.backgroundColor} 
+                onChange={(color) => upd({ backgroundColor: color })}
+              />
             </Field>
           </div>
         </Section>
@@ -354,18 +410,10 @@ const PropertyPanel = () => {
             </Field>
           </div>
           <Field label="Цвет обводки" compact>
-            <div className="relative">
-              <input 
-                type="color" 
-                value={s.borderColor} 
-                onChange={(e) => upd({ borderColor: e.target.value })} 
-                className="w-full h-9 rounded-lg border border-input cursor-pointer opacity-0 absolute inset-0" 
-              />
-              <div className="w-full h-9 rounded-lg border border-input flex items-center gap-2 px-2">
-                <div className="w-5 h-5 rounded-md border border-border" style={{ backgroundColor: s.borderColor }} />
-                <span className="text-xs text-muted-foreground font-mono">{s.borderColor}</span>
-              </div>
-            </div>
+            <ColorPicker 
+              value={s.borderColor} 
+              onChange={(color) => upd({ borderColor: color })}
+            />
           </Field>
         </Section>
         
@@ -414,24 +462,10 @@ const PropertyPanel = () => {
                     <div key={ci} className="space-y-2 p-2 rounded-lg bg-secondary/30 border border-border/30">
                       <span className="text-[11px] font-semibold text-card-foreground/60 uppercase tracking-widest">Колонка {ci + 1}</span>
                       <Field label="Фон" compact>
-                        <div className="relative">
-                          <input
-                            type="color"
-                            value={cs.backgroundColor === 'transparent' ? '#ffffff' : cs.backgroundColor}
-                            onChange={(e) => updateCellStyle(rowId, ci, { backgroundColor: e.target.value })}
-                            className="w-full h-8 rounded-lg border border-input cursor-pointer opacity-0 absolute inset-0"
-                          />
-                          <div className="w-full h-8 rounded-lg border border-input flex items-center gap-2 px-2">
-                            <div className="w-4 h-4 rounded border border-border" style={{ backgroundColor: cs.backgroundColor === 'transparent' ? '#ffffff' : cs.backgroundColor }} />
-                            <span className="text-xs text-muted-foreground font-mono">{cs.backgroundColor === 'transparent' ? 'прозр.' : cs.backgroundColor}</span>
-                            {cs.backgroundColor !== 'transparent' && (
-                              <button
-                                onClick={(e) => { e.stopPropagation(); updateCellStyle(rowId, ci, { backgroundColor: 'transparent' }); }}
-                                className="ml-auto text-[10px] text-muted-foreground hover:text-foreground"
-                              >✕</button>
-                            )}
-                          </div>
-                        </div>
+                        <ColorPicker
+                          value={cs.backgroundColor === 'transparent' ? '#ffffff' : cs.backgroundColor}
+                          onChange={(color) => updateCellStyle(rowId, ci, { backgroundColor: color })}
+                        />
                       </Field>
                       <Field label="Закругление" compact>
                         <NumberInput 
@@ -677,7 +711,7 @@ const RichTextField: React.FC<{ content: string; onChange: (content: string) => 
             onChange={handleChange}
             rows={6}
             dir="ltr"
-            style={{ direction: 'ltr', textAlign: 'left' }}
+            style={{ direction: 'ltr', textAlign: 'left', whiteSpace: 'pre-wrap', wordWrap: 'break-word' }}
             className="w-full rounded-lg border border-input bg-secondary/50 px-3 py-2 text-sm text-card-foreground focus:outline-none focus:ring-1 focus:ring-primary/50 transition-all"
             placeholder="Введите текст. Выделите часть и нажмите кнопку форматирования"
           />
@@ -802,18 +836,10 @@ const ListFields: React.FC<{
         )}
         <div className="grid grid-cols-2 gap-2">
           <Field label="Цвет" compact>
-            <div className="relative">
-              <input 
-                type="color" 
-                value={bs.color} 
-                onChange={(e) => onUpdateBullet({ ...bs, color: e.target.value })} 
-                className="w-full h-8 rounded-lg border border-input cursor-pointer opacity-0 absolute inset-0" 
-              />
-              <div className="w-full h-8 rounded-lg border border-input flex items-center gap-2 px-2">
-                <div className="w-4 h-4 rounded border border-border" style={{ backgroundColor: bs.color }} />
-                <span className="text-xs text-muted-foreground font-mono">{bs.color}</span>
-              </div>
-            </div>
+            <ColorPicker
+              value={bs.color}
+              onChange={(color) => onUpdateBullet({ ...bs, color })}
+            />
           </Field>
           <Field label="Размер" compact>
             <NumberInput 
