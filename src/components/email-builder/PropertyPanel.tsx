@@ -72,7 +72,7 @@ const PropertyPanel = () => {
   };
 
   return (
-    <div className="w-72 bg-card border-l border-border h-full overflow-y-auto scrollbar-thin">
+    <div className="w-[28rem] bg-card border-l border-border h-full overflow-y-auto scrollbar-thin">
       <div className="p-4 border-b border-border flex items-center justify-between">
         <div className="flex items-center gap-2">
           <div className="w-2 h-2 rounded-full gradient-primary" />
