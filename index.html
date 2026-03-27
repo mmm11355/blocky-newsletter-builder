@@ -20,6 +20,23 @@
   <meta name="twitter:title" content="MailCraft — Конструктор рассылок">
   <meta property="og:description" content="Визуальный конструктор email-рассылок с drag-and-drop">
   <meta name="twitter:description" content="Визуальный конструктор email-рассылок с drag-and-drop">
+
+
+    <script>
+  (function() {
+    // Принудительно устанавливаем LTR
+    document.documentElement.setAttribute('dir', 'ltr');
+    document.body.style.direction = 'ltr';
+    
+    // Отключаем возможность изменения
+    Object.defineProperty(document.documentElement, 'dir', {
+      get: () => 'ltr',
+      set: () => {},
+      configurable: false
+    });
+  })();
+</script>
+    
 </head>
 
   <body class="h-full">
