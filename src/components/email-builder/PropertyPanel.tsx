@@ -1,7 +1,7 @@
-import { useRef, useCallback, useState } from 'react';
+import { useRef, useCallback, useState, useEffect } from 'react';
 import { useEmailBuilder } from '@/context/EmailBuilderContext';
 import { EMAIL_FONTS, BulletType, MenuItem, MenuLayout } from '@/types/email-builder';
-import { Trash2, ArrowUp, ArrowDown, Settings2, Upload, ClipboardPaste, Link, Plus, X } from 'lucide-react';
+import { Trash2, ArrowUp, ArrowDown, Settings2, Upload, ClipboardPaste, Link, Plus, X, Bold, Palette, Highlighter } from 'lucide-react';
 
 const PropertyPanel = () => {
   const { getSelectedBlock, updateBlock, updateBlockStyle, deleteBlock, moveBlock, selection, template, updateCellStyle, updateCellGap, updateRowMobileStack } = useEmailBuilder();
@@ -26,13 +26,6 @@ const PropertyPanel = () => {
 
   const typeLabels: Record<string, string> = { heading: 'Заголовок', text: 'Текст', image: 'Изображение', button: 'Кнопка', list: 'Список', menu: 'Меню' };
 
-  // Очищаем HTML теги для отображения
-  const getPlainText = (html: string) => {
-    const temp = document.createElement('div');
-    temp.innerHTML = html;
-    return temp.textContent || temp.innerText || '';
-  };
-
   return (
     <div className="w-72 bg-card border-l border-border h-full overflow-y-auto scrollbar-thin">
       <div className="p-4 border-b border-border flex items-center justify-between">
@@ -48,25 +41,9 @@ const PropertyPanel = () => {
       </div>
 
       <div className="p-4 space-y-5">
-        {/* Content - простое текстовое поле */}
+        {/* Content with rich text */}
         {(block.type === 'heading' || block.type === 'text' || block.type === 'button') && (
-          <Field label="Контент">
-            {block.type === 'text' ? (
-              <textarea
-                value={getPlainText(block.content)}
-                onChange={(e) => updBlock({ content: e.target.value })}
-                rows={6}
-                className="w-full rounded-lg border border-input bg-secondary/50 px-3 py-2 text-sm text-card-foreground focus:outline-none focus:ring-1 focus:ring-primary/50 transition-all"
-              />
-            ) : (
-              <input
-                type="text"
-                value={getPlainText(block.content)}
-                onChange={(e) => updBlock({ content: e.target.value })}
-                className="w-full rounded-lg border border-input bg-secondary/50 px-3 py-2 text-sm text-card-foreground focus:outline-none focus:ring-1 focus:ring-primary/50 transition-all"
-              />
-            )}
-          </Field>
+          <RichTextField content={block.content} onChange={(content) => updBlock({ content })} multiline={block.type === 'text'} />
         )}
 
         {/* List Items */}
@@ -102,7 +79,7 @@ const PropertyPanel = () => {
           </Field>
         )}
 
-        {/* Font Family */}
+        {/* Font Family — for heading, text, button */}
         {(block.type === 'heading' || block.type === 'text' || block.type === 'button') && (
           <Section title="Шрифт">
             <Field label="Семейство шрифта" compact>
@@ -460,6 +437,140 @@ const Section: React.FC<{ title: string; children: React.ReactNode }> = ({ title
     {children}
   </div>
 );
+
+// RichTextField с форматированием и без зеркальности
+const RichTextField: React.FC<{ content: string; onChange: (content: string) => void; multiline?: boolean }> = ({ content, onChange, multiline }) => {
+  const editorRef = useRef<HTMLDivElement>(null);
+  const [showColorPicker, setShowColorPicker] = useState(false);
+  const [showBgColorPicker, setShowBgColorPicker] = useState(false);
+
+  // Функция применения форматирования
+  const execCommand = (cmd: string, value?: string) => {
+    if (!editorRef.current) return;
+    editorRef.current.focus();
+    document.execCommand(cmd, false, value || '');
+    if (editorRef.current) {
+      onChange(editorRef.current.innerHTML);
+    }
+  };
+
+  const handleInput = () => {
+    if (editorRef.current) {
+      onChange(editorRef.current.innerHTML);
+    }
+  };
+
+  const handlePaste = (e: React.ClipboardEvent) => {
+    e.preventDefault();
+    const text = e.clipboardData.getData('text/plain');
+    document.execCommand('insertText', false, text);
+  };
+
+  // Принудительное исправление направления текста
+  useEffect(() => {
+    if (editorRef.current) {
+      editorRef.current.style.direction = 'ltr';
+      editorRef.current.style.textAlign = 'left';
+      editorRef.current.style.whiteSpace = multiline ? 'pre-wrap' : 'normal';
+    }
+  }, [multiline]);
+
+  return (
+    <Field label="Контент">
+      <div className="space-y-1.5">
+        {/* Панель инструментов */}
+        <div className="flex items-center gap-1 p-1 rounded-lg bg-secondary/50 border border-input flex-wrap">
+          <button
+            type="button"
+            onMouseDown={(e) => { e.preventDefault(); execCommand('bold'); }}
+            className="p-1.5 rounded hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors"
+            title="Жирный"
+          >
+            <Bold className="h-3.5 w-3.5" />
+          </button>
+          
+          <div className="relative">
+            <button
+              type="button"
+              onMouseDown={(e) => { e.preventDefault(); setShowColorPicker(!showColorPicker); setShowBgColorPicker(false); }}
+              className="p-1.5 rounded hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors"
+              title="Цвет текста"
+            >
+              <Palette className="h-3.5 w-3.5" />
+            </button>
+            {showColorPicker && (
+              <div className="absolute top-full left-0 mt-1 z-20 p-2 rounded-lg bg-card border border-border shadow-lg">
+                <input
+                  type="color"
+                  defaultValue="#000000"
+                  onChange={(e) => { execCommand('foreColor', e.target.value); setShowColorPicker(false); }}
+                  className="w-8 h-8 cursor-pointer border-0"
+                />
+              </div>
+            )}
+          </div>
+
+          <div className="relative">
+            <button
+              type="button"
+              onMouseDown={(e) => { e.preventDefault(); setShowBgColorPicker(!showBgColorPicker); setShowColorPicker(false); }}
+              className="p-1.5 rounded hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors"
+              title="Цвет фона"
+            >
+              <Highlighter className="h-3.5 w-3.5" />
+            </button>
+            {showBgColorPicker && (
+              <div className="absolute top-full left-0 mt-1 z-20 p-2 rounded-lg bg-card border border-border shadow-lg">
+                <input
+                  type="color"
+                  defaultValue="#ffff00"
+                  onChange={(e) => { execCommand('backColor', e.target.value); setShowBgColorPicker(false); }}
+                  className="w-8 h-8 cursor-pointer border-0"
+                />
+              </div>
+            )}
+          </div>
+
+          <div className="w-px h-4 bg-border mx-1" />
+          
+          <button
+            type="button"
+            onMouseDown={(e) => { e.preventDefault(); execCommand('removeFormat'); }}
+            className="p-1.5 rounded hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors text-xs"
+            title="Очистить форматирование"
+          >
+            Tx
+          </button>
+        </div>
+
+        {/* Редактор */}
+        <div
+          ref={editorRef}
+          contentEditable
+          suppressContentEditableWarning
+          onInput={handleInput}
+          onPaste={handlePaste}
+          dangerouslySetInnerHTML={{ __html: content }}
+          className={`w-full rounded-lg border border-input bg-secondary/50 px-3 py-2 text-sm text-card-foreground focus:outline-none focus:ring-1 focus:ring-primary/50 transition-all overflow-y-auto ${
+            multiline ? 'min-h-[150px]' : 'min-h-[36px]'
+          }`}
+          style={{
+            whiteSpace: multiline ? 'pre-wrap' : 'normal',
+            overflowX: multiline ? 'hidden' : 'auto',
+            direction: 'ltr',
+            textAlign: 'left',
+          }}
+        />
+        {multiline && (
+          <p className="text-[10px] text-muted-foreground">
+            📝 Выделите текст → используйте кнопки для форматирования.<br/>
+            🔹 Enter — новый абзац | 🔹 Shift+Enter — новая строка
+          </p>
+        )}
+      </div>
+    </Field>
+  );
+};
 
 import type { ListBulletStyle } from '@/types/email-builder';
 
