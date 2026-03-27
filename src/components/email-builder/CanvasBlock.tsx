@@ -9,6 +9,24 @@ interface Props {
   cellIndex: number;
 }
 
+// Функция парсинга тегов форматирования в HTML
+const parseContentToHtml = (content: string): string => {
+  if (!content) return '';
+  
+  let html = content;
+  
+  // Жирный текст **текст**
+  html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+  
+  // Цвет текста {color:#ff0000}текст{/color}
+  html = html.replace(/{color:([^}]+)}(.*?){\/color}/g, '<span style="color:$1">$2</span>');
+  
+  // Цвет фона {bgcolor:#ffff00}текст{/bgcolor}
+  html = html.replace(/{bgcolor:([^}]+)}(.*?){\/bgcolor}/g, '<span style="background-color:$1">$2</span>');
+  
+  return html;
+};
+
 const CanvasBlock: React.FC<Props> = ({ block, rowId, cellIndex }) => {
   const { selection, setSelection, previewMode } = useEmailBuilder();
   const isSelected = selection?.blockId === block.id;
@@ -79,12 +97,15 @@ const CanvasBlock: React.FC<Props> = ({ block, rowId, cellIndex }) => {
     return <span style={{ ...bulletContainerStyle, color: bs.color, fontSize: bs.size, fontWeight: bs.fontWeight as any }}>•</span>;
   };
 
+  // Парсим контент перед отображением
+  const parsedContent = parseContentToHtml(block.content);
+
   const renderContent = () => {
     switch (block.type) {
       case 'heading':
-        return <h1 style={{ ...baseStyle, margin: 0 }} onClick={handleClick} dangerouslySetInnerHTML={{ __html: block.content }} />;
+        return <h1 style={{ ...baseStyle, margin: 0 }} onClick={handleClick} dangerouslySetInnerHTML={{ __html: parsedContent }} />;
       case 'text':
-        return <p style={{ ...baseStyle, margin: 0 }} onClick={handleClick} dangerouslySetInnerHTML={{ __html: block.content }} />;
+        return <p style={{ ...baseStyle, margin: 0 }} onClick={handleClick} dangerouslySetInnerHTML={{ __html: parsedContent }} />;
       case 'image':
         return (
           <div style={baseStyle} onClick={handleClick}>
@@ -113,7 +134,7 @@ const CanvasBlock: React.FC<Props> = ({ block, rowId, cellIndex }) => {
               textAlign: s.textAlign as any,
               lineHeight: s.lineHeight,
             }}>
-              <span dangerouslySetInnerHTML={{ __html: block.content }} />
+              <span dangerouslySetInnerHTML={{ __html: parsedContent }} />
             </a>
           </div>
         );
