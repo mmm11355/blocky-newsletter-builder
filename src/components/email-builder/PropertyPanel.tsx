@@ -1,7 +1,7 @@
 import { useRef, useCallback, useState, useEffect } from 'react';
 import { useEmailBuilder } from '@/context/EmailBuilderContext';
 import { EMAIL_FONTS, BulletType, MenuItem, MenuLayout } from '@/types/email-builder';
-import { Trash2, ArrowUp, ArrowDown, Settings2, Upload, ClipboardPaste, Link, Plus, X, Bold, Palette, Highlighter } from 'lucide-react';
+import { Trash2, ArrowUp, ArrowDown, Settings2, Upload, ClipboardPaste, Link, Plus, X, Bold, Palette, Highlighter, Minus } from 'lucide-react';
 
 const PropertyPanel = () => {
   const { getSelectedBlock, updateBlock, updateBlockStyle, deleteBlock, moveBlock, selection, template, updateCellStyle, updateCellGap, updateRowMobileStack } = useEmailBuilder();
@@ -135,42 +135,18 @@ const PropertyPanel = () => {
         <Section title="Типографика">
           <div className="grid grid-cols-2 gap-2">
             <Field label="Размер" compact>
-              <div className="flex items-center gap-2">
-                <input
-                  type="range"
-                  min={8}
-                  max={72}
-                  value={s.fontSize}
-                  onChange={(e) => upd({ fontSize: +e.target.value })}
-                  className="flex-1 h-2 accent-primary cursor-pointer"
-                />
-                <input
-                  type="number"
-                  value={s.fontSize}
-                  onChange={(e) => upd({ fontSize: +e.target.value })}
-                  className="w-14 rounded-lg border border-input bg-secondary/50 px-2 py-1.5 text-sm text-card-foreground text-center"
-                />
-              </div>
+              <NumberInput 
+                value={s.fontSize} 
+                onChange={(v) => upd({ fontSize: v })} 
+                min={8} max={72} step={1}
+              />
             </Field>
             <Field label="Высота строки" compact>
-              <div className="flex items-center gap-2">
-                <input
-                  type="range"
-                  min={0.8}
-                  max={2.5}
-                  step={0.1}
-                  value={s.lineHeight}
-                  onChange={(e) => upd({ lineHeight: +e.target.value })}
-                  className="flex-1 h-2 accent-primary cursor-pointer"
-                />
-                <input
-                  type="number"
-                  step={0.1}
-                  value={s.lineHeight}
-                  onChange={(e) => upd({ lineHeight: +e.target.value })}
-                  className="w-14 rounded-lg border border-input bg-secondary/50 px-2 py-1.5 text-sm text-card-foreground text-center"
-                />
-              </div>
+              <NumberInput 
+                value={s.lineHeight} 
+                onChange={(v) => upd({ lineHeight: v })} 
+                min={0.8} max={2.5} step={0.1}
+              />
             </Field>
           </div>
           <Field label="Жирность" compact>
@@ -241,30 +217,20 @@ const PropertyPanel = () => {
         {/* Width */}
         <Section title="Размер">
           <Field label="Ширина (десктоп)" compact>
-            <div className="flex items-center gap-2">
-              <input
-                type="range"
-                min={10}
-                max={100}
-                value={parseInt(s.width) || 100}
-                onChange={(e) => upd({ width: `${e.target.value}%` })}
-                className="flex-1 h-2 accent-primary"
-              />
-              <span className="text-xs text-muted-foreground font-mono w-10 text-right">{s.width || '100%'}</span>
-            </div>
+            <NumberInput 
+              value={parseInt(s.width) || 100} 
+              onChange={(v) => upd({ width: `${v}%` })} 
+              min={10} max={100} step={1}
+              suffix="%"
+            />
           </Field>
           <Field label="Ширина (мобильная)" compact>
-            <div className="flex items-center gap-2">
-              <input
-                type="range"
-                min={10}
-                max={100}
-                value={parseInt(s.mobileWidth) || 100}
-                onChange={(e) => upd({ mobileWidth: `${e.target.value}%` })}
-                className="flex-1 h-2 accent-primary"
-              />
-              <span className="text-xs text-muted-foreground font-mono w-10 text-right">{s.mobileWidth || '100%'}</span>
-            </div>
+            <NumberInput 
+              value={parseInt(s.mobileWidth) || 100} 
+              onChange={(v) => upd({ mobileWidth: `${v}%` })} 
+              min={10} max={100} step={1}
+              suffix="%"
+            />
           </Field>
         </Section>
         
@@ -273,11 +239,11 @@ const PropertyPanel = () => {
           <div className="grid grid-cols-2 gap-2">
             {([['paddingTop', '↑ Верх'], ['paddingRight', '→ Право'], ['paddingBottom', '↓ Низ'], ['paddingLeft', '← Лево']] as const).map(([key, label]) => (
               <Field key={key} label={label} compact>
-                <input 
-                  type="number" 
+                <NumberInput 
                   value={s[key]} 
-                  onChange={(e) => upd({ [key]: +e.target.value })} 
-                  className="w-full rounded-lg border border-input bg-secondary/50 px-2 py-1.5 text-sm text-card-foreground focus:outline-none focus:ring-1 focus:ring-primary/50" 
+                  onChange={(v) => upd({ [key]: v })} 
+                  min={0} max={200} step={1}
+                  suffix="px"
                 />
               </Field>
             ))}
@@ -289,11 +255,11 @@ const PropertyPanel = () => {
           <div className="grid grid-cols-2 gap-2">
             {([['marginTop', '↑ Верх'], ['marginRight', '→ Право'], ['marginBottom', '↓ Низ'], ['marginLeft', '← Лево']] as const).map(([key, label]) => (
               <Field key={key} label={label} compact>
-                <input 
-                  type="number" 
+                <NumberInput 
                   value={s[key]} 
-                  onChange={(e) => upd({ [key]: +e.target.value })} 
-                  className="w-full rounded-lg border border-input bg-secondary/50 px-2 py-1.5 text-sm text-card-foreground focus:outline-none focus:ring-1 focus:ring-primary/50" 
+                  onChange={(v) => upd({ [key]: v })} 
+                  min={0} max={200} step={1}
+                  suffix="px"
                 />
               </Field>
             ))}
@@ -304,19 +270,19 @@ const PropertyPanel = () => {
         <Section title="Обводка">
           <div className="grid grid-cols-2 gap-2">
             <Field label="Толщина" compact>
-              <input 
-                type="number" 
+              <NumberInput 
                 value={s.borderWidth} 
-                onChange={(e) => upd({ borderWidth: +e.target.value })} 
-                className="w-full rounded-lg border border-input bg-secondary/50 px-2 py-1.5 text-sm text-card-foreground focus:outline-none focus:ring-1 focus:ring-primary/50" 
+                onChange={(v) => upd({ borderWidth: v })} 
+                min={0} max={20} step={1}
+                suffix="px"
               />
             </Field>
             <Field label="Радиус" compact>
-              <input 
-                type="number" 
+              <NumberInput 
                 value={s.borderRadius} 
-                onChange={(e) => upd({ borderRadius: +e.target.value })} 
-                className="w-full rounded-lg border border-input bg-secondary/50 px-2 py-1.5 text-sm text-card-foreground focus:outline-none focus:ring-1 focus:ring-primary/50" 
+                onChange={(v) => upd({ borderRadius: v })} 
+                min={0} max={50} step={1}
+                suffix="px"
               />
             </Field>
           </div>
@@ -367,17 +333,12 @@ const PropertyPanel = () => {
                 </div>
               </Field>
               <Field label="Отступ между колонками" compact>
-                <div className="flex items-center gap-2">
-                  <input
-                    type="range"
-                    min={0}
-                    max={40}
-                    value={row.cellGap || 0}
-                    onChange={(e) => updateCellGap(rowId, +e.target.value)}
-                    className="flex-1 h-2 accent-primary"
-                  />
-                  <span className="text-xs text-muted-foreground font-mono w-10 text-right">{row.cellGap || 0}px</span>
-                </div>
+                <NumberInput 
+                  value={row.cellGap || 0} 
+                  onChange={(v) => updateCellGap(rowId, v)} 
+                  min={0} max={40} step={1}
+                  suffix="px"
+                />
               </Field>
               <div className="space-y-3">
                 {row.cells.map((_, ci) => {
@@ -406,26 +367,22 @@ const PropertyPanel = () => {
                         </div>
                       </Field>
                       <Field label="Закругление" compact>
-                        <div className="flex items-center gap-2">
-                          <input 
-                            type="range" 
-                            min={0} 
-                            max={40} 
-                            value={cs.borderRadius || 0} 
-                            onChange={(e) => updateCellStyle(rowId, ci, { borderRadius: +e.target.value })} 
-                            className="flex-1 h-2 accent-primary" 
-                          />
-                          <span className="text-xs text-muted-foreground font-mono w-10 text-right">{cs.borderRadius || 0}px</span>
-                        </div>
+                        <NumberInput 
+                          value={cs.borderRadius || 0} 
+                          onChange={(v) => updateCellStyle(rowId, ci, { borderRadius: v })} 
+                          min={0} max={40} step={1}
+                          suffix="px"
+                        />
                       </Field>
                       <div className="grid grid-cols-2 gap-1.5">
                         {([['paddingTop', '↑'], ['paddingRight', '→'], ['paddingBottom', '↓'], ['paddingLeft', '←']] as const).map(([key, icon]) => (
                           <Field key={key} label={icon} compact>
-                            <input 
-                              type="number" 
+                            <NumberInput 
                               value={(cs as any)[key] || 0} 
-                              onChange={(e) => updateCellStyle(rowId, ci, { [key]: +e.target.value })} 
-                              className="w-full rounded-lg border border-input bg-secondary/50 px-2 py-1 text-xs text-card-foreground focus:outline-none focus:ring-1 focus:ring-primary/50" 
+                              onChange={(v) => updateCellStyle(rowId, ci, { [key]: v })} 
+                              min={0} max={100} step={1}
+                              suffix="px"
+                              size="sm"
                             />
                           </Field>
                         ))}
@@ -438,6 +395,69 @@ const PropertyPanel = () => {
           );
         })()}
       </div>
+    </div>
+  );
+};
+
+// Универсальный компонент числового ввода с кнопками + и -
+const NumberInput: React.FC<{
+  value: number;
+  onChange: (v: number) => void;
+  min?: number;
+  max?: number;
+  step?: number;
+  suffix?: string;
+  size?: 'sm' | 'md';
+}> = ({ value, onChange, min = 0, max = 9999, step = 1, suffix = '', size = 'md' }) => {
+  const handleDecrement = () => {
+    const newValue = Math.max(min, Number((value - step).toFixed(1)));
+    onChange(newValue);
+  };
+  
+  const handleIncrement = () => {
+    const newValue = Math.min(max, Number((value + step).toFixed(1)));
+    onChange(newValue);
+  };
+  
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newValue = Math.min(max, Math.max(min, parseFloat(e.target.value) || 0));
+    onChange(newValue);
+  };
+  
+  return (
+    <div className="flex items-center gap-1">
+      <button
+        type="button"
+        onClick={handleDecrement}
+        className="p-1 rounded-md bg-secondary text-secondary-foreground hover:bg-secondary/80 transition-colors"
+      >
+        <Minus className={`h-3 w-3 ${size === 'sm' ? 'h-2.5 w-2.5' : ''}`} />
+      </button>
+      <div className="relative flex-1">
+        <input
+          type="number"
+          value={value}
+          onChange={handleChange}
+          min={min}
+          max={max}
+          step={step}
+          className={`w-full rounded-lg border border-input bg-secondary/50 text-card-foreground focus:outline-none focus:ring-1 focus:ring-primary/50 text-center ${
+            size === 'sm' ? 'px-1 py-1 text-xs' : 'px-2 py-1.5 text-sm'
+          }`}
+        />
+        {suffix && (
+          <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-muted-foreground pointer-events-none">
+            {suffix}
+          </span>
+        )}
+      </div>
+      <button
+        type="button"
+        onClick={handleIncrement}
+        className="p-1 rounded-md bg-secondary text-secondary-foreground hover:bg-secondary/80 transition-colors"
+      >
+        <Plus className={`h-3 w-3 ${size === 'sm' ? 'h-2.5 w-2.5' : ''}`} />
+      </button>
     </div>
   );
 };
@@ -563,64 +583,56 @@ const Section: React.FC<{ title: string; children: React.ReactNode }> = ({ title
   </div>
 );
 
-// RichTextField с исправленным направлением текста и синхронизацией
+// RichTextField с исправленным форматированием
 const RichTextField: React.FC<{ content: string; onChange: (content: string) => void; multiline?: boolean }> = ({ 
   content, 
   onChange, 
   multiline 
 }) => {
-  // Очищаем HTML теги для отображения
-  const getPlainText = (html: string) => {
-    const temp = document.createElement('div');
-    temp.innerHTML = html;
-    return temp.textContent || temp.innerText || '';
-  };
-  
-  const [text, setText] = useState(() => getPlainText(content));
   const textareaRef = useRef<HTMLTextAreaElement | HTMLInputElement>(null);
+  const [localValue, setLocalValue] = useState(content || '');
   
-  // Синхронизируем состояние с пропом content при его изменении
+  // Синхронизация с внешним контентом
   useEffect(() => {
-    const plainText = getPlainText(content);
-    if (plainText !== text) {
-      setText(plainText);
+    if (content !== localValue) {
+      setLocalValue(content || '');
     }
   }, [content]);
   
-  const updateText = (newText: string) => {
-    setText(newText);
-    onChange(newText);
+  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
+    const newValue = e.target.value;
+    setLocalValue(newValue);
+    onChange(newValue);
   };
   
   const wrapText = (before: string, after: string = '') => {
-    if (!textareaRef.current) return;
     const element = textareaRef.current;
+    if (!element) return;
+    
     const start = element.selectionStart;
     const end = element.selectionEnd;
-    const selected = text.substring(start, end);
+    const selected = localValue.substring(start, end);
     
-    if (!selected && start === end) {
-      // Если ничего не выделено, вставляем теги и ставим курсор между ними
-      const newText = text.substring(0, start) + before + after + text.substring(end);
-      updateText(newText);
-      setTimeout(() => {
-        if (textareaRef.current) {
-          textareaRef.current.focus();
-          textareaRef.current.setSelectionRange(start + before.length, start + before.length);
-        }
-      }, 0);
-      return;
+    let newText: string;
+    let newCursorPos: number;
+    
+    if (selected) {
+      // Если текст выделен - оборачиваем его
+      newText = localValue.substring(0, start) + before + selected + after + localValue.substring(end);
+      newCursorPos = end + before.length + after.length;
+    } else {
+      // Если нет выделения - вставляем теги и ставим курсор между ними
+      newText = localValue.substring(0, start) + before + after + localValue.substring(end);
+      newCursorPos = start + before.length;
     }
     
-    const newText = text.substring(0, start) + before + selected + after + text.substring(end);
-    updateText(newText);
+    setLocalValue(newText);
+    onChange(newText);
     
-    // Восстанавливаем выделение
+    // Восстанавливаем фокус и позицию курсора
     setTimeout(() => {
-      if (textareaRef.current) {
-        textareaRef.current.focus();
-        textareaRef.current.setSelectionRange(start + before.length, end + before.length);
-      }
+      element.focus();
+      element.setSelectionRange(newCursorPos, newCursorPos);
     }, 0);
   };
   
@@ -637,54 +649,50 @@ const RichTextField: React.FC<{ content: string; onChange: (content: string) => 
           >
             <Bold className="h-3.5 w-3.5" />
           </button>
-          <div className="relative">
-            <button
-              type="button"
-              onMouseDown={(e) => { e.preventDefault(); wrapText('{color}', '{/color}'); }}
-              className="p-1.5 rounded hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors"
-              title="Цвет текста (введите цвет вручную, например: {color:#ff0000}текст{/color})"
-            >
-              <Palette className="h-3.5 w-3.5" />
-            </button>
-          </div>
-          <div className="relative">
-            <button
-              type="button"
-              onMouseDown={(e) => { e.preventDefault(); wrapText('{bgcolor}', '{/bgcolor}'); }}
-              className="p-1.5 rounded hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors"
-              title="Цвет фона (например: {bgcolor:#ffff00}текст{/bgcolor})"
-            >
-              <Highlighter className="h-3.5 w-3.5" />
-            </button>
-          </div>
+          <button
+            type="button"
+            onMouseDown={(e) => { e.preventDefault(); wrapText('{color:#ff0000}', '{/color}'); }}
+            className="p-1.5 rounded hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors"
+            title="Цвет текста"
+          >
+            <Palette className="h-3.5 w-3.5" />
+          </button>
+          <button
+            type="button"
+            onMouseDown={(e) => { e.preventDefault(); wrapText('{bgcolor:#ffff00}', '{/bgcolor}'); }}
+            className="p-1.5 rounded hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors"
+            title="Цвет фона"
+          >
+            <Highlighter className="h-3.5 w-3.5" />
+          </button>
           <div className="w-px h-4 bg-border mx-1" />
         </div>
         
-        {/* Поле ввода с явным указанием направления текста LTR */}
+        {/* Поле ввода с явным направлением LTR */}
         {multiline ? (
           <textarea
             ref={textareaRef as React.RefObject<HTMLTextAreaElement>}
-            value={text}
-            onChange={(e) => updateText(e.target.value)}
+            value={localValue}
+            onChange={handleChange}
             rows={8}
             dir="ltr"
             style={{ direction: 'ltr', textAlign: 'left' }}
             className="w-full rounded-lg border border-input bg-secondary/50 px-3 py-2 text-sm text-card-foreground focus:outline-none focus:ring-1 focus:ring-primary/50 transition-all"
-            placeholder="Введите текст... **жирный** {color:#ff0000}красный{/color} {bgcolor:#ffff00}выделенный{/bgcolor}"
+            placeholder="Введите текст... Выделите и нажмите кнопки выше"
           />
         ) : (
           <input
             ref={textareaRef as React.RefObject<HTMLInputElement>}
             type="text"
-            value={text}
-            onChange={(e) => updateText(e.target.value)}
+            value={localValue}
+            onChange={handleChange}
             dir="ltr"
             style={{ direction: 'ltr', textAlign: 'left' }}
             className="w-full rounded-lg border border-input bg-secondary/50 px-3 py-2 text-sm text-card-foreground focus:outline-none focus:ring-1 focus:ring-primary/50 transition-all"
           />
         )}
         <p className="text-[10px] text-muted-foreground">
-          📝 **текст** — жирный | {`{color:#ff0000}текст{/color}`} — цвет | {`{bgcolor:#ffff00}текст{/bgcolor}`} — фон
+          📝 Выделите текст и нажмите кнопку для форматирования
         </p>
       </div>
     </Field>
@@ -807,11 +815,11 @@ const ListFields: React.FC<{
             </div>
           </Field>
           <Field label="Размер" compact>
-            <input 
-              type="number" 
+            <NumberInput 
               value={bs.size} 
-              onChange={(e) => onUpdateBullet({ ...bs, size: +e.target.value })} 
-              className="w-full rounded-lg border border-input bg-secondary/50 px-2 py-1.5 text-sm text-card-foreground focus:outline-none focus:ring-1 focus:ring-primary/50" 
+              onChange={(v) => onUpdateBullet({ ...bs, size: v })} 
+              min={8} max={48} step={1}
+              suffix="px"
             />
           </Field>
         </div>
@@ -829,30 +837,20 @@ const ListFields: React.FC<{
         </Field>
         <div className="grid grid-cols-2 gap-2">
           <Field label="Сдвиг X" compact>
-            <div className="flex items-center gap-2">
-              <input 
-                type="range" 
-                min={-20} 
-                max={20} 
-                value={bs.offsetX} 
-                onChange={(e) => onUpdateBullet({ ...bs, offsetX: +e.target.value })} 
-                className="flex-1 h-2 accent-primary" 
-              />
-              <span className="text-xs text-muted-foreground font-mono w-8 text-right">{bs.offsetX}</span>
-            </div>
+            <NumberInput 
+              value={bs.offsetX} 
+              onChange={(v) => onUpdateBullet({ ...bs, offsetX: v })} 
+              min={-20} max={20} step={1}
+              suffix="px"
+            />
           </Field>
           <Field label="Сдвиг Y" compact>
-            <div className="flex items-center gap-2">
-              <input 
-                type="range" 
-                min={-20} 
-                max={20} 
-                value={bs.offsetY} 
-                onChange={(e) => onUpdateBullet({ ...bs, offsetY: +e.target.value })} 
-                className="flex-1 h-2 accent-primary" 
-              />
-              <span className="text-xs text-muted-foreground font-mono w-8 text-right">{bs.offsetY}</span>
-            </div>
+            <NumberInput 
+              value={bs.offsetY} 
+              onChange={(v) => onUpdateBullet({ ...bs, offsetY: v })} 
+              min={-20} max={20} step={1}
+              suffix="px"
+            />
           </Field>
         </div>
       </Section>
@@ -949,17 +947,12 @@ const MenuFields: React.FC<{
         {logoSrc && (
           <>
             <Field label="Ширина лого" compact>
-              <div className="flex items-center gap-2">
-                <input 
-                  type="range" 
-                  min={30} 
-                  max={300} 
-                  value={logoWidth} 
-                  onChange={(e) => onUpdate({ menuLogoWidth: +e.target.value })} 
-                  className="flex-1 h-2 accent-primary" 
-                />
-                <span className="text-xs text-muted-foreground font-mono w-10 text-right">{logoWidth}px</span>
-              </div>
+              <NumberInput 
+                value={logoWidth} 
+                onChange={(v) => onUpdate({ menuLogoWidth: v })} 
+                min={30} max={300} step={10}
+                suffix="px"
+              />
             </Field>
             <Field label="Ссылка лого" compact>
               <input 
@@ -1015,17 +1008,12 @@ const MenuFields: React.FC<{
         </div>
       </Section>
       <Field label="Отступ между элементами" compact>
-        <div className="flex items-center gap-2">
-          <input 
-            type="range" 
-            min={4} 
-            max={40} 
-            value={gap} 
-            onChange={(e) => onUpdate({ menuGap: +e.target.value })} 
-            className="flex-1 h-2 accent-primary" 
-          />
-          <span className="text-xs text-muted-foreground font-mono w-10 text-right">{gap}px</span>
-        </div>
+        <NumberInput 
+          value={gap} 
+          onChange={(v) => onUpdate({ menuGap: v })} 
+          min={4} max={40} step={1}
+          suffix="px"
+        />
       </Field>
     </>
   );
