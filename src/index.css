@@ -149,9 +149,14 @@
 }
 
 
-/* Исправление зеркального текста */
+/* Принудительное исправление направления текста */
 * {
   direction: ltr !important;
+}
+
+[contenteditable="true"] {
+  direction: ltr !important;
+  text-align: left !important;
 }
 
 
