@@ -34,7 +34,11 @@ const PropertyPanel = () => {
   };
 
   const [textValue, setTextValue] = useState(() => stripHtml(block.content));
+  const [showColorPicker, setShowColorPicker] = useState(false);
+  const [showBgColorPicker, setShowBgColorPicker] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement | HTMLInputElement>(null);
+  const [selectedColor, setSelectedColor] = useState('#ff0000');
+  const [selectedBgColor, setSelectedBgColor] = useState('#ffff00');
 
   const updateText = (newText: string) => {
     setTextValue(newText);
@@ -55,6 +59,16 @@ const PropertyPanel = () => {
         textareaRef.current.setSelectionRange(start + before.length, end + before.length);
       }
     }, 0);
+  };
+
+  const applyColor = (color: string) => {
+    wrapText(`{color:${color}}`, '{/color}');
+    setShowColorPicker(false);
+  };
+
+  const applyBgColor = (color: string) => {
+    wrapText(`{bgcolor:${color}}`, '{/bgcolor}');
+    setShowBgColorPicker(false);
   };
 
   return (
@@ -87,23 +101,67 @@ const PropertyPanel = () => {
                   <Bold className="h-3.5 w-3.5" />
                 </button>
                 
-                <button
-                  type="button"
-                  onMouseDown={(e) => { e.preventDefault(); wrapText('{color:#ff0000}', '{/color}'); }}
-                  className="p-1.5 rounded hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors"
-                  title="Красный цвет"
-                >
-                  <Palette className="h-3.5 w-3.5" />
-                </button>
+                <div className="relative">
+                  <button
+                    type="button"
+                    onMouseDown={(e) => { e.preventDefault(); setShowColorPicker(!showColorPicker); setShowBgColorPicker(false); }}
+                    className="p-1.5 rounded hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors"
+                    title="Цвет текста"
+                  >
+                    <Palette className="h-3.5 w-3.5" />
+                  </button>
+                  {showColorPicker && (
+                    <div className="absolute top-full left-0 mt-1 z-20 p-2 rounded-lg bg-card border border-border shadow-lg">
+                      <input
+                        type="color"
+                        value={selectedColor}
+                        onChange={(e) => { setSelectedColor(e.target.value); applyColor(e.target.value); }}
+                        className="w-8 h-8 cursor-pointer border-0"
+                      />
+                      <div className="flex gap-1 mt-2">
+                        {['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff', '#000000', '#ffffff'].map(c => (
+                          <button
+                            key={c}
+                            onClick={() => applyColor(c)}
+                            className="w-5 h-5 rounded border border-border"
+                            style={{ backgroundColor: c }}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
 
-                <button
-                  type="button"
-                  onMouseDown={(e) => { e.preventDefault(); wrapText('{bgcolor:#ffff00}', '{/bgcolor}'); }}
-                  className="p-1.5 rounded hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors"
-                  title="Желтый фон"
-                >
-                  <Highlighter className="h-3.5 w-3.5" />
-                </button>
+                <div className="relative">
+                  <button
+                    type="button"
+                    onMouseDown={(e) => { e.preventDefault(); setShowBgColorPicker(!showBgColorPicker); setShowColorPicker(false); }}
+                    className="p-1.5 rounded hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors"
+                    title="Цвет фона"
+                  >
+                    <Highlighter className="h-3.5 w-3.5" />
+                  </button>
+                  {showBgColorPicker && (
+                    <div className="absolute top-full left-0 mt-1 z-20 p-2 rounded-lg bg-card border border-border shadow-lg">
+                      <input
+                        type="color"
+                        value={selectedBgColor}
+                        onChange={(e) => { setSelectedBgColor(e.target.value); applyBgColor(e.target.value); }}
+                        className="w-8 h-8 cursor-pointer border-0"
+                      />
+                      <div className="flex gap-1 mt-2">
+                        {['#ffff00', '#ffcc00', '#ff9900', '#ff6600', '#ff3300', '#00ff00', '#00ccff', '#ff00ff'].map(c => (
+                          <button
+                            key={c}
+                            onClick={() => applyBgColor(c)}
+                            className="w-5 h-5 rounded border border-border"
+                            style={{ backgroundColor: c }}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
 
               {/* Поле ввода */}
@@ -114,7 +172,7 @@ const PropertyPanel = () => {
                   onChange={(e) => updateText(e.target.value)}
                   rows={8}
                   className="w-full rounded-lg border border-input bg-secondary/50 px-3 py-2 text-sm text-card-foreground focus:outline-none focus:ring-1 focus:ring-primary/50 transition-all"
-                  placeholder="Введите текст... **жирный** {color:#ff0000}красный{/color} {bgcolor:#ffff00}фон{/bgcolor}"
+                  placeholder="Введите текст... Выделите слово и нажмите кнопки форматирования"
                 />
               ) : (
                 <input
@@ -127,7 +185,7 @@ const PropertyPanel = () => {
               )}
               
               <p className="text-[10px] text-muted-foreground">
-                📝 **текст** — жирный | {`{color:#ff0000}текст{/color}`} — цвет | {`{bgcolor:#ffff00}текст{/bgcolor}`} — фон
+                📝 Выделите слово → нажмите <strong>B</strong> для жирного, 🎨 для цвета, 🖌️ для фона
               </p>
             </div>
           </Field>
@@ -187,7 +245,13 @@ const PropertyPanel = () => {
         <Section title="Типографика">
           <div className="grid grid-cols-2 gap-2">
             <Field label="Размер" compact>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={() => upd({ fontSize: Math.max(8, (s.fontSize || 16) - 2) })}
+                  className="w-6 h-6 rounded bg-secondary hover:bg-secondary/80 flex items-center justify-center text-sm"
+                >
+                  -
+                </button>
                 <input
                   type="range"
                   min={8}
@@ -196,6 +260,12 @@ const PropertyPanel = () => {
                   onChange={(e) => upd({ fontSize: +e.target.value })}
                   className="flex-1 h-2 accent-primary cursor-pointer"
                 />
+                <button
+                  onClick={() => upd({ fontSize: Math.min(72, (s.fontSize || 16) + 2) })}
+                  className="w-6 h-6 rounded bg-secondary hover:bg-secondary/80 flex items-center justify-center text-sm"
+                >
+                  +
+                </button>
                 <input
                   type="number"
                   value={s.fontSize}
@@ -204,8 +274,15 @@ const PropertyPanel = () => {
                 />
               </div>
             </Field>
+            
             <Field label="Высота строки" compact>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={() => upd({ lineHeight: Math.max(0.8, (s.lineHeight || 1.5) - 0.1) })}
+                  className="w-6 h-6 rounded bg-secondary hover:bg-secondary/80 flex items-center justify-center text-sm"
+                >
+                  -
+                </button>
                 <input
                   type="range"
                   min={0.8}
@@ -215,6 +292,12 @@ const PropertyPanel = () => {
                   onChange={(e) => upd({ lineHeight: +e.target.value })}
                   className="flex-1 h-2 accent-primary cursor-pointer"
                 />
+                <button
+                  onClick={() => upd({ lineHeight: Math.min(2.5, (s.lineHeight || 1.5) + 0.1) })}
+                  className="w-6 h-6 rounded bg-secondary hover:bg-secondary/80 flex items-center justify-center text-sm"
+                >
+                  +
+                </button>
                 <input
                   type="number"
                   step={0.1}
@@ -272,27 +355,52 @@ const PropertyPanel = () => {
         <Section title="Размер">
           <Field label="Ширина (десктоп)" compact>
             <div className="flex items-center gap-2">
+              <button
+                onClick={() => upd({ width: `${Math.max(10, (parseInt(s.width) || 100) - 5)}%` })}
+                className="w-6 h-6 rounded bg-secondary hover:bg-secondary/80 flex items-center justify-center text-sm"
+              >
+                -
+              </button>
               <input
                 type="range"
                 min={10}
                 max={100}
                 value={parseInt(s.width) || 100}
                 onChange={(e) => upd({ width: `${e.target.value}%` })}
-                className="flex-1 h-2 accent-primary"
+                className="flex-1 h-2 accent-primary cursor-pointer"
               />
+              <button
+                onClick={() => upd({ width: `${Math.min(100, (parseInt(s.width) || 100) + 5)}%` })}
+                className="w-6 h-6 rounded bg-secondary hover:bg-secondary/80 flex items-center justify-center text-sm"
+              >
+                +
+              </button>
               <span className="text-xs text-muted-foreground font-mono w-10 text-right">{s.width || '100%'}</span>
             </div>
           </Field>
+          
           <Field label="Ширина (мобильная)" compact>
             <div className="flex items-center gap-2">
+              <button
+                onClick={() => upd({ mobileWidth: `${Math.max(10, (parseInt(s.mobileWidth) || 100) - 5)}%` })}
+                className="w-6 h-6 rounded bg-secondary hover:bg-secondary/80 flex items-center justify-center text-sm"
+              >
+                -
+              </button>
               <input
                 type="range"
                 min={10}
                 max={100}
                 value={parseInt(s.mobileWidth) || 100}
                 onChange={(e) => upd({ mobileWidth: `${e.target.value}%` })}
-                className="flex-1 h-2 accent-primary"
+                className="flex-1 h-2 accent-primary cursor-pointer"
               />
+              <button
+                onClick={() => upd({ mobileWidth: `${Math.min(100, (parseInt(s.mobileWidth) || 100) + 5)}%` })}
+                className="w-6 h-6 rounded bg-secondary hover:bg-secondary/80 flex items-center justify-center text-sm"
+              >
+                +
+              </button>
               <span className="text-xs text-muted-foreground font-mono w-10 text-right">{s.mobileWidth || '100%'}</span>
             </div>
           </Field>
@@ -303,7 +411,26 @@ const PropertyPanel = () => {
           <div className="grid grid-cols-2 gap-2">
             {([['paddingTop', '↑ Верх'], ['paddingRight', '→ Право'], ['paddingBottom', '↓ Низ'], ['paddingLeft', '← Лево']] as const).map(([key, label]) => (
               <Field key={key} label={label} compact>
-                <input type="number" value={s[key]} onChange={(e) => upd({ [key]: +e.target.value })} className="w-full rounded-lg border border-input bg-secondary/50 px-2 py-1.5 text-sm text-card-foreground focus:outline-none focus:ring-1 focus:ring-primary/50" />
+                <div className="flex items-center gap-1">
+                  <button
+                    onClick={() => upd({ [key]: Math.max(0, (s[key] || 0) - 5) })}
+                    className="w-6 h-6 rounded bg-secondary hover:bg-secondary/80 flex items-center justify-center text-sm"
+                  >
+                    -
+                  </button>
+                  <input
+                    type="number"
+                    value={s[key] || 0}
+                    onChange={(e) => upd({ [key]: +e.target.value })}
+                    className="w-16 rounded-lg border border-input bg-secondary/50 px-2 py-1.5 text-sm text-card-foreground text-center focus:outline-none focus:ring-1 focus:ring-primary/50"
+                  />
+                  <button
+                    onClick={() => upd({ [key]: (s[key] || 0) + 5 })}
+                    className="w-6 h-6 rounded bg-secondary hover:bg-secondary/80 flex items-center justify-center text-sm"
+                  >
+                    +
+                  </button>
+                </div>
               </Field>
             ))}
           </div>
@@ -314,7 +441,26 @@ const PropertyPanel = () => {
           <div className="grid grid-cols-2 gap-2">
             {([['marginTop', '↑ Верх'], ['marginRight', '→ Право'], ['marginBottom', '↓ Низ'], ['marginLeft', '← Лево']] as const).map(([key, label]) => (
               <Field key={key} label={label} compact>
-                <input type="number" value={s[key]} onChange={(e) => upd({ [key]: +e.target.value })} className="w-full rounded-lg border border-input bg-secondary/50 px-2 py-1.5 text-sm text-card-foreground focus:outline-none focus:ring-1 focus:ring-primary/50" />
+                <div className="flex items-center gap-1">
+                  <button
+                    onClick={() => upd({ [key]: Math.max(0, (s[key] || 0) - 5) })}
+                    className="w-6 h-6 rounded bg-secondary hover:bg-secondary/80 flex items-center justify-center text-sm"
+                  >
+                    -
+                  </button>
+                  <input
+                    type="number"
+                    value={s[key] || 0}
+                    onChange={(e) => upd({ [key]: +e.target.value })}
+                    className="w-16 rounded-lg border border-input bg-secondary/50 px-2 py-1.5 text-sm text-card-foreground text-center focus:outline-none focus:ring-1 focus:ring-primary/50"
+                  />
+                  <button
+                    onClick={() => upd({ [key]: (s[key] || 0) + 5 })}
+                    className="w-6 h-6 rounded bg-secondary hover:bg-secondary/80 flex items-center justify-center text-sm"
+                  >
+                    +
+                  </button>
+                </div>
               </Field>
             ))}
           </div>
@@ -324,10 +470,48 @@ const PropertyPanel = () => {
         <Section title="Обводка">
           <div className="grid grid-cols-2 gap-2">
             <Field label="Толщина" compact>
-              <input type="number" value={s.borderWidth} onChange={(e) => upd({ borderWidth: +e.target.value })} className="w-full rounded-lg border border-input bg-secondary/50 px-2 py-1.5 text-sm text-card-foreground focus:outline-none focus:ring-1 focus:ring-primary/50" />
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={() => upd({ borderWidth: Math.max(0, (s.borderWidth || 0) - 1) })}
+                  className="w-6 h-6 rounded bg-secondary hover:bg-secondary/80 flex items-center justify-center text-sm"
+                >
+                  -
+                </button>
+                <input
+                  type="number"
+                  value={s.borderWidth || 0}
+                  onChange={(e) => upd({ borderWidth: +e.target.value })}
+                  className="w-16 rounded-lg border border-input bg-secondary/50 px-2 py-1.5 text-sm text-card-foreground text-center focus:outline-none focus:ring-1 focus:ring-primary/50"
+                />
+                <button
+                  onClick={() => upd({ borderWidth: (s.borderWidth || 0) + 1 })}
+                  className="w-6 h-6 rounded bg-secondary hover:bg-secondary/80 flex items-center justify-center text-sm"
+                >
+                  +
+                </button>
+              </div>
             </Field>
             <Field label="Радиус" compact>
-              <input type="number" value={s.borderRadius} onChange={(e) => upd({ borderRadius: +e.target.value })} className="w-full rounded-lg border border-input bg-secondary/50 px-2 py-1.5 text-sm text-card-foreground focus:outline-none focus:ring-1 focus:ring-primary/50" />
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={() => upd({ borderRadius: Math.max(0, (s.borderRadius || 0) - 2) })}
+                  className="w-6 h-6 rounded bg-secondary hover:bg-secondary/80 flex items-center justify-center text-sm"
+                >
+                  -
+                </button>
+                <input
+                  type="number"
+                  value={s.borderRadius || 0}
+                  onChange={(e) => upd({ borderRadius: +e.target.value })}
+                  className="w-16 rounded-lg border border-input bg-secondary/50 px-2 py-1.5 text-sm text-card-foreground text-center focus:outline-none focus:ring-1 focus:ring-primary/50"
+                />
+                <button
+                  onClick={() => upd({ borderRadius: (s.borderRadius || 0) + 2 })}
+                  className="w-6 h-6 rounded bg-secondary hover:bg-secondary/80 flex items-center justify-center text-sm"
+                >
+                  +
+                </button>
+              </div>
             </Field>
           </div>
           <Field label="Цвет обводки" compact>
