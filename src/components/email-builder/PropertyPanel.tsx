@@ -465,7 +465,7 @@ const RichTextField: React.FC<{ content: string; onChange: (content: string) => 
           onInput={handleInput}
           onBlur={handleInput}
           className={`w-full rounded-lg border border-input bg-secondary/50 px-3 py-2 text-sm text-card-foreground focus:outline-none focus:ring-1 focus:ring-primary/50 transition-all ${multiline ? 'min-h-[80px]' : 'min-h-[36px]'}`}
-          style={{ whiteSpace: multiline ? 'pre-wrap' : 'nowrap', overflowX: multiline ? undefined : 'auto' }}
+          style={{ whiteSpace: multiline ? 'pre-wrap' : 'normal', overflowX: multiline ? undefined : 'auto' }}
         />
       </div>
     </Field>
