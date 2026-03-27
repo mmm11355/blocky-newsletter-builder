@@ -150,13 +150,3 @@
 
 
 
-/* ПРИНУДИТЕЛЬНОЕ ИСПРАВЛЕНИЕ ЗЕРКАЛЬНОГО ТЕКСТА */
-* {
-  direction: ltr !important;
-  unicode-bidi: normal !important;
-}
-
-body, html, div, p, h1, h2, h3, h4, h5, h6, span, a, button, input, textarea, [contenteditable="true"] {
-  direction: ltr !important;
-  text-align: left !important;
-}
