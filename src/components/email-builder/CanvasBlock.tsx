@@ -19,10 +19,10 @@ const parseContentToHtml = (content: string): string => {
   html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
   
   // Цвет текста {color:#ff0000}текст{/color}
-  html = html.replace(/{color:([^}]+)}(.*?){\/color}/g, '<span style="color:$1">$2</span>');
+  html = html.replace(/\{color:([^}]+)\}(.*?)\{\/color\}/g, '<span style="color: $1;">$2</span>');
   
   // Цвет фона {bgcolor:#ffff00}текст{/bgcolor}
-  html = html.replace(/{bgcolor:([^}]+)}(.*?){\/bgcolor}/g, '<span style="background-color:$1">$2</span>');
+  html = html.replace(/\{bgcolor:([^}]+)\}(.*?)\{\/bgcolor\}/g, '<span style="background-color: $1;">$2</span>');
   
   return html;
 };
@@ -53,6 +53,7 @@ const CanvasBlock: React.FC<Props> = ({ block, rowId, cellIndex }) => {
     marginBottom: s.marginBottom || 0,
     marginLeft: s.textAlign === 'center' ? 'auto' : s.textAlign === 'right' ? 'auto' : (s.marginLeft || 0),
     position: 'relative',
+    direction: 'ltr', // Принудительное направление слева направо
   };
 
   const baseStyle: React.CSSProperties = {
@@ -70,6 +71,8 @@ const CanvasBlock: React.FC<Props> = ({ block, rowId, cellIndex }) => {
     outline: isSelected ? '2px solid hsl(var(--primary))' : 'none',
     outlineOffset: '1px',
     transition: 'outline 0.15s',
+    direction: 'ltr', // Принудительное направление
+    textAlign: s.textAlign === 'center' ? 'center' : s.textAlign === 'right' ? 'right' : 'left',
   };
 
   const renderBullet = (index: number) => {
@@ -84,6 +87,7 @@ const CanvasBlock: React.FC<Props> = ({ block, rowId, cellIndex }) => {
       left: bs.offsetX,
       top: bs.offsetY,
       flexShrink: 0,
+      direction: 'ltr',
     };
     if (bs.type === 'custom' && bs.customIcon) {
       return <span style={bulletContainerStyle}><img src={bs.customIcon} alt="" style={{ width: bs.size, height: bs.size }} /></span>;
@@ -103,9 +107,9 @@ const CanvasBlock: React.FC<Props> = ({ block, rowId, cellIndex }) => {
   const renderContent = () => {
     switch (block.type) {
       case 'heading':
-        return <h1 style={{ ...baseStyle, margin: 0 }} onClick={handleClick} dangerouslySetInnerHTML={{ __html: parsedContent }} />;
+        return <h1 style={{ ...baseStyle, margin: 0, direction: 'ltr' }} onClick={handleClick} dangerouslySetInnerHTML={{ __html: parsedContent }} />;
       case 'text':
-        return <p style={{ ...baseStyle, margin: 0 }} onClick={handleClick} dangerouslySetInnerHTML={{ __html: parsedContent }} />;
+        return <div style={{ ...baseStyle, margin: 0, direction: 'ltr', whiteSpace: 'pre-wrap' }} onClick={handleClick} dangerouslySetInnerHTML={{ __html: parsedContent }} />;
       case 'image':
         return (
           <div style={baseStyle} onClick={handleClick}>
@@ -114,7 +118,7 @@ const CanvasBlock: React.FC<Props> = ({ block, rowId, cellIndex }) => {
         );
       case 'button':
         return (
-          <div style={{ textAlign: s.textAlign as any }} onClick={handleClick}>
+          <div style={{ textAlign: s.textAlign as any, direction: 'ltr' }} onClick={handleClick}>
             <a style={{
               display: 'block',
               width: '100%',
@@ -133,6 +137,7 @@ const CanvasBlock: React.FC<Props> = ({ block, rowId, cellIndex }) => {
               textDecoration: 'none',
               textAlign: s.textAlign as any,
               lineHeight: s.lineHeight,
+              direction: 'ltr',
             }}>
               <span dangerouslySetInnerHTML={{ __html: parsedContent }} />
             </a>
@@ -140,11 +145,11 @@ const CanvasBlock: React.FC<Props> = ({ block, rowId, cellIndex }) => {
         );
       case 'list':
         return (
-          <div style={{ ...baseStyle, margin: 0 }} onClick={handleClick}>
+          <div style={{ ...baseStyle, margin: 0, direction: 'ltr' }} onClick={handleClick}>
             {(block.listItems || []).map((item, i) => (
-              <div key={i} style={{ display: 'flex', alignItems: 'flex-start', marginBottom: i < (block.listItems?.length || 0) - 1 ? 6 : 0 }}>
+              <div key={i} style={{ display: 'flex', alignItems: 'flex-start', marginBottom: i < (block.listItems?.length || 0) - 1 ? 6 : 0, direction: 'ltr' }}>
                 {renderBullet(i)}
-                <span>{item}</span>
+                <span style={{ direction: 'ltr' }}>{item}</span>
               </div>
             ))}
           </div>
@@ -154,7 +159,7 @@ const CanvasBlock: React.FC<Props> = ({ block, rowId, cellIndex }) => {
         const gap = block.menuGap || 16;
         const isHorizontal = layout === 'horizontal';
         return (
-          <div style={{ ...baseStyle, margin: 0 }} onClick={handleClick}>
+          <div style={{ ...baseStyle, margin: 0, direction: 'ltr' }} onClick={handleClick}>
             <div style={{
               display: 'flex',
               flexDirection: isHorizontal ? 'row' : 'column',
@@ -162,12 +167,13 @@ const CanvasBlock: React.FC<Props> = ({ block, rowId, cellIndex }) => {
               justifyContent: s.textAlign === 'center' ? 'center' : s.textAlign === 'right' ? 'flex-end' : 'flex-start',
               gap,
               flexWrap: 'wrap',
+              direction: 'ltr',
             }}>
               {block.menuLogoSrc && (
                 <img src={block.menuLogoSrc} alt="Logo" style={{ width: block.menuLogoWidth || 120, height: 'auto', flexShrink: 0 }} />
               )}
               {(block.menuItems || []).map((item, i) => (
-                <a key={i} style={{ color: s.color, fontSize: s.fontSize, fontWeight: s.fontWeight as any, textDecoration: 'none', whiteSpace: 'nowrap' }}>
+                <a key={i} style={{ color: s.color, fontSize: s.fontSize, fontWeight: s.fontWeight as any, textDecoration: 'none', whiteSpace: 'nowrap', direction: 'ltr' }}>
                   {item.label}
                 </a>
               ))}
