@@ -406,67 +406,33 @@ const Section: React.FC<{ title: string; children: React.ReactNode }> = ({ title
   </div>
 );
 
+// УПРОЩЁННЫЙ RichTextField - без contenteditable, обычные input/textarea
 const RichTextField: React.FC<{ content: string; onChange: (content: string) => void; multiline?: boolean }> = ({ content, onChange, multiline }) => {
-  const editorRef = useRef<HTMLDivElement>(null);
-  const [showColorPicker, setShowColorPicker] = useState(false);
+  // Очищаем HTML теги, оставляем только текст
+  const plainText = content.replace(/<[^>]*>/g, '');
 
-  const execCmd = (cmd: string, value?: string) => {
-    editorRef.current?.focus();
-    document.execCommand(cmd, false, value);
-    if (editorRef.current) {
-      onChange(editorRef.current.innerHTML);
-    }
-  };
-
-  const handleInput = () => {
-    if (editorRef.current) {
-      onChange(editorRef.current.innerHTML);
-    }
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    onChange(e.target.value);
   };
 
   return (
     <Field label="Контент">
       <div className="space-y-1.5">
-        <div className="flex items-center gap-1 p-1 rounded-lg bg-secondary/50 border border-input">
-          <button
-            type="button"
-            onMouseDown={(e) => { e.preventDefault(); execCmd('bold'); }}
-            className="p-1.5 rounded hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors"
-            title="Жирный"
-          >
-            <Bold className="h-3.5 w-3.5" />
-          </button>
-          <div className="relative">
-            <button
-              type="button"
-              onMouseDown={(e) => { e.preventDefault(); setShowColorPicker(!showColorPicker); }}
-              className="p-1.5 rounded hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors"
-              title="Цвет текста"
-            >
-              <Palette className="h-3.5 w-3.5" />
-            </button>
-            {showColorPicker && (
-              <div className="absolute top-full left-0 mt-1 z-20 p-2 rounded-lg bg-card border border-border shadow-lg">
-                <input
-                  type="color"
-                  defaultValue="#ff0000"
-                  onChange={(e) => { execCmd('foreColor', e.target.value); setShowColorPicker(false); }}
-                  className="w-8 h-8 cursor-pointer border-0"
-                />
-              </div>
-            )}
-          </div>
-        </div>
-        <div
-          ref={editorRef}
-          contentEditable
-          suppressContentEditableWarning
-          dangerouslySetInnerHTML={{ __html: content }}
-          onInput={handleInput}
-          onBlur={handleInput}
-          className={`w-full rounded-lg border border-input bg-secondary/50 px-3 py-2 text-sm text-card-foreground focus:outline-none focus:ring-1 focus:ring-primary/50 transition-all ${multiline ? 'min-h-[80px]' : 'min-h-[36px]'}`}
-          style={{ whiteSpace: multiline ? 'pre-wrap' : 'normal', overflowX: multiline ? undefined : 'auto' }}
-        />
+        {multiline ? (
+          <textarea
+            value={plainText}
+            onChange={handleChange}
+            rows={4}
+            className="w-full rounded-lg border border-input bg-secondary/50 px-3 py-2 text-sm text-card-foreground focus:outline-none focus:ring-1 focus:ring-primary/50 transition-all min-h-[80px]"
+          />
+        ) : (
+          <input
+            type="text"
+            value={plainText}
+            onChange={handleChange}
+            className="w-full rounded-lg border border-input bg-secondary/50 px-3 py-2 text-sm text-card-foreground focus:outline-none focus:ring-1 focus:ring-primary/50 transition-all"
+          />
+        )}
       </div>
     </Field>
   );
