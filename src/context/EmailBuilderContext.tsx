@@ -263,21 +263,18 @@ export const EmailBuilderProvider: React.FC<{ children: React.ReactNode }> = ({ 
     return { block, rowId: selection.rowId, cellIndex: selection.cellIndex };
   }, [selection, template]);
 
+  // Функция для обработки маркеров форматирования
+  const formatContent = (content: string) => {
+    if (!content) return '';
+    let formatted = content.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    formatted = formatted.replace(/\{color:(#[0-9a-fA-F]{6})\}(.*?)\{\/color\}/g, '<span style="color: $1;">$2</span>');
+    formatted = formatted.replace(/\{bgcolor:(#[0-9a-fA-F]{6})\}(.*?)\{\/bgcolor\}/g, '<span style="background-color: $1;">$2</span>');
+    return formatted;
+  };
+
   const generateHTML = useCallback(() => {
     const { globalStyle, rows } = template;
     let blockCounter = 0;
-
-    // Функция для обработки маркеров форматирования
-    const formatContent = (content: string) => {
-        if (!content) return '';
-        // Жирный текст: **текст** → <strong>текст</strong>
-        let formatted = content.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-        // Цвет текста: {color:#ff0000}текст{/color} → <span style="color: #ff0000;">текст</span>
-        formatted = formatted.replace(/\{color:(#[0-9a-fA-F]{6})\}(.*?)\{\/color\}/g, '<span style="color: $1;">$2</span>');
-        // Цвет фона: {bgcolor:#ffff00}текст{/bgcolor} → <span style="background-color: #ffff00;">текст</span>
-        formatted = formatted.replace(/\{bgcolor:(#[0-9a-fA-F]{6})\}(.*?)\{\/bgcolor\}/g, '<span style="background-color: $1;">$2</span>');
-        return formatted;
-    };
 
     const renderBlock = (block: EmailBlock) => {
       const s = block.style;
@@ -293,20 +290,17 @@ export const EmailBuilderProvider: React.FC<{ children: React.ReactNode }> = ({ 
 
       switch (block.type) {
         case 'heading': {
-          // Обрабатываем маркеры форматирования
           const formattedContent = formatContent(block.content);
-          return `<table role="presentation" cellpadding="0" cellspacing="0" border="0" class="${blockClass}" width="100%" style="${wrapStyle}"> 
-            <tr> 
-              <td>
-                <h1 style="${baseStyle}margin:0;mso-line-height-rule:exactly;">${formattedContent}</h1>
-              </td> 
-            </tr>
-          </table>`;
+          return `<table role="presentation" cellpadding="0" cellspacing="0" border="0" class="${blockClass}" width="100%" style="${wrapStyle}">
+             <tr>
+               <td>
+                 <h1 style="${baseStyle}margin:0;mso-line-height-rule:exactly;">${formattedContent}</h1>
+               </td>
+             </tr>
+           </table>`;
         }
         case 'text': {
-          // Обрабатываем маркеры форматирования
           const formattedContent = formatContent(block.content);
-          // Преобразуем переносы строк в абзацы, если нет HTML-тегов
           let finalContent = formattedContent;
           if (!finalContent.includes('<p>') && !finalContent.includes('<br')) {
             finalContent = finalContent
@@ -318,42 +312,44 @@ export const EmailBuilderProvider: React.FC<{ children: React.ReactNode }> = ({ 
               })
               .join('');
           }
-          return `<table role="presentation" cellpadding="0" cellspacing="0" border="0" class="${blockClass}" width="100%" style="${wrapStyle}"> 
-            <tr> 
-              <td>
-                <div style="${baseStyle}margin:0;mso-line-height-rule:exactly;">${finalContent}</div>
-              </td> 
-            </tr>
-          </table>`;
+          return `<table role="presentation" cellpadding="0" cellspacing="0" border="0" class="${blockClass}" width="100%" style="${wrapStyle}">
+             <tr>
+               <td>
+                 <div style="${baseStyle}margin:0;mso-line-height-rule:exactly;">${finalContent}</div>
+               </td>
+             </tr>
+           </table>`;
         }
         case 'image': {
           const imgWidth = s.width && s.width !== '100%' ? s.width.replace('px', '').replace('%', '') : '100%';
           const imgTag = `<img src="${block.src}" alt="${block.alt || ''}" width="${imgWidth}" style="max-width:100%;height:auto;display:block;border:0;outline:none;border-radius:${s.borderRadius}px;${s.textAlign === 'center' ? 'margin:0 auto;' : ''}" />`;
           const wrapped = block.href ? `<a href="${block.href}" target="_blank" style="text-decoration:none;border:0;">${imgTag}</a>` : imgTag;
-          return `<table role="presentation" cellpadding="0" cellspacing="0" border="0" class="${blockClass}" width="100%" style="${wrapStyle}"> 
-            <tr> 
-              <td style="padding:${s.paddingTop}px ${s.paddingRight}px ${s.paddingBottom}px ${s.paddingLeft}px;text-align:${s.textAlign};">${wrapped}</td> 
-            </tr>
-          </table>`;
+          return `<table role="presentation" cellpadding="0" cellspacing="0" border="0" class="${blockClass}" width="100%" style="${wrapStyle}">
+             <tr>
+               <td style="padding:${s.paddingTop}px ${s.paddingRight}px ${s.paddingBottom}px ${s.paddingLeft}px;text-align:${s.textAlign};">${wrapped}</td>
+             </tr>
+           </table>`;
         }
         case 'button': {
           const btnAlign = s.textAlign === 'center' ? 'center' : s.textAlign === 'right' ? 'right' : 'left';
           const formattedContent = formatContent(block.content);
-          return `<table role="presentation" cellpadding="0" cellspacing="0" border="0" class="${blockClass}" width="100%" style="${wrapStyle}"> 
-            <tr> 
-              <td align="${btnAlign}" style="padding:4px 0;">
-                <!--[if mso]>
-                <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="${block.href || '#'}" style="height:auto;v-text-anchor:middle;width:auto;" arcsize="${Math.round(s.borderRadius / 40 * 100)}%" strokecolor="${s.borderColor}" fillcolor="${s.backgroundColor}">
-                  <w:anchorlock/>
-                  <center style="color:${s.color};font-family:${s.fontFamily !== 'inherit' ? s.fontFamily : globalStyle.fontFamily};font-size:${s.fontSize}px;font-weight:${s.fontWeight};">${formattedContent}</center>
-                </v:roundrect>
-                <![endif]-->
-                <!--[if !mso]><!-->
-                <a href="${block.href || '#'}" target="_blank" style="display:inline-block;background-color:${s.backgroundColor};color:${s.color};font-size:${s.fontSize}px;font-weight:${s.fontWeight};padding:${s.paddingTop}px ${s.paddingRight}px ${s.paddingBottom}px ${s.paddingLeft}px;border-radius:${s.borderRadius}px;text-decoration:none;text-align:center;${fontFamilyStr}${borderStr}line-height:${s.lineHeight};mso-hide:all;">${formattedContent}</a>
-                <!--<![endif]-->
-              </td> 
-            </tr>
-          </table>`;
+          const buttonWidth = s.width ? `width:${s.width};` : '';
+          const buttonMargin = s.textAlign === 'center' ? 'margin:0 auto;' : s.textAlign === 'right' ? 'margin:0 0 0 auto;' : '';
+          return `<table role="presentation" cellpadding="0" cellspacing="0" border="0" class="${blockClass}" width="100%" style="${wrapStyle}">
+             <tr>
+               <td align="${btnAlign}" style="padding:4px 0;">
+                 <!--[if mso]>
+                 <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="${block.href || '#'}" style="height:auto;v-text-anchor:middle;width:auto;" arcsize="${Math.round(s.borderRadius / 40 * 100)}%" strokecolor="${s.borderColor}" fillcolor="${s.backgroundColor}">
+                   <w:anchorlock/>
+                   <center style="color:${s.color};font-family:${s.fontFamily !== 'inherit' ? s.fontFamily : globalStyle.fontFamily};font-size:${s.fontSize}px;font-weight:${s.fontWeight};">${formattedContent}</center>
+                 </v:roundrect>
+                 <![endif]-->
+                 <!--[if !mso]><!-->
+                 <a href="${block.href || '#'}" target="_blank" style="display:inline-block;background-color:${s.backgroundColor};color:${s.color};font-size:${s.fontSize}px;font-weight:${s.fontWeight};padding:${s.paddingTop}px ${s.paddingRight}px ${s.paddingBottom}px ${s.paddingLeft}px;border-radius:${s.borderRadius}px;text-decoration:none;text-align:center;${fontFamilyStr}${borderStr}line-height:${s.lineHeight};${buttonWidth}${buttonMargin}">${formattedContent}</a>
+                 <!--<![endif]-->
+               </td>
+             </tr>
+           </table>`;
         }
         case 'list': {
           const bs = block.bulletStyle || { type: 'disc', color: '#333333', size: 16, fontWeight: '400', customIcon: '', offsetX: 0, offsetY: 0 };
@@ -371,13 +367,13 @@ export const EmailBuilderProvider: React.FC<{ children: React.ReactNode }> = ({ 
             }
             return `<tr>${bulletHtml}<td style="color:${s.color};font-size:${s.fontSize}px;line-height:${s.lineHeight};${fontFamilyStr}padding-bottom:${i < (block.listItems?.length || 0) - 1 ? '6' : '0'}px;">${item}</td></tr>`;
           }).join('');
-          return `<table role="presentation" cellpadding="0" cellspacing="0" border="0" class="${blockClass}" width="100%" style="${wrapStyle}"> 
-            <tr> 
-              <td style="${baseStyle}">
-                <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">${items}</table>
-              </td> 
-            </tr>
-          </table>`;
+          return `<table role="presentation" cellpadding="0" cellspacing="0" border="0" class="${blockClass}" width="100%" style="${wrapStyle}">
+             <tr>
+               <td style="${baseStyle}">
+                 <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">${items}</table>
+               </td>
+             </tr>
+           </table>`;
         }
         case 'menu': {
           const menuLayout = block.menuLayout || 'horizontal';
@@ -394,34 +390,36 @@ export const EmailBuilderProvider: React.FC<{ children: React.ReactNode }> = ({ 
           ).join('');
 
           if (isH) {
-            return `<table role="presentation" cellpadding="0" cellspacing="0" border="0" class="${blockClass}" width="100%" style="${wrapStyle}"> 
-              <tr> 
-                <td style="${baseStyle}" align="${btnAlign}">
-                  <table role="presentation" cellpadding="0" cellspacing="0" border="0">
-                    <tr>${logoHtml}${linksHtml}</tr>
-                  </table>
-                </td> 
-              </tr>
-            </table>`;
+            return `<table role="presentation" cellpadding="0" cellspacing="0" border="0" class="${blockClass}" width="100%" style="${wrapStyle}">
+               <tr>
+                 <td style="${baseStyle}" align="${btnAlign}">
+                   <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+                     <tr>${logoHtml}${linksHtml}</tr>
+                   </table>
+                 </td>
+               </tr>
+             </table>`;
           } else {
             const allItems = [];
             if (logoHtml) allItems.push(`<tr>${logoHtml}</tr>`);
             (block.menuItems || []).forEach((item, i) => {
               allItems.push(`<tr><td style="padding:${i > 0 ? gap / 2 : 0}px 0 ${i < (block.menuItems?.length || 0) - 1 ? gap / 2 : 0}px 0;"><a href="${item.href || '#'}" target="_blank" style="color:${s.color};font-size:${s.fontSize}px;font-weight:${s.fontWeight};text-decoration:none;white-space:nowrap;${fontFamilyStr}">${item.label}</a></td></tr>`);
             });
-            return `<table role="presentation" cellpadding="0" cellspacing="0" border="0" class="${blockClass}" width="100%" style="${wrapStyle}"> 
-              <tr> 
-                <td style="${baseStyle}" align="${btnAlign}">
-                  <table role="presentation" cellpadding="0" cellspacing="0" border="0">${allItems.join('')}</table>
-                </td> 
-              </tr>
-            </table>`;
+            return `<table role="presentation" cellpadding="0" cellspacing="0" border="0" class="${blockClass}" width="100%" style="${wrapStyle}">
+               <tr>
+                 <td style="${baseStyle}" align="${btnAlign}">
+                   <table role="presentation" cellpadding="0" cellspacing="0" border="0">${allItems.join('')}</table>
+                 </td>
+               </tr>
+             </table>`;
           }
         }
+        default:
+          return '';
       }
     };
 
-    // Collect mobile width overrides
+    // Сборка мобильных стилей
     blockCounter = 0;
     const mobileStyles: string[] = [];
     rows.forEach(row => {
@@ -450,35 +448,16 @@ export const EmailBuilderProvider: React.FC<{ children: React.ReactNode }> = ({ 
         const cellPad = cs ? `padding:${cs.paddingTop || 0}px ${cs.paddingRight || 0}px ${cs.paddingBottom || 0}px ${cs.paddingLeft || 0}px;` : '';
         return `<td style="width:${colWidth}%;vertical-align:top;${cellBgStyle}${cellBr}${cellPad}" valign="top">${cell.map(renderBlock).join('')}</td>`;
       }).join('');
-      const stackClass = (row.mobileStack !== false && row.columns > 1) ? ' mobile-stack' : '';
-      return `<table role="presentation" width="100%" cellpadding="0" cellspacing="${gap}" border="0" class="${stackClass}" style="background-color:${row.style.backgroundColor};padding:${row.style.paddingTop}px ${row.style.paddingRight}px ${row.style.paddingBottom}px ${row.style.paddingLeft}px;border-collapse:separate;border-spacing:${gap}px;"><tr>${cellsHTML}</tr></table>`;
+      
+      // Определяем класс для мобильной версии
+      const stackClass = (row.mobileStack !== false && row.columns > 1) ? 'mobile-stack' : '';
+      
+      return `<table role="presentation" width="100%" cellpadding="0" cellspacing="${gap}" border="0" class="${stackClass}" style="background-color:${row.style.backgroundColor};padding:${row.style.paddingTop}px ${row.style.paddingRight}px ${row.style.paddingBottom}px ${row.style.paddingLeft}px;border-collapse:separate;border-spacing:${gap}px;">
+        <tr>${cellsHTML}</tr>
+      </table>`;
     };
 
     const mobileCSS = mobileStyles.length > 0 ? mobileStyles.join('\n    ') : '';
-
-    // Check for base64 images
-    const hasBase64Images = rows.some(row =>
-      row.cells.some(cell =>
-        cell.some(block =>
-          (block.src && block.src.startsWith('data:')) ||
-          (block.menuLogoSrc && block.menuLogoSrc.startsWith('data:')) ||
-          (block.bulletStyle?.customIcon && block.bulletStyle.customIcon.startsWith('data:'))
-        )
-      )
-    );
-
-    // If base64 images present, strip them to reduce size (they won't work in most email clients anyway)
-    const processImageSrc = (src: string | undefined) => {
-      if (!src) return '';
-      if (src.startsWith('data:')) return 'https://placehold.co/600x300/e2e8f0/64748b?text=Upload+Image+URL';
-      return src;
-    };
-
-    // Re-render with processed images if base64 detected
-    if (hasBase64Images) {
-      blockCounter = 0;
-      // We'll use a second pass approach - just warn in the export dialog
-    }
 
     return `<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office" lang="ru">
@@ -506,9 +485,16 @@ export const EmailBuilderProvider: React.FC<{ children: React.ReactNode }> = ({ 
   body{margin:0;padding:0;width:100%!important;background-color:${globalStyle.backgroundColor};font-family:${globalStyle.fontFamily};-webkit-font-smoothing:antialiased;}
   .email-container{max-width:${globalStyle.maxWidth}px;}
   u+#body a{color:inherit;text-decoration:none;font-size:inherit;font-family:inherit;font-weight:inherit;line-height:inherit;}
-  @media only screen and (max-width:${globalStyle.maxWidth + 20}px){
+  
+  /* Мобильные стили */
+  @media only screen and (max-width: ${globalStyle.maxWidth + 20}px){
     .email-container{width:100%!important;max-width:100%!important;}
-    .mobile-stack td{display:block!important;width:100%!important;box-sizing:border-box!important;}
+    .mobile-stack td{
+      display:block!important;
+      width:100%!important;
+      box-sizing:border-box!important;
+      margin-bottom:${row => row.cellGap || 0}px!important;
+    }
     ${mobileCSS}
   }
 </style>
@@ -517,15 +503,17 @@ export const EmailBuilderProvider: React.FC<{ children: React.ReactNode }> = ({ 
 <div style="display:none;font-size:1px;color:${globalStyle.backgroundColor};line-height:1px;max-height:0;max-width:0;opacity:0;overflow:hidden;">&#8199;&#65279;&#847;</div>
 <center style="width:100%;background-color:${globalStyle.backgroundColor};">
 <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color:${globalStyle.backgroundColor};">
-<tr>
-<td align="center" valign="top">
-<table role="presentation" class="email-container" cellpadding="0" cellspacing="0" border="0" width="${globalStyle.maxWidth}" style="margin:0 auto;max-width:${globalStyle.maxWidth}px;width:100%;">
-<tr><td>
-${rows.map(renderRow).join('\n')}
-</td></tr>
-</table>
-</td>
-</tr>
+  <tr>
+    <td align="center" valign="top">
+      <table role="presentation" class="email-container" cellpadding="0" cellspacing="0" border="0" width="${globalStyle.maxWidth}" style="margin:0 auto;max-width:${globalStyle.maxWidth}px;width:100%;">
+        <tr>
+          <td>
+            ${rows.map(renderRow).join('\n')}
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
 </table>
 </center>
 </body>
