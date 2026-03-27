@@ -1,7 +1,7 @@
-import { useRef, useCallback, useState, useEffect } from 'react';
+import { useRef, useCallback, useState } from 'react';
 import { useEmailBuilder } from '@/context/EmailBuilderContext';
 import { EMAIL_FONTS, BulletType, MenuItem, MenuLayout } from '@/types/email-builder';
-import { Trash2, ArrowUp, ArrowDown, Settings2, Upload, ClipboardPaste, Link, Plus, X, Bold, Palette, Highlighter } from 'lucide-react';
+import { Trash2, ArrowUp, ArrowDown, Settings2, Upload, ClipboardPaste, Link, Plus, X } from 'lucide-react';
 
 const PropertyPanel = () => {
   const { getSelectedBlock, updateBlock, updateBlockStyle, deleteBlock, moveBlock, selection, template, updateCellStyle, updateCellGap, updateRowMobileStack } = useEmailBuilder();
@@ -26,6 +26,13 @@ const PropertyPanel = () => {
 
   const typeLabels: Record<string, string> = { heading: 'Заголовок', text: 'Текст', image: 'Изображение', button: 'Кнопка', list: 'Список', menu: 'Меню' };
 
+  // Очищаем HTML теги для отображения
+  const getPlainText = (html: string) => {
+    const temp = document.createElement('div');
+    temp.innerHTML = html;
+    return temp.textContent || temp.innerText || '';
+  };
+
   return (
     <div className="w-72 bg-card border-l border-border h-full overflow-y-auto scrollbar-thin">
       <div className="p-4 border-b border-border flex items-center justify-between">
@@ -41,9 +48,25 @@ const PropertyPanel = () => {
       </div>
 
       <div className="p-4 space-y-5">
-        {/* Content with rich text */}
+        {/* Content - простое текстовое поле */}
         {(block.type === 'heading' || block.type === 'text' || block.type === 'button') && (
-          <RichTextField content={block.content} onChange={(content) => updBlock({ content })} multiline={block.type === 'text'} />
+          <Field label="Контент">
+            {block.type === 'text' ? (
+              <textarea
+                value={getPlainText(block.content)}
+                onChange={(e) => updBlock({ content: e.target.value })}
+                rows={6}
+                className="w-full rounded-lg border border-input bg-secondary/50 px-3 py-2 text-sm text-card-foreground focus:outline-none focus:ring-1 focus:ring-primary/50 transition-all"
+              />
+            ) : (
+              <input
+                type="text"
+                value={getPlainText(block.content)}
+                onChange={(e) => updBlock({ content: e.target.value })}
+                className="w-full rounded-lg border border-input bg-secondary/50 px-3 py-2 text-sm text-card-foreground focus:outline-none focus:ring-1 focus:ring-primary/50 transition-all"
+              />
+            )}
+          </Field>
         )}
 
         {/* List Items */}
@@ -79,7 +102,7 @@ const PropertyPanel = () => {
           </Field>
         )}
 
-        {/* Font Family — for heading, text, button */}
+        {/* Font Family */}
         {(block.type === 'heading' || block.type === 'text' || block.type === 'button') && (
           <Section title="Шрифт">
             <Field label="Семейство шрифта" compact>
@@ -96,7 +119,7 @@ const PropertyPanel = () => {
           </Section>
         )}
 
-                {/* Typography */}
+        {/* Typography */}
         <Section title="Типографика">
           <div className="grid grid-cols-2 gap-2">
             <Field label="Размер" compact>
@@ -155,6 +178,30 @@ const PropertyPanel = () => {
               ))}
             </div>
           </Field>
+        </Section>
+
+        {/* Colors */}
+        <Section title="Цвета">
+          <div className="grid grid-cols-2 gap-2">
+            <Field label="Текст" compact>
+              <div className="relative">
+                <input type="color" value={s.color} onChange={(e) => upd({ color: e.target.value })} className="w-full h-9 rounded-lg border border-input cursor-pointer opacity-0 absolute inset-0" />
+                <div className="w-full h-9 rounded-lg border border-input flex items-center gap-2 px-2">
+                  <div className="w-5 h-5 rounded-md border border-border" style={{ backgroundColor: s.color }} />
+                  <span className="text-xs text-muted-foreground font-mono">{s.color}</span>
+                </div>
+              </div>
+            </Field>
+            <Field label="Фон" compact>
+              <div className="relative">
+                <input type="color" value={s.backgroundColor === 'transparent' ? '#ffffff' : s.backgroundColor} onChange={(e) => upd({ backgroundColor: e.target.value })} className="w-full h-9 rounded-lg border border-input cursor-pointer opacity-0 absolute inset-0" />
+                <div className="w-full h-9 rounded-lg border border-input flex items-center gap-2 px-2">
+                  <div className="w-5 h-5 rounded-md border border-border" style={{ backgroundColor: s.backgroundColor === 'transparent' ? '#ffffff' : s.backgroundColor }} />
+                  <span className="text-xs text-muted-foreground font-mono">{s.backgroundColor === 'transparent' ? '#fff' : s.backgroundColor}</span>
+                </div>
+              </div>
+            </Field>
+          </div>
         </Section>
 
         {/* Width */}
@@ -413,111 +460,6 @@ const Section: React.FC<{ title: string; children: React.ReactNode }> = ({ title
     {children}
   </div>
 );
-
-// RichTextField с форматированием и БЕЗ зеркального текста
-const RichTextField: React.FC<{ content: string; onChange: (content: string) => void; multiline?: boolean }> = ({ content, onChange, multiline }) => {
-  // Очищаем HTML теги для отображения в поле
-  const getPlainText = (html: string) => {
-    const temp = document.createElement('div');
-    temp.innerHTML = html;
-    return temp.textContent || temp.innerText || '';
-  };
-
-  const [text, setText] = useState(() => getPlainText(content));
-  const [selectionStart, setSelectionStart] = useState(0);
-  const [selectionEnd, setSelectionEnd] = useState(0);
-  const textareaRef = useRef<HTMLTextAreaElement | HTMLInputElement>(null);
-
-  const updateText = (newText: string) => {
-    setText(newText);
-    onChange(newText);
-  };
-
-  const wrapText = (before: string, after: string = '') => {
-    if (!textareaRef.current) return;
-    
-    const start = textareaRef.current.selectionStart;
-    const end = textareaRef.current.selectionEnd;
-    const selected = text.substring(start, end);
-    
-    if (!selected) return;
-    
-    const newText = text.substring(0, start) + before + selected + after + text.substring(end);
-    updateText(newText);
-    
-    // Восстанавливаем выделение
-    setTimeout(() => {
-      if (textareaRef.current) {
-        textareaRef.current.focus();
-        textareaRef.current.setSelectionRange(start + before.length, end + before.length);
-      }
-    }, 0);
-  };
-
-  const handleSelect = () => {
-    if (textareaRef.current) {
-      setSelectionStart(textareaRef.current.selectionStart);
-      setSelectionEnd(textareaRef.current.selectionEnd);
-    }
-  };
-
-  return (
-    <Field label="Контент">
-      <div className="space-y-1.5">
-        {/* Панель инструментов */}
-        <div className="flex items-center gap-1 p-1 rounded-lg bg-secondary/50 border border-input flex-wrap">
-          <button
-            type="button"
-            onMouseDown={(e) => { e.preventDefault(); wrapText('**', '**'); }}
-            className="p-1.5 rounded hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors"
-            title="Жирный"
-          >
-            <Bold className="h-3.5 w-3.5" />
-          </button>
-          
-          <div className="relative">
-            <button
-              type="button"
-              onMouseDown={(e) => { e.preventDefault(); wrapText('{color}', '{/color}'); }}
-              className="p-1.5 rounded hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors"
-              title="Цвет текста (введите цвет вручную)"
-            >
-              <Palette className="h-3.5 w-3.5" />
-            </button>
-          </div>
-
-          <div className="w-px h-4 bg-border mx-1" />
-        </div>
-
-        {/* Поле ввода */}
-        {multiline ? (
-          <textarea
-            ref={textareaRef as React.RefObject<HTMLTextAreaElement>}
-            value={text}
-            onChange={(e) => updateText(e.target.value)}
-            onSelect={handleSelect}
-            rows={8}
-            className="w-full rounded-lg border border-input bg-secondary/50 px-3 py-2 text-sm text-card-foreground focus:outline-none focus:ring-1 focus:ring-primary/50 transition-all"
-            placeholder="Введите текст... **жирный** {color}цвет{/color}"
-          />
-        ) : (
-          <input
-            ref={textareaRef as React.RefObject<HTMLInputElement>}
-            type="text"
-            value={text}
-            onChange={(e) => updateText(e.target.value)}
-            onSelect={handleSelect}
-            className="w-full rounded-lg border border-input bg-secondary/50 px-3 py-2 text-sm text-card-foreground focus:outline-none focus:ring-1 focus:ring-primary/50 transition-all"
-          />
-        )}
-        
-        <p className="text-[10px] text-muted-foreground">
-          📝 **текст** — жирный | {`{color}текст{/color}`} — цвет (укажите цвет вручную)
-        </p>
-      </div>
-    </Field>
-  );
-};
 
 import type { ListBulletStyle } from '@/types/email-builder';
 
