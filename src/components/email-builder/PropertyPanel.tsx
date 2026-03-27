@@ -9,7 +9,7 @@ const PropertyPanel = () => {
 
   if (!selected || !selection) {
     return (
-      <div className="w-72 bg-card border-l border-border p-6 h-full overflow-y-auto scrollbar-thin flex flex-col items-center justify-center">
+      <div className="w-[28rem] bg-card border-l border-border p-6 h-full overflow-y-auto scrollbar-thin flex flex-col items-center justify-center">
         <div className="w-12 h-12 rounded-xl bg-secondary flex items-center justify-center mb-3">
           <Settings2 className="h-5 w-5 text-muted-foreground" />
         </div>
