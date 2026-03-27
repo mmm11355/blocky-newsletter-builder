@@ -416,39 +416,50 @@ const Section: React.FC<{ title: string; children: React.ReactNode }> = ({ title
 
 // RichTextField с форматированием и БЕЗ зеркального текста
 const RichTextField: React.FC<{ content: string; onChange: (content: string) => void; multiline?: boolean }> = ({ content, onChange, multiline }) => {
-  const editorRef = useRef<HTMLDivElement>(null);
-  const [showColorPicker, setShowColorPicker] = useState(false);
-  const [showBgColorPicker, setShowBgColorPicker] = useState(false);
-
-  // Применяем форматирование к выделенному тексту
-  const execCommand = (cmd: string, value?: string) => {
-    if (!editorRef.current) return;
-    editorRef.current.focus();
-    document.execCommand(cmd, false, value || '');
-    if (editorRef.current) {
-      onChange(editorRef.current.innerHTML);
-    }
+  // Очищаем HTML теги для отображения в поле
+  const getPlainText = (html: string) => {
+    const temp = document.createElement('div');
+    temp.innerHTML = html;
+    return temp.textContent || temp.innerText || '';
   };
 
-  const handleInput = () => {
-    if (editorRef.current) {
-      onChange(editorRef.current.innerHTML);
-    }
+  const [text, setText] = useState(() => getPlainText(content));
+  const [selectionStart, setSelectionStart] = useState(0);
+  const [selectionEnd, setSelectionEnd] = useState(0);
+  const textareaRef = useRef<HTMLTextAreaElement | HTMLInputElement>(null);
+
+  const updateText = (newText: string) => {
+    setText(newText);
+    onChange(newText);
   };
 
-  const handlePaste = (e: React.ClipboardEvent) => {
-    e.preventDefault();
-    const text = e.clipboardData.getData('text/plain');
-    document.execCommand('insertText', false, text);
+  const wrapText = (before: string, after: string = '') => {
+    if (!textareaRef.current) return;
+    
+    const start = textareaRef.current.selectionStart;
+    const end = textareaRef.current.selectionEnd;
+    const selected = text.substring(start, end);
+    
+    if (!selected) return;
+    
+    const newText = text.substring(0, start) + before + selected + after + text.substring(end);
+    updateText(newText);
+    
+    // Восстанавливаем выделение
+    setTimeout(() => {
+      if (textareaRef.current) {
+        textareaRef.current.focus();
+        textareaRef.current.setSelectionRange(start + before.length, end + before.length);
+      }
+    }, 0);
   };
 
-  // Принудительно устанавливаем направление текста LTR
-  useEffect(() => {
-    if (editorRef.current) {
-      editorRef.current.style.direction = 'ltr';
-      editorRef.current.style.textAlign = 'left';
+  const handleSelect = () => {
+    if (textareaRef.current) {
+      setSelectionStart(textareaRef.current.selectionStart);
+      setSelectionEnd(textareaRef.current.selectionEnd);
     }
-  }, []);
+  };
 
   return (
     <Field label="Контент">
@@ -457,7 +468,7 @@ const RichTextField: React.FC<{ content: string; onChange: (content: string) => 
         <div className="flex items-center gap-1 p-1 rounded-lg bg-secondary/50 border border-input flex-wrap">
           <button
             type="button"
-            onMouseDown={(e) => { e.preventDefault(); execCommand('bold'); }}
+            onMouseDown={(e) => { e.preventDefault(); wrapText('**', '**'); }}
             className="p-1.5 rounded hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors"
             title="Жирный"
           >
@@ -467,81 +478,42 @@ const RichTextField: React.FC<{ content: string; onChange: (content: string) => 
           <div className="relative">
             <button
               type="button"
-              onMouseDown={(e) => { e.preventDefault(); setShowColorPicker(!showColorPicker); setShowBgColorPicker(false); }}
+              onMouseDown={(e) => { e.preventDefault(); wrapText('{color}', '{/color}'); }}
               className="p-1.5 rounded hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors"
-              title="Цвет текста"
+              title="Цвет текста (введите цвет вручную)"
             >
               <Palette className="h-3.5 w-3.5" />
             </button>
-            {showColorPicker && (
-              <div className="absolute top-full left-0 mt-1 z-20 p-2 rounded-lg bg-card border border-border shadow-lg">
-                <input
-                  type="color"
-                  defaultValue="#000000"
-                  onChange={(e) => { execCommand('foreColor', e.target.value); setShowColorPicker(false); }}
-                  className="w-8 h-8 cursor-pointer border-0"
-                />
-              </div>
-            )}
-          </div>
-
-          <div className="relative">
-            <button
-              type="button"
-              onMouseDown={(e) => { e.preventDefault(); setShowBgColorPicker(!showBgColorPicker); setShowColorPicker(false); }}
-              className="p-1.5 rounded hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors"
-              title="Цвет фона"
-            >
-              <Highlighter className="h-3.5 w-3.5" />
-            </button>
-            {showBgColorPicker && (
-              <div className="absolute top-full left-0 mt-1 z-20 p-2 rounded-lg bg-card border border-border shadow-lg">
-                <input
-                  type="color"
-                  defaultValue="#ffff00"
-                  onChange={(e) => { execCommand('backColor', e.target.value); setShowBgColorPicker(false); }}
-                  className="w-8 h-8 cursor-pointer border-0"
-                />
-              </div>
-            )}
           </div>
 
           <div className="w-px h-4 bg-border mx-1" />
-          
-          <button
-            type="button"
-            onMouseDown={(e) => { e.preventDefault(); execCommand('removeFormat'); }}
-            className="p-1.5 rounded hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors text-xs"
-            title="Очистить форматирование"
-          >
-            Tx
-          </button>
         </div>
 
-        {/* Редактор */}
-        <div
-          ref={editorRef}
-          contentEditable
-          suppressContentEditableWarning
-          onInput={handleInput}
-          onPaste={handlePaste}
-          dangerouslySetInnerHTML={{ __html: content }}
-          className={`w-full rounded-lg border border-input bg-secondary/50 px-3 py-2 text-sm text-card-foreground focus:outline-none focus:ring-1 focus:ring-primary/50 transition-all overflow-y-auto ${
-            multiline ? 'min-h-[150px]' : 'min-h-[36px]'
-          }`}
-          style={{
-            whiteSpace: multiline ? 'pre-wrap' : 'normal',
-            overflowX: multiline ? 'hidden' : 'auto',
-            direction: 'ltr',
-            textAlign: 'left',
-          }}
-        />
-        {multiline && (
-          <p className="text-[10px] text-muted-foreground">
-            📝 Выделите текст → используйте кнопки для форматирования.<br/>
-            🔹 Enter — новый абзац | 🔹 Shift+Enter — новая строка
-          </p>
+        {/* Поле ввода */}
+        {multiline ? (
+          <textarea
+            ref={textareaRef as React.RefObject<HTMLTextAreaElement>}
+            value={text}
+            onChange={(e) => updateText(e.target.value)}
+            onSelect={handleSelect}
+            rows={8}
+            className="w-full rounded-lg border border-input bg-secondary/50 px-3 py-2 text-sm text-card-foreground focus:outline-none focus:ring-1 focus:ring-primary/50 transition-all"
+            placeholder="Введите текст... **жирный** {color}цвет{/color}"
+          />
+        ) : (
+          <input
+            ref={textareaRef as React.RefObject<HTMLInputElement>}
+            type="text"
+            value={text}
+            onChange={(e) => updateText(e.target.value)}
+            onSelect={handleSelect}
+            className="w-full rounded-lg border border-input bg-secondary/50 px-3 py-2 text-sm text-card-foreground focus:outline-none focus:ring-1 focus:ring-primary/50 transition-all"
+          />
         )}
+        
+        <p className="text-[10px] text-muted-foreground">
+          📝 **текст** — жирный | {`{color}текст{/color}`} — цвет (укажите цвет вручную)
+        </p>
       </div>
     </Field>
   );
