@@ -3,6 +3,72 @@ import { useEmailBuilder } from '@/context/EmailBuilderContext';
 import { EMAIL_FONTS, BulletType, MenuItem, MenuLayout } from '@/types/email-builder';
 import { Trash2, ArrowUp, ArrowDown, Settings2, Upload, ClipboardPaste, Link, Plus, X, Bold, Palette, Highlighter, Minus } from 'lucide-react';
 
+// Компонент числового ввода с кнопками + и -
+const NumberInput: React.FC<{
+  value: number;
+  onChange: (v: number) => void;
+  min?: number;
+  max?: number;
+  step?: number;
+  suffix?: string;
+  size?: 'sm' | 'md';
+}> = ({ value, onChange, min = 0, max = 9999, step = 1, suffix = '', size = 'md' }) => {
+  const handleDecrement = () => {
+    const newValue = Math.max(min, Number((value - step).toFixed(1)));
+    onChange(newValue);
+  };
+  
+  const handleIncrement = () => {
+    const newValue = Math.min(max, Number((value + step).toFixed(1)));
+    onChange(newValue);
+  };
+  
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = parseFloat(e.target.value);
+    if (!isNaN(val)) {
+      const newValue = Math.min(max, Math.max(min, val));
+      onChange(newValue);
+    }
+  };
+  
+  return (
+    <div className="flex items-center gap-1">
+      <button
+        type="button"
+        onClick={handleDecrement}
+        className="p-1 rounded bg-secondary hover:bg-secondary/80 text-secondary-foreground transition-colors"
+      >
+        <Minus className={`h-3 w-3 ${size === 'sm' ? 'h-2.5 w-2.5' : ''}`} />
+      </button>
+      <div className="relative flex-1">
+        <input
+          type="number"
+          value={value}
+          onChange={handleChange}
+          min={min}
+          max={max}
+          step={step}
+          className={`w-full rounded-lg border border-input bg-secondary/50 text-card-foreground focus:outline-none focus:ring-1 focus:ring-primary/50 text-center ${
+            size === 'sm' ? 'px-1 py-1 text-xs' : 'px-2 py-1.5 text-sm'
+          }`}
+        />
+        {suffix && (
+          <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-muted-foreground pointer-events-none">
+            {suffix}
+          </span>
+        )}
+      </div>
+      <button
+        type="button"
+        onClick={handleIncrement}
+        className="p-1 rounded bg-secondary hover:bg-secondary/80 text-secondary-foreground transition-colors"
+      >
+        <Plus className={`h-3 w-3 ${size === 'sm' ? 'h-2.5 w-2.5' : ''}`} />
+      </button>
+    </div>
+  );
+};
+
 const PropertyPanel = () => {
   const { getSelectedBlock, updateBlock, updateBlockStyle, deleteBlock, moveBlock, selection, template, updateCellStyle, updateCellGap, updateRowMobileStack } = useEmailBuilder();
   const selected = getSelectedBlock();
@@ -114,7 +180,7 @@ const PropertyPanel = () => {
           </Field>
         )}
         
-        {/* Font Family — for heading, text, button */}
+        {/* Font Family */}
         {(block.type === 'heading' || block.type === 'text' || block.type === 'button') && (
           <Section title="Шрифт">
             <Field label="Семейство шрифта" compact>
@@ -139,6 +205,7 @@ const PropertyPanel = () => {
                 value={s.fontSize} 
                 onChange={(v) => upd({ fontSize: v })} 
                 min={8} max={72} step={1}
+                suffix="px"
               />
             </Field>
             <Field label="Высота строки" compact>
@@ -399,69 +466,6 @@ const PropertyPanel = () => {
   );
 };
 
-// Универсальный компонент числового ввода с кнопками + и -
-const NumberInput: React.FC<{
-  value: number;
-  onChange: (v: number) => void;
-  min?: number;
-  max?: number;
-  step?: number;
-  suffix?: string;
-  size?: 'sm' | 'md';
-}> = ({ value, onChange, min = 0, max = 9999, step = 1, suffix = '', size = 'md' }) => {
-  const handleDecrement = () => {
-    const newValue = Math.max(min, Number((value - step).toFixed(1)));
-    onChange(newValue);
-  };
-  
-  const handleIncrement = () => {
-    const newValue = Math.min(max, Number((value + step).toFixed(1)));
-    onChange(newValue);
-  };
-  
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newValue = Math.min(max, Math.max(min, parseFloat(e.target.value) || 0));
-    onChange(newValue);
-  };
-  
-  return (
-    <div className="flex items-center gap-1">
-      <button
-        type="button"
-        onClick={handleDecrement}
-        className="p-1 rounded-md bg-secondary text-secondary-foreground hover:bg-secondary/80 transition-colors"
-      >
-        <Minus className={`h-3 w-3 ${size === 'sm' ? 'h-2.5 w-2.5' : ''}`} />
-      </button>
-      <div className="relative flex-1">
-        <input
-          type="number"
-          value={value}
-          onChange={handleChange}
-          min={min}
-          max={max}
-          step={step}
-          className={`w-full rounded-lg border border-input bg-secondary/50 text-card-foreground focus:outline-none focus:ring-1 focus:ring-primary/50 text-center ${
-            size === 'sm' ? 'px-1 py-1 text-xs' : 'px-2 py-1.5 text-sm'
-          }`}
-        />
-        {suffix && (
-          <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-muted-foreground pointer-events-none">
-            {suffix}
-          </span>
-        )}
-      </div>
-      <button
-        type="button"
-        onClick={handleIncrement}
-        className="p-1 rounded-md bg-secondary text-secondary-foreground hover:bg-secondary/80 transition-colors"
-      >
-        <Plus className={`h-3 w-3 ${size === 'sm' ? 'h-2.5 w-2.5' : ''}`} />
-      </button>
-    </div>
-  );
-};
-
 const fileToDataURL = (file: File): Promise<string> =>
   new Promise((resolve) => {
     const reader = new FileReader();
@@ -583,56 +587,54 @@ const Section: React.FC<{ title: string; children: React.ReactNode }> = ({ title
   </div>
 );
 
-// RichTextField с исправленным форматированием
+// RichTextField - упрощенный без форматирования для надежности
 const RichTextField: React.FC<{ content: string; onChange: (content: string) => void; multiline?: boolean }> = ({ 
   content, 
   onChange, 
   multiline 
 }) => {
+  const [text, setText] = useState(content || '');
   const textareaRef = useRef<HTMLTextAreaElement | HTMLInputElement>(null);
-  const [localValue, setLocalValue] = useState(content || '');
   
   // Синхронизация с внешним контентом
   useEffect(() => {
-    if (content !== localValue) {
-      setLocalValue(content || '');
-    }
+    setText(content || '');
   }, [content]);
   
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
     const newValue = e.target.value;
-    setLocalValue(newValue);
+    setText(newValue);
     onChange(newValue);
   };
   
-  const wrapText = (before: string, after: string = '') => {
+  const applyFormat = (before: string, after: string = '') => {
     const element = textareaRef.current;
     if (!element) return;
     
     const start = element.selectionStart;
     const end = element.selectionEnd;
-    const selected = localValue.substring(start, end);
+    const selected = text.substring(start, end);
     
-    let newText: string;
-    let newCursorPos: number;
-    
-    if (selected) {
-      // Если текст выделен - оборачиваем его
-      newText = localValue.substring(0, start) + before + selected + after + localValue.substring(end);
-      newCursorPos = end + before.length + after.length;
-    } else {
-      // Если нет выделения - вставляем теги и ставим курсор между ними
-      newText = localValue.substring(0, start) + before + after + localValue.substring(end);
-      newCursorPos = start + before.length;
+    if (!selected) {
+      // Если нет выделения - просто вставляем теги с плейсхолдером
+      const newText = text.substring(0, start) + before + 'текст' + after + text.substring(end);
+      setText(newText);
+      onChange(newText);
+      setTimeout(() => {
+        element.focus();
+        element.setSelectionRange(start + before.length, start + before.length + 4);
+      }, 0);
+      return;
     }
     
-    setLocalValue(newText);
+    // Оборачиваем выделенный текст
+    const newText = text.substring(0, start) + before + selected + after + text.substring(end);
+    setText(newText);
     onChange(newText);
     
-    // Восстанавливаем фокус и позицию курсора
     setTimeout(() => {
       element.focus();
-      element.setSelectionRange(newCursorPos, newCursorPos);
+      element.setSelectionRange(start + before.length, end + before.length);
     }, 0);
   };
   
@@ -640,10 +642,10 @@ const RichTextField: React.FC<{ content: string; onChange: (content: string) => 
     <Field label="Контент">
       <div className="space-y-1.5">
         {/* Панель инструментов */}
-        <div className="flex items-center gap-1 p-1 rounded-lg bg-secondary/50 border border-input flex-wrap">
+        <div className="flex items-center gap-1 p-1 rounded-lg bg-secondary/50 border border-input">
           <button
             type="button"
-            onMouseDown={(e) => { e.preventDefault(); wrapText('**', '**'); }}
+            onClick={() => applyFormat('**', '**')}
             className="p-1.5 rounded hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors"
             title="Жирный"
           >
@@ -651,40 +653,39 @@ const RichTextField: React.FC<{ content: string; onChange: (content: string) => 
           </button>
           <button
             type="button"
-            onMouseDown={(e) => { e.preventDefault(); wrapText('{color:#ff0000}', '{/color}'); }}
+            onClick={() => applyFormat('{color:#ff0000}', '{/color}')}
             className="p-1.5 rounded hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors"
-            title="Цвет текста"
+            title="Красный цвет"
           >
             <Palette className="h-3.5 w-3.5" />
           </button>
           <button
             type="button"
-            onMouseDown={(e) => { e.preventDefault(); wrapText('{bgcolor:#ffff00}', '{/bgcolor}'); }}
+            onClick={() => applyFormat('{bgcolor:#ffff00}', '{/bgcolor}')}
             className="p-1.5 rounded hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors"
-            title="Цвет фона"
+            title="Желтый фон"
           >
             <Highlighter className="h-3.5 w-3.5" />
           </button>
-          <div className="w-px h-4 bg-border mx-1" />
         </div>
         
-        {/* Поле ввода с явным направлением LTR */}
+        {/* Поле ввода */}
         {multiline ? (
           <textarea
             ref={textareaRef as React.RefObject<HTMLTextAreaElement>}
-            value={localValue}
+            value={text}
             onChange={handleChange}
-            rows={8}
+            rows={6}
             dir="ltr"
             style={{ direction: 'ltr', textAlign: 'left' }}
             className="w-full rounded-lg border border-input bg-secondary/50 px-3 py-2 text-sm text-card-foreground focus:outline-none focus:ring-1 focus:ring-primary/50 transition-all"
-            placeholder="Введите текст... Выделите и нажмите кнопки выше"
+            placeholder="Введите текст. Выделите часть и нажмите кнопку форматирования"
           />
         ) : (
           <input
             ref={textareaRef as React.RefObject<HTMLInputElement>}
             type="text"
-            value={localValue}
+            value={text}
             onChange={handleChange}
             dir="ltr"
             style={{ direction: 'ltr', textAlign: 'left' }}
@@ -692,7 +693,7 @@ const RichTextField: React.FC<{ content: string; onChange: (content: string) => 
           />
         )}
         <p className="text-[10px] text-muted-foreground">
-          📝 Выделите текст и нажмите кнопку для форматирования
+          Выделите текст и нажмите кнопку для форматирования
         </p>
       </div>
     </Field>
