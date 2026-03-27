@@ -100,10 +100,42 @@ const PropertyPanel = () => {
         <Section title="Типографика">
           <div className="grid grid-cols-2 gap-2">
             <Field label="Размер" compact>
-              <input type="number" value={s.fontSize} onChange={(e) => upd({ fontSize: +e.target.value })} className="w-full rounded-lg border border-input bg-secondary/50 px-2 py-1.5 text-sm text-card-foreground focus:outline-none focus:ring-1 focus:ring-primary/50" />
+              <div className="flex items-center gap-2">
+                <input
+                  type="range"
+                  min={8}
+                  max={72}
+                  value={s.fontSize}
+                  onChange={(e) => upd({ fontSize: +e.target.value })}
+                  className="flex-1 h-2 accent-primary"
+                />
+                <input
+                  type="number"
+                  value={s.fontSize}
+                  onChange={(e) => upd({ fontSize: +e.target.value })}
+                  className="w-14 rounded-lg border border-input bg-secondary/50 px-2 py-1.5 text-sm text-card-foreground text-center"
+                />
+              </div>
             </Field>
             <Field label="Высота строки" compact>
-              <input type="number" step={0.1} value={s.lineHeight} onChange={(e) => upd({ lineHeight: +e.target.value })} className="w-full rounded-lg border border-input bg-secondary/50 px-2 py-1.5 text-sm text-card-foreground focus:outline-none focus:ring-1 focus:ring-primary/50" />
+              <div className="flex items-center gap-2">
+                <input
+                  type="range"
+                  min={0.8}
+                  max={2.5}
+                  step={0.1}
+                  value={s.lineHeight}
+                  onChange={(e) => upd({ lineHeight: +e.target.value })}
+                  className="flex-1 h-2 accent-primary"
+                />
+                <input
+                  type="number"
+                  step={0.1}
+                  value={s.lineHeight}
+                  onChange={(e) => upd({ lineHeight: +e.target.value })}
+                  className="w-14 rounded-lg border border-input bg-secondary/50 px-2 py-1.5 text-sm text-card-foreground text-center"
+                />
+              </div>
             </Field>
           </div>
           <Field label="Жирность" compact>
@@ -406,7 +438,7 @@ const Section: React.FC<{ title: string; children: React.ReactNode }> = ({ title
   </div>
 );
 
-// RichTextField с форматированием и без зеркального текста
+// RichTextField с contenteditable, но без зеркального текста
 const RichTextField: React.FC<{ content: string; onChange: (content: string) => void; multiline?: boolean }> = ({ content, onChange, multiline }) => {
   const editorRef = useRef<HTMLDivElement>(null);
   const [showColorPicker, setShowColorPicker] = useState(false);
