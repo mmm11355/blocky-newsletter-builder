@@ -1,4 +1,4 @@
-import { Type, Image, Heading1, MousePointerClick, Columns2, Columns3, LayoutList, GripVertical, List, Menu } from 'lucide-react';
+import { Type, Image, Heading1, MousePointerClick, Columns2, Columns3, LayoutList, GripVertical, List, Menu, Share2, Star, Mic } from 'lucide-react';
 import { useEmailBuilder } from '@/context/EmailBuilderContext';
 import { BlockType, ColumnLayout } from '@/types/email-builder';
 
@@ -9,6 +9,9 @@ const elements: { type: BlockType; label: string; icon: React.ReactNode; desc: s
   { type: 'button', label: 'Кнопка', icon: <MousePointerClick className="h-5 w-5" />, desc: 'CTA кнопка' },
   { type: 'list', label: 'Список', icon: <List className="h-5 w-5" />, desc: 'Маркированный список' },
   { type: 'menu', label: 'Меню', icon: <Menu className="h-5 w-5" />, desc: 'Навигация с лого' },
+  { type: 'social', label: 'Соцсети', icon: <Share2 className="h-5 w-5" />, desc: 'Иконки соцсетей' },
+  { type: 'testimonial', label: 'Отзыв', icon: <Star className="h-5 w-5" />, desc: 'Отзыв клиента' },
+  { type: 'speaker', label: 'Спикер', icon: <Mic className="h-5 w-5" />, desc: 'Карточка спикера' },
 ];
 
 const layouts: { columns: ColumnLayout; label: string; icon: React.ReactNode; visual: number[] }[] = [
