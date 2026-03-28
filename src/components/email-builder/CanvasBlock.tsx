@@ -14,28 +14,21 @@ const parseContentToHtml = (content: string): string => {
   if (!content) return '';
   
   let html = content;
-  
-  // Жирный текст **текст**
   html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-  
-  // Цвет текста {color:#ff0000}текст{/color}
   html = html.replace(/\{color:(#[0-9a-fA-F]{6})\}(.*?)\{\/color\}/g, '<span style="color: $1;">$2</span>');
-  
-  // Цвет фона {bgcolor:#ffff00}текст{/bgcolor}
   html = html.replace(/\{bgcolor:(#[0-9a-fA-F]{6})\}(.*?)\{\/bgcolor\}/g, '<span style="background-color: $1;">$2</span>');
   
   return html;
 };
 
-// Иконки для соцсетей
-// Функция получения иконки (Font Awesome через CDN или SVG)
-const getSocialIconHtml = (network: string, customIconName: string | undefined, size: number, color: string, bgColor: string): string => {
+// Функция получения иконки (SVG для стандартных, или Font Awesome через i-тег)
+const getSocialIconHtml = (network: string, customIconName: string | undefined, size: number, color: string): string => {
   // Если указано кастомное имя иконки (например, "fa-brands fa-facebook")
   if (customIconName) {
-    return `<i class="${customIconName}" style="font-size:${size * 0.6}px; color:${color}; width:${size}px; height:${size}px; display:flex; align-items:center; justify-content:center;"></i>`;
+    return `<i class="${customIconName}" style="font-size:${size * 0.6}px; color:${color}; display:flex; align-items:center; justify-content:center;"></i>`;
   }
   
-  // Стандартные иконки (SVG)
+  // Стандартные SVG иконки
   const icons: Record<string, string> = {
     facebook: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="${color}" width="${size * 0.6}" height="${size * 0.6}"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>`,
     instagram: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="${color}" width="${size * 0.6}" height="${size * 0.6}"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zM5.838 12c0-3.402 2.76-6.162 6.162-6.162s6.162 2.76 6.162 6.162-2.76 6.162-6.162 6.162-6.162-2.76-6.162-6.162zM12 16c-2.209 0-4-1.791-4-4s1.791-4 4-4 4 1.791 4 4-1.791 4-4 4zm4.965-10.405c0 .796-.645 1.441-1.441 1.441-.795 0-1.44-.645-1.44-1.441 0-.795.645-1.44 1.44-1.44.796 0 1.441.645 1.441 1.44z"/></svg>`,
@@ -77,7 +70,7 @@ const CanvasBlock: React.FC<Props> = ({ block, rowId, cellIndex }) => {
     direction: 'ltr',
   };
 
-    const baseStyle: React.CSSProperties = {
+  const baseStyle: React.CSSProperties = {
     color: s.color,
     fontSize: s.fontSize,
     fontWeight: s.fontWeight as any,
@@ -109,9 +102,11 @@ const CanvasBlock: React.FC<Props> = ({ block, rowId, cellIndex }) => {
       flexShrink: 0,
       direction: 'ltr',
     };
+    
+    // Font Awesome иконка
     if (bs.type === 'custom' && bs.fontAwesomeIcon) {
-  return <span style={bulletContainerStyle} dangerouslySetInnerHTML={{ __html: `<i class="${bs.fontAwesomeIcon}" style="color:${bs.color}; font-size:${bs.size}px;"></i>` }} />;
-}
+      return <span style={bulletContainerStyle} dangerouslySetInnerHTML={{ __html: `<i class="${bs.fontAwesomeIcon}" style="color:${bs.color}; font-size:${bs.size}px;"></i>` }} />;
+    }
     if (bs.type === 'custom' && bs.customIcon) {
       return <span style={bulletContainerStyle}><img src={bs.customIcon} alt="" style={{ width: bs.size, height: bs.size }} /></span>;
     }
@@ -201,7 +196,7 @@ const CanvasBlock: React.FC<Props> = ({ block, rowId, cellIndex }) => {
           </div>
         );
       }
-                  case 'social': {
+      case 'social': {
         const socialBlock = block as SocialBlock;
         return (
           <div style={{ ...baseStyle, margin: 0, direction: 'ltr' }} onClick={handleClick}>
@@ -223,7 +218,7 @@ const CanvasBlock: React.FC<Props> = ({ block, rowId, cellIndex }) => {
                   style={{
                     display: 'inline-flex',
                     textDecoration: 'none',
-                    backgroundColor: socialBlock.iconBgColor,
+                    backgroundColor: link.bgColor || socialBlock.iconBgColor,
                     borderRadius: '50%',
                     width: socialBlock.iconSize,
                     height: socialBlock.iconSize,
@@ -232,7 +227,7 @@ const CanvasBlock: React.FC<Props> = ({ block, rowId, cellIndex }) => {
                   }}
                   onClick={(e) => e.stopPropagation()}
                   dangerouslySetInnerHTML={{
-                    __html: getSocialIconHtml(link.network, link.iconName, socialBlock.iconSize, socialBlock.iconColor, socialBlock.iconBgColor)
+                    __html: getSocialIconHtml(link.network, link.iconName, socialBlock.iconSize, link.iconColor || socialBlock.iconColor)
                   }}
                 />
               ))}
@@ -271,7 +266,7 @@ const CanvasBlock: React.FC<Props> = ({ block, rowId, cellIndex }) => {
             {sp.company && <p style={{ margin: '0 0 12px', fontSize: 12, opacity: 0.8 }}>{sp.company}</p>}
             <p style={{ margin: '0 0 16px', fontSize: 14, lineHeight: 1.5 }}>{sp.bio}</p>
             <div style={{ display: 'flex', gap: 12, justifyContent: 'center', direction: 'ltr' }}>
-              {sp.socialLinks.map((link, i) => (
+              {(sp.socialLinks || []).map((link, i) => (
                 <a
                   key={i}
                   href={link.url}
@@ -280,7 +275,10 @@ const CanvasBlock: React.FC<Props> = ({ block, rowId, cellIndex }) => {
                   style={{ color: 'white', textDecoration: 'none', fontSize: 18 }}
                   onClick={(e) => e.stopPropagation()}
                 >
-                  {getSocialIcon(link.network, 18)}
+                  {link.iconName ? 
+                    <i className={link.iconName} style={{ fontSize: 18 }} /> : 
+                    (link.network === 'linkedin' ? 'in' : link.network === 'twitter' ? '🐦' : '•')
+                  }
                 </a>
               ))}
             </div>
