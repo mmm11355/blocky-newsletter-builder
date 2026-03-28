@@ -1,105 +1,148 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useEmailBuilder } from '@/context/EmailBuilderContext';
-import { EmailRow } from '@/types/email-builder';
+import { EmailRow, BlockType } from '@/types/email-builder';
 import CanvasBlock from './CanvasBlock';
-import { ArrowUp, ArrowDown, Trash2, Plus } from 'lucide-react';
+import { Trash2, ArrowUp, ArrowDown, GripVertical } from 'lucide-react';
 
 interface Props {
   row: EmailRow;
-  rowIndex: number;
-  onMoveRow: (rowId: string, direction: 'up' | 'down') => void;
-  onDeleteRow: (rowId: string) => void;
-  totalRows: number;
+  isMobile: boolean;
 }
 
-const CanvasRow: React.FC<Props> = ({ row, rowIndex, onMoveRow, onDeleteRow, totalRows }) => {
-  const { previewMode, addBlockToCell } = useEmailBuilder();
-  const isMobile = previewMode === 'mobile';
-  const gap = row.cellGap || 0;
-  
-  const handleDragOver = (e: React.DragEvent) => {
+const CanvasRow: React.FC<Props> = ({ row, isMobile }) => {
+  const { addBlockToCell, deleteRow, moveRow, reorderBlock, moveBlockBetweenCells } = useEmailBuilder();
+  const [hoveredCell, setHoveredCell] = useState<number | null>(null);
+  const [hovered, setHovered] = useState(false);
+  const [dropIndicator, setDropIndicator] = useState<{ cellIndex: number; position: number } | null>(null);
+
+  const handleDragOver = (e: React.DragEvent, cellIndex: number) => {
     e.preventDefault();
-    e.dataTransfer.dropEffect = 'copy';
-  };
-  
-  const handleDrop = (e: React.DragEvent, cellIndex: number) => {
-    e.preventDefault();
-    const blockType = e.dataTransfer.getData('blockType');
-    if (blockType) {
-      addBlockToCell(row.id, cellIndex, blockType as any);
+    e.stopPropagation();
+
+    const isMoveBlock = e.dataTransfer.types.includes('moveblock');
+    const isNewBlock = e.dataTransfer.types.includes('blocktype');
+
+    if (isMoveBlock) {
+      const cellEl = e.currentTarget as HTMLElement;
+      const children = Array.from(cellEl.querySelectorAll(':scope > [style], :scope > .group\\/block'));
+      const rect = cellEl.getBoundingClientRect();
+      const y = e.clientY - rect.top;
+      
+      let position = row.cells[cellIndex]?.length || 0;
+      for (let i = 0; i < children.length; i++) {
+        const childRect = children[i].getBoundingClientRect();
+        const childMid = childRect.top - rect.top + childRect.height / 2;
+        if (y < childMid) {
+          position = i;
+          break;
+        }
+      }
+      setDropIndicator({ cellIndex, position });
+      e.dataTransfer.dropEffect = 'move';
+    } else if (isNewBlock) {
+      setHoveredCell(cellIndex);
     }
   };
-  
-  return (
-    <div className="relative group/row mb-6 border border-transparent hover:border-border/30 rounded-lg transition-all">
-      {/* Панель управления строкой */}
-      <div className="absolute -left-10 top-1/2 -translate-y-1/2 opacity-0 group-hover/row:opacity-100 flex flex-col gap-1 bg-card rounded-lg shadow-md border border-border p-1 z-10 transition-opacity">
-        {rowIndex > 0 && (
-          <button
-            onClick={() => onMoveRow(row.id, 'up')}
-            className="p-1 rounded hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors"
-            title="Переместить вверх"
-          >
-            <ArrowUp className="h-3.5 w-3.5" />
-          </button>
-        )}
-        {rowIndex < totalRows - 1 && (
-          <button
-            onClick={() => onMoveRow(row.id, 'down')}
-            className="p-1 rounded hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors"
-            title="Переместить вниз"
-          >
-            <ArrowDown className="h-3.5 w-3.5" />
-          </button>
-        )}
-        <div className="w-full h-px bg-border my-0.5" />
-        <button
-          onClick={() => onDeleteRow(row.id)}
-          className="p-1 rounded hover:bg-destructive hover:text-destructive-foreground text-muted-foreground transition-colors"
-          title="Удалить строку"
-        >
-          <Trash2 className="h-3.5 w-3.5" />
-        </button>
-      </div>
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    setHoveredCell(null);
+    setDropIndicator(null);
+  };
+
+  const handleDrop = (e: React.DragEvent, cellIndex: number) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const moveData = e.dataTransfer.getData('moveBlock');
+    if (moveData) {
+      const { rowId: fromRowId, cellIndex: fromCellIndex, blockId } = JSON.parse(moveData);
+      const targetPosition = dropIndicator?.cellIndex === cellIndex ? dropIndicator.position : (row.cells[cellIndex]?.length || 0);
       
-      {/* Сама строка */}
-      <div 
-        className="flex"
-        style={{
-          gap: isMobile ? 0 : `${gap}px`,
-          flexDirection: isMobile && row.mobileStack !== false ? 'column' : 'row',
-        }}
-      >
-        {row.cells.map((cell, cellIndex) => (
-          <div
-            key={cellIndex}
-            className="flex-1 min-w-0 bg-card/30 rounded-lg p-2 transition-all hover:bg-card/50"
-            style={{
-              marginBottom: isMobile && row.mobileStack !== false ? `${gap}px` : 0,
-            }}
-            onDragOver={handleDragOver}
-            onDrop={(e) => handleDrop(e, cellIndex)}
-          >
-            <div className="space-y-2">
-              {cell.map((block) => (
-                <CanvasBlock
-                  key={block.id}
-                  block={block}
-                  rowId={row.id}
-                  cellIndex={cellIndex}
-                />
-              ))}
-              <button
-                onClick={() => {
-                  // Можно добавить меню выбора блока
+      if (fromRowId === row.id && fromCellIndex === cellIndex) {
+        reorderBlock(row.id, cellIndex, blockId, targetPosition);
+      } else {
+        moveBlockBetweenCells(fromRowId, fromCellIndex, blockId, row.id, cellIndex, targetPosition);
+      }
+    } else {
+      const type = e.dataTransfer.getData('blockType') as BlockType;
+      if (type) addBlockToCell(row.id, cellIndex, type);
+    }
+
+    setHoveredCell(null);
+    setDropIndicator(null);
+  };
+
+  return (
+    <div
+      className="relative group"
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+    >
+      {hovered && (
+        <div className="absolute -left-11 top-1/2 -translate-y-1/2 flex flex-col gap-0.5 z-10">
+          <button onClick={() => moveRow(row.id, 'up')} className="p-1.5 rounded-md bg-card border border-border text-muted-foreground hover:text-foreground hover:border-primary/30 transition-colors">
+            <ArrowUp className="h-3 w-3" />
+          </button>
+          <button onClick={() => deleteRow(row.id)} className="p-1.5 rounded-md bg-destructive/90 text-destructive-foreground hover:bg-destructive transition-colors">
+            <Trash2 className="h-3 w-3" />
+          </button>
+          <button onClick={() => moveRow(row.id, 'down')} className="p-1.5 rounded-md bg-card border border-border text-muted-foreground hover:text-foreground hover:border-primary/30 transition-colors">
+            <ArrowDown className="h-3 w-3" />
+          </button>
+        </div>
+      )}
+
+      <div className={`transition-all ${hovered ? 'ring-1 ring-primary/30 rounded-sm' : ''}`}>
+        <div
+          className={`flex ${isMobile && row.mobileStack !== false ? 'flex-col' : 'flex-row'}`}
+          style={{
+            backgroundColor: row.style.backgroundColor,
+            padding: `${row.style.paddingTop}px ${row.style.paddingRight}px ${row.style.paddingBottom}px ${row.style.paddingLeft}px`,
+            gap: `${row.cellGap || 0}px`,
+          }}
+        >
+          {row.cells.map((cell, cellIndex) => {
+            const cellStyle = row.cellStyles?.[cellIndex];
+            const cellBg = cellStyle?.backgroundColor && cellStyle.backgroundColor !== 'transparent'
+              ? cellStyle.backgroundColor
+              : undefined;
+
+            return (
+              <div
+                key={cellIndex}
+                className={`${isMobile ? 'w-full' : ''} min-h-[60px] transition-all ${hoveredCell === cellIndex ? 'drag-over rounded-md' : ''}`}
+                style={{
+                  width: (isMobile && row.mobileStack !== false) ? '100%' : `${100 / row.columns}%`,
+                  backgroundColor: cellBg,
+                  borderRadius: cellStyle?.borderRadius ? `${cellStyle.borderRadius}px` : undefined,
+                  padding: cellStyle ? `${cellStyle.paddingTop || 0}px ${cellStyle.paddingRight || 0}px ${cellStyle.paddingBottom || 0}px ${cellStyle.paddingLeft || 0}px` : undefined,
                 }}
-                className="w-full py-2 text-xs text-muted-foreground border border-dashed border-border rounded-lg hover:border-primary hover:text-primary transition-colors"
+                onDragOver={(e) => handleDragOver(e, cellIndex)}
+                onDragLeave={handleDragLeave}
+                onDrop={(e) => handleDrop(e, cellIndex)}
               >
-                + Добавить блок
-              </button>
-            </div>
-          </div>
-        ))}
+                {cell.length === 0 ? (
+                  <div className="h-full min-h-[60px] border border-dashed border-border/30 rounded-md flex items-center justify-center text-xs text-muted-foreground/50 m-1">
+                    Перетащите сюда
+                  </div>
+                ) : (
+                  cell.map((block, blockIndex) => (
+                    <React.Fragment key={block.id}>
+                      {dropIndicator?.cellIndex === cellIndex && dropIndicator.position === blockIndex && (
+                        <div className="h-0.5 bg-primary rounded-full mx-2 my-1" />
+                      )}
+                      <CanvasBlock block={block} rowId={row.id} cellIndex={cellIndex} />
+                    </React.Fragment>
+                  ))
+                )}
+                {dropIndicator?.cellIndex === cellIndex && dropIndicator.position === cell.length && cell.length > 0 && (
+                  <div className="h-0.5 bg-primary rounded-full mx-2 my-1" />
+                )}
+              </div>
+            );
+          })}
+        </div>
       </div>
     </div>
   );
