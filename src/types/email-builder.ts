@@ -1,4 +1,4 @@
-export type BlockType = 'heading' | 'text' | 'image' | 'button' | 'list' | 'menu' | 'social' | 'testimonial' | 'speaker';
+export type BlockType = 'heading' | 'text' | 'image' | 'button' | 'list' | 'menu' | 'social' | 'testimonial' | 'speaker' | 'contact' | 'links';
 
 export type ColumnLayout = 1 | 2 | 3;
 
@@ -6,12 +6,18 @@ export type BulletType = 'disc' | 'check' | 'number' | 'custom';
 
 export type MenuLayout = 'horizontal' | 'vertical';
 
+// Соцсети
+export type SocialNetwork = 
+  | 'facebook' | 'instagram' | 'twitter' | 'linkedin' | 'youtube' | 'telegram' 
+  | 'tiktok' | 'vk' | 'whatsapp' | 'tenchat' | 'dzen' | 'rutube' | 'setka' | 'custom';
+
 export interface SocialLink {
-  network: 'facebook' | 'instagram' | 'twitter' | 'linkedin' | 'youtube' | 'telegram' | 'tiktok' | 'vk' | 'whatsapp';
+  network: SocialNetwork;
   url: string;
   iconName?: string;
-  iconColor?: string;   // индивидуальный цвет иконки
-  bgColor?: string;     // индивидуальный цвет фона
+  customIconUrl?: string;
+  iconColor?: string;
+  bgColor?: string;
 }
 
 export interface SocialBlock extends BaseBlock {
@@ -43,13 +49,33 @@ export interface SpeakerBlock extends BaseBlock {
   socialLinks: SocialLink[];
 }
 
+// Блок контактов
+export interface ContactBlock extends BaseBlock {
+  type: 'contact';
+  email?: string;
+  phone?: string;
+  address?: string;
+  workHours?: string;
+}
+
+// Блок ссылок
+export interface LinksBlock extends BaseBlock {
+  type: 'links';
+  links: {
+    label: string;
+    url: string;
+  }[];
+  layout: 'horizontal' | 'vertical';
+  gap: number;
+}
+
 export interface ListBulletStyle {
   type: BulletType;
   color: string;
   size: number;
   fontWeight: string;
   customIcon: string;
-  fontAwesomeIcon: string; // например, "fa-solid fa-check"
+  fontAwesomeIcon: string;
   offsetX: number;
   offsetY: number;
 }
@@ -102,7 +128,7 @@ export interface MenuBlock extends BaseBlock {
   menuGap: number;
 }
 
-export type EmailBlock = HeadingBlock | TextBlock | ImageBlock | ButtonBlock | ListBlock | MenuBlock | SocialBlock | TestimonialBlock | SpeakerBlock;
+export type EmailBlock = HeadingBlock | TextBlock | ImageBlock | ButtonBlock | ListBlock | MenuBlock | SocialBlock | TestimonialBlock | SpeakerBlock | ContactBlock | LinksBlock;
 
 export interface BlockStyle {
   color: string;
@@ -166,7 +192,6 @@ export const createBlock = (type: BlockType): EmailBlock => {
     color: '#000000',
     fontSize: 16,
     fontWeight: '400',
-    fontAwesomeIcon: 'fa-solid fa-circle',
     fontFamily: 'inherit',
     textAlign: 'left',
     backgroundColor: 'transparent',
@@ -226,7 +251,7 @@ export const createBlock = (type: BlockType): EmailBlock => {
         content: '',
         style: { ...baseStyle, textAlign: 'left' },
         listItems: ['Пункт списка 1', 'Пункт списка 2', 'Пункт списка 3'],
-        bulletStyle: { type: 'disc', color: '#333333', size: 16, fontWeight: '400', customIcon: '', offsetX: 0, offsetY: 0 },
+        bulletStyle: { type: 'disc', color: '#333333', size: 16, fontWeight: '400', customIcon: '', fontAwesomeIcon: '', offsetX: 0, offsetY: 0 },
       } as ListBlock;
     case 'menu':
       return {
@@ -252,9 +277,9 @@ export const createBlock = (type: BlockType): EmailBlock => {
         content: '',
         style: { ...baseStyle, textAlign: 'center', paddingTop: 16, paddingBottom: 16 },
         links: [
-          { network: 'facebook', url: '#' },
-          { network: 'instagram', url: '#' },
-          { network: 'twitter', url: '#' },
+          { network: 'facebook', url: '#', iconName: '', iconColor: '#ffffff', bgColor: '#3b5998' },
+          { network: 'instagram', url: '#', iconName: '', iconColor: '#ffffff', bgColor: '#e4405f' },
+          { network: 'twitter', url: '#', iconName: '', iconColor: '#ffffff', bgColor: '#1da1f2' },
         ],
         iconSize: 32,
         iconColor: '#ffffff',
@@ -286,10 +311,35 @@ export const createBlock = (type: BlockType): EmailBlock => {
         photoUrl: 'https://randomuser.me/api/portraits/men/1.jpg',
         company: 'EmailPro',
         socialLinks: [
-          { network: 'linkedin', url: '#' },
-          { network: 'twitter', url: '#' },
+          { network: 'linkedin', url: '#', iconName: '', iconColor: '#ffffff', bgColor: '#0a66c2' },
+          { network: 'twitter', url: '#', iconName: '', iconColor: '#ffffff', bgColor: '#1da1f2' },
         ],
       } as SpeakerBlock;
+    case 'contact':
+      return {
+        id: crypto.randomUUID(),
+        type: 'contact',
+        content: '',
+        style: { ...baseStyle, textAlign: 'left' },
+        email: 'info@example.com',
+        phone: '+7 (999) 123-45-67',
+        address: 'г. Москва, ул. Примерная, д. 1',
+        workHours: 'Пн-Пт: 9:00-18:00',
+      } as ContactBlock;
+    case 'links':
+      return {
+        id: crypto.randomUUID(),
+        type: 'links',
+        content: '',
+        style: { ...baseStyle, textAlign: 'center' },
+        links: [
+          { label: 'Политика конфиденциальности', url: '#' },
+          { label: 'Договор оферты', url: '#' },
+          { label: 'Помощь', url: '#' },
+        ],
+        layout: 'horizontal',
+        gap: 16,
+      } as LinksBlock;
     default:
       throw new Error(`Unknown block type: ${type}`);
   }
