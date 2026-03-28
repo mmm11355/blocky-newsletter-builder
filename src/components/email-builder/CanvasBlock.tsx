@@ -175,17 +175,45 @@ const CanvasBlock: React.FC<Props> = ({ block, rowId, cellIndex }) => {
             </a>
           </div>
         );
-      case 'list':
-        return (
-          <div style={{ ...baseStyle, margin: 0, direction: 'ltr' }} onClick={handleClick}>
-            {((block as any).listItems || []).map((item: string, i: number) => (
-              <div key={i} style={{ display: 'flex', alignItems: 'flex-start', marginBottom: i < ((block as any).listItems?.length || 0) - 1 ? 6 : 0, direction: 'ltr' }}>
-                {renderBullet(i)}
-                <span style={{ direction: 'ltr' }}>{item}</span>
-              </div>
-            ))}
-          </div>
-        );
+      case 'list': {
+  const bs = (block as any).bulletStyle || { type: 'disc', color: '#333333', size: 16, fontWeight: '400', customIcon: '', fontAwesomeIcon: '', offsetX: 0, offsetY: 0 };
+  const listItems = (block as any).listItems || [];
+  
+  return (
+    <div style={{ ...baseStyle, margin: 0, direction: 'ltr' }} onClick={handleClick}>
+      <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+        <tbody>
+          {listItems.map((item: string, i: number) => {
+            let bulletContent = null;
+            
+            if (bs.type === 'custom' && bs.fontAwesomeIcon) {
+              bulletContent = <i className={bs.fontAwesomeIcon} style={{ color: bs.color, fontSize: bs.size, width: bs.size, textAlign: 'center', display: 'inline-block' }} />;
+            } else if (bs.type === 'custom' && bs.customIcon) {
+              bulletContent = <img src={bs.customIcon} alt="" style={{ width: bs.size, height: bs.size, display: 'inline-block', verticalAlign: 'middle' }} />;
+            } else if (bs.type === 'check') {
+              bulletContent = <span style={{ color: bs.color, fontSize: bs.size }}>✓</span>;
+            } else if (bs.type === 'number') {
+              bulletContent = <span style={{ color: bs.color, fontSize: bs.size, fontWeight: bs.fontWeight }}>{i + 1}.</span>;
+            } else {
+              bulletContent = <span style={{ color: bs.color, fontSize: bs.size }}>•</span>;
+            }
+            
+            return (
+              <tr key={i} style={{ verticalAlign: 'middle' }}>
+                <td style={{ width: bs.size + 12, paddingRight: 8, verticalAlign: 'middle', textAlign: 'center' }}>
+                  {bulletContent}
+                </td>
+                <td style={{ color: s.color, fontSize: s.fontSize, lineHeight: s.lineHeight, paddingBottom: i < listItems.length - 1 ? 6 : 0, verticalAlign: 'middle' }}>
+                  {item}
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
+  );
+}
       case 'menu': {
         const layout = (block as any).menuLayout || 'horizontal';
         const gap = (block as any).menuGap || 16;
