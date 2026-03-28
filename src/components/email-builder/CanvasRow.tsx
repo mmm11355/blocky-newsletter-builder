@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useEmailBuilder } from '@/context/EmailBuilderContext';
 import { EmailRow, BlockType } from '@/types/email-builder';
 import CanvasBlock from './CanvasBlock';
-import { Trash2, ArrowUp, ArrowDown } from 'lucide-react';
+import { Trash2, ArrowUp, ArrowDown, Plus } from 'lucide-react';
 
 interface Props {
   row: EmailRow;
@@ -14,6 +14,21 @@ const CanvasRow: React.FC<Props> = ({ row, isMobile }) => {
   const [hoveredCell, setHoveredCell] = useState<number | null>(null);
   const [hovered, setHovered] = useState(false);
   const [dropIndicator, setDropIndicator] = useState<{ cellIndex: number; position: number } | null>(null);
+  const [showBlockMenu, setShowBlockMenu] = useState<{ cellIndex: number; show: boolean } | null>(null);
+
+  const blockTypes: { type: BlockType; label: string }[] = [
+    { type: 'heading', label: 'Заголовок' },
+    { type: 'text', label: 'Текст' },
+    { type: 'image', label: 'Изображение' },
+    { type: 'button', label: 'Кнопка' },
+    { type: 'list', label: 'Список' },
+    { type: 'menu', label: 'Меню' },
+    { type: 'social', label: 'Соцсети' },
+    { type: 'testimonial', label: 'Отзыв' },
+    { type: 'speaker', label: 'Спикер' },
+    { type: 'contact', label: 'Контакты' },
+    { type: 'links', label: 'Ссылки' },
+  ];
 
   const handleDragOver = (e: React.DragEvent, cellIndex: number) => {
     e.preventDefault();
@@ -138,18 +153,35 @@ const CanvasRow: React.FC<Props> = ({ row, isMobile }) => {
                 )}
                 
                 {/* Кнопка добавления нового блока */}
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    const blockType = prompt('Выберите тип блока:\nheading - заголовок\ntext - текст\nimage - изображение\nbutton - кнопка\nlist - список\nmenu - меню\nsocial - соцсети\ntestimonial - отзыв\nspeaker - спикер\ncontact - контакты\nlinks - ссылки');
-                    if (blockType) {
-                      addBlockToCell(row.id, cellIndex, blockType as any);
-                    }
-                  }}
-                  className="w-full mt-2 py-2 text-xs text-muted-foreground border border-dashed border-border rounded-lg hover:border-primary hover:text-primary transition-colors"
-                >
-                  + Добавить блок
-                </button>
+                <div className="relative mt-2">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setShowBlockMenu(showBlockMenu?.cellIndex === cellIndex && showBlockMenu.show ? null : { cellIndex, show: true });
+                    }}
+                    className="w-full py-2 text-xs text-muted-foreground border border-dashed border-border rounded-lg hover:border-primary hover:text-primary transition-colors flex items-center justify-center gap-1"
+                  >
+                    <Plus className="h-3 w-3" />
+                    Добавить блок
+                  </button>
+                  
+                  {showBlockMenu?.cellIndex === cellIndex && showBlockMenu.show && (
+                    <div className="absolute bottom-full left-0 mb-1 w-48 bg-card border border-border rounded-lg shadow-lg z-20 py-1 max-h-60 overflow-y-auto">
+                      {blockTypes.map((bt) => (
+                        <button
+                          key={bt.type}
+                          onClick={() => {
+                            addBlockToCell(row.id, cellIndex, bt.type);
+                            setShowBlockMenu(null);
+                          }}
+                          className="w-full text-left px-3 py-1.5 text-xs hover:bg-secondary transition-colors"
+                        >
+                          {bt.label}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
             );
           })}
