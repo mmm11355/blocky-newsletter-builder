@@ -267,7 +267,6 @@ export const EmailBuilderProvider: React.FC<{ children: React.ReactNode }> = ({ 
     return { block, rowId: selection.rowId, cellIndex: selection.cellIndex };
   }, [selection, template]);
 
-  // Функция для обработки маркеров форматирования
   const formatContent = (content: string) => {
     if (!content) return '';
     let formatted = content.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
@@ -296,12 +295,12 @@ export const EmailBuilderProvider: React.FC<{ children: React.ReactNode }> = ({ 
         case 'heading': {
           const formattedContent = formatContent(block.content);
           return `<table role="presentation" cellpadding="0" cellspacing="0" border="0" class="${blockClass}" width="100%" style="${wrapStyle}">
-              <tr>
+               <tr>
                 <td>
                   <h1 style="${baseStyle}margin:0;mso-line-height-rule:exactly;">${formattedContent}</h1>
                 </td>
-              </tr>
-            </table>`;
+               </tr>
+             </table>`;
         }
         case 'text': {
           const formattedContent = formatContent(block.content);
@@ -317,22 +316,22 @@ export const EmailBuilderProvider: React.FC<{ children: React.ReactNode }> = ({ 
               .join('');
           }
           return `<table role="presentation" cellpadding="0" cellspacing="0" border="0" class="${blockClass}" width="100%" style="${wrapStyle}">
-              <tr>
+               <tr>
                 <td>
                   <div style="${baseStyle}margin:0;mso-line-height-rule:exactly;">${finalContent}</div>
                 </td>
-              </tr>
-            </table>`;
+               </tr>
+             </table>`;
         }
         case 'image': {
           const imgWidth = s.width && s.width !== '100%' ? s.width.replace('px', '').replace('%', '') : '100%';
           const imgTag = `<img src="${(block as any).src}" alt="${(block as any).alt || ''}" width="${imgWidth}" style="max-width:100%;height:auto;display:block;border:0;outline:none;border-radius:${s.borderRadius}px;${s.textAlign === 'center' ? 'margin:0 auto;' : ''}" />`;
           const wrapped = (block as any).href ? `<a href="${(block as any).href}" target="_blank" style="text-decoration:none;border:0;">${imgTag}</a>` : imgTag;
           return `<table role="presentation" cellpadding="0" cellspacing="0" border="0" class="${blockClass}" width="100%" style="${wrapStyle}">
-              <tr>
+               <tr>
                 <td style="padding:${s.paddingTop}px ${s.paddingRight}px ${s.paddingBottom}px ${s.paddingLeft}px;text-align:${s.textAlign};">${wrapped}</td>
-              </tr>
-            </table>`;
+               </tr>
+             </table>`;
         }
         case 'button': {
           const btnAlign = s.textAlign === 'center' ? 'center' : s.textAlign === 'right' ? 'right' : 'left';
@@ -340,7 +339,7 @@ export const EmailBuilderProvider: React.FC<{ children: React.ReactNode }> = ({ 
           const buttonWidth = s.width ? `width:${s.width};` : '';
           const buttonMargin = s.textAlign === 'center' ? 'margin:0 auto;' : s.textAlign === 'right' ? 'margin:0 0 0 auto;' : '';
           return `<table role="presentation" cellpadding="0" cellspacing="0" border="0" class="${blockClass}" width="100%" style="${wrapStyle}">
-              <tr>
+               <tr>
                 <td align="${btnAlign}" style="padding:4px 0;">
                   <!--[if mso]>
                   <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="${(block as any).href || '#'}" style="height:auto;v-text-anchor:middle;width:auto;" arcsize="${Math.round(s.borderRadius / 40 * 100)}%" strokecolor="${s.borderColor}" fillcolor="${s.backgroundColor}">
@@ -352,8 +351,8 @@ export const EmailBuilderProvider: React.FC<{ children: React.ReactNode }> = ({ 
                   <a href="${(block as any).href || '#'}" target="_blank" style="display:inline-block;background-color:${s.backgroundColor};color:${s.color};font-size:${s.fontSize}px;font-weight:${s.fontWeight};padding:${s.paddingTop}px ${s.paddingRight}px ${s.paddingBottom}px ${s.paddingLeft}px;border-radius:${s.borderRadius}px;text-decoration:none;text-align:center;${fontFamilyStr}${borderStr}line-height:${s.lineHeight};${buttonWidth}${buttonMargin}">${formattedContent}</a>
                   <!--<![endif]-->
                 </td>
-              </tr>
-            </table>`;
+               </tr>
+             </table>`;
         }
         case 'list': {
           const bs = (block as any).bulletStyle || { type: 'disc', color: '#333333', size: 16, fontWeight: '400', customIcon: '', fontAwesomeIcon: '', offsetX: 0, offsetY: 0 };
@@ -378,12 +377,12 @@ export const EmailBuilderProvider: React.FC<{ children: React.ReactNode }> = ({ 
             </tr>`;
           }).join('');
           return `<table role="presentation" cellpadding="0" cellspacing="0" border="0" class="${blockClass}" width="100%" style="${wrapStyle}">
-              <tr>
+               <tr>
                 <td style="${baseStyle}">
                   <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">${items}</table>
                 </td>
-              </tr>
-            </table>`;
+               </tr>
+             </table>`;
         }
         case 'menu': {
           const menuLayout = (block as any).menuLayout || 'horizontal';
@@ -403,7 +402,7 @@ export const EmailBuilderProvider: React.FC<{ children: React.ReactNode }> = ({ 
                 <tr>
                   <td style="${baseStyle}" align="${btnAlign}">
                     <table role="presentation" cellpadding="0" cellspacing="0" border="0">
-                      <tr>${logoHtml}${linksHtml}</tr>
+                       <tr>${logoHtml}${linksHtml}</tr>
                     </table>
                   </td>
                 </tr>
@@ -453,20 +452,20 @@ export const EmailBuilderProvider: React.FC<{ children: React.ReactNode }> = ({ 
           const flexDirection = layout === 'horizontal' ? 'row' : 'column';
           
           return `<table role="presentation" cellpadding="0" cellspacing="0" border="0" class="${blockClass}" width="100%" style="${wrapStyle}">
-              <tr>
+               <tr>
                 <td style="${baseStyle}" align="${s.textAlign}">
                   <div style="display:flex; flex-direction:${flexDirection}; gap:${gap}px; justify-content:${s.textAlign}; align-items:center; flex-wrap:wrap;">
                     ${linksHtml}
                   </div>
                 </td>
-              </tr>
-            </table>`;
+               </tr>
+             </table>`;
         }
         case 'testimonial': {
           const tb = block as TestimonialBlock;
           const stars = '★'.repeat(tb.rating) + '☆'.repeat(5 - tb.rating);
           return `<table role="presentation" cellpadding="0" cellspacing="0" border="0" class="${blockClass}" width="100%" style="${wrapStyle}">
-              <tr>
+               <tr>
                 <td style="${baseStyle}">
                   <div style="display:flex; gap:12px; align-items:flex-start;">
                     ${tb.avatarUrl ? `<img src="${tb.avatarUrl}" width="48" height="48" style="border-radius:50%; object-fit:cover;" />` : ''}
@@ -478,13 +477,13 @@ export const EmailBuilderProvider: React.FC<{ children: React.ReactNode }> = ({ 
                     </div>
                   </div>
                 </td>
-              </tr>
-            </table>`;
+               </tr>
+             </table>`;
         }
         case 'speaker': {
           const sp = block as SpeakerBlock;
           return `<table role="presentation" cellpadding="0" cellspacing="0" border="0" class="${blockClass}" width="100%" style="${wrapStyle}">
-              <tr>
+               <tr>
                 <td style="${baseStyle}" align="center">
                   ${sp.photoUrl ? `<img src="${sp.photoUrl}" width="100" height="100" style="border-radius:50%; margin:0 auto 16px;" />` : ''}
                   <h3 style="margin:0 0 8px; font-size:20px; font-weight:bold;">${sp.name}</h3>
@@ -499,13 +498,13 @@ export const EmailBuilderProvider: React.FC<{ children: React.ReactNode }> = ({ 
                     `).join('')}
                   </div>
                 </td>
-              </tr>
-            </table>`;
+               </tr>
+             </table>`;
         }
         case 'contact': {
           const cb = block as ContactBlock;
           return `<table role="presentation" cellpadding="0" cellspacing="0" border="0" class="${blockClass}" width="100%" style="${wrapStyle}">
-              <tr>
+               <tr>
                 <td style="${baseStyle}">
                   <div style="display:flex; flex-direction:column; gap:12px;">
                     ${cb.email ? `<div>📧 <a href="mailto:${cb.email}" style="color:${s.color};">${cb.email}</a></div>` : ''}
@@ -514,8 +513,8 @@ export const EmailBuilderProvider: React.FC<{ children: React.ReactNode }> = ({ 
                     ${cb.workHours ? `<div>🕒 ${cb.workHours}</div>` : ''}
                   </div>
                 </td>
-              </tr>
-            </table>`;
+               </tr>
+             </table>`;
         }
         case 'links': {
           const lb = block as LinksBlock;
@@ -524,21 +523,20 @@ export const EmailBuilderProvider: React.FC<{ children: React.ReactNode }> = ({ 
             <a href="${link.url}" target="_blank" style="color:${s.color}; text-decoration:none; font-size:${s.fontSize}px;">${link.label}</a>
           `).join('');
           return `<table role="presentation" cellpadding="0" cellspacing="0" border="0" class="${blockClass}" width="100%" style="${wrapStyle}">
-              <tr>
+               <tr>
                 <td style="${baseStyle}" align="${s.textAlign}">
                   <div style="display:flex; flex-direction:${isHorizontal ? 'row' : 'column'}; gap:${lb.gap}px; justify-content:${s.textAlign}; align-items:center; flex-wrap:wrap;">
                     ${linksHtml}
                   </div>
                 </td>
-              </tr>
-            </table>`;
+               </tr>
+             </table>`;
         }
         default:
           return '';
       }
     };
 
-    // Сборка мобильных стилей
     blockCounter = 0;
     const mobileStyles: string[] = [];
     rows.forEach(row => {
@@ -571,8 +569,8 @@ export const EmailBuilderProvider: React.FC<{ children: React.ReactNode }> = ({ 
       const stackClass = (row.mobileStack !== false && row.columns > 1) ? 'mobile-stack' : '';
       
       return `<table role="presentation" width="100%" cellpadding="0" cellspacing="${gap}" border="0" class="${stackClass}" style="background-color:${row.style.backgroundColor};padding:${row.style.paddingTop}px ${row.style.paddingRight}px ${row.style.paddingBottom}px ${row.style.paddingLeft}px;border-collapse:separate;border-spacing:${gap}px;">
-        <tr>${cellsHTML}</tr>
-      </table>`;
+          <tr>${cellsHTML} 
+        </table>`;
     };
 
     const mobileCSS = mobileStyles.length > 0 ? mobileStyles.join('\n    ') : '';
@@ -606,12 +604,21 @@ export const EmailBuilderProvider: React.FC<{ children: React.ReactNode }> = ({ 
   
   /* Мобильные стили */
   @media only screen and (max-width: ${globalStyle.maxWidth + 20}px){
-    .email-container{width:100%!important;max-width:100%!important;}
+    .email-container{
+      width:100%!important;
+      max-width:100%!important;
+    }
+    .mobile-stack{
+      width:100%!important;
+    }
     .mobile-stack td{
       display:block!important;
       width:100%!important;
       box-sizing:border-box!important;
-      margin-bottom:${(row: any) => row?.cellGap || 0}px!important;
+      margin-bottom:10px!important;
+    }
+    .mobile-stack td:last-child{
+      margin-bottom:0!important;
     }
     ${mobileCSS}
   }
@@ -622,18 +629,18 @@ export const EmailBuilderProvider: React.FC<{ children: React.ReactNode }> = ({ 
 <div style="display:none;font-size:1px;color:${globalStyle.backgroundColor};line-height:1px;max-height:0;max-width:0;opacity:0;overflow:hidden;">&#8199;&#65279;&#847;</div>
 <center style="width:100%;background-color:${globalStyle.backgroundColor};">
 <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color:${globalStyle.backgroundColor};">
-   <tr>
-    <td align="center" valign="top">
-      <table role="presentation" class="email-container" cellpadding="0" cellspacing="0" border="0" width="${globalStyle.maxWidth}" style="margin:0 auto;max-width:${globalStyle.maxWidth}px;width:100%;">
-         <tr>
-           <td>
+    <tr>
+      <td align="center" valign="top">
+        <table role="presentation" class="email-container" cellpadding="0" cellspacing="0" border="0" width="${globalStyle.maxWidth}" style="margin:0 auto;max-width:${globalStyle.maxWidth}px;width:100%;">
+          <tr>
+            <td>
             ${rows.map(renderRow).join('\n')}
-           </td>
-         </tr>
-       </table>
-     </td>
-   </tr>
-</table>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
 </center>
 </body>
 </html>`;
