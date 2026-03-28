@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useEmailBuilder } from '@/context/EmailBuilderContext';
 import { EmailRow } from '@/types/email-builder';
 import CanvasBlock from './CanvasBlock';
-import { GripVertical, Plus, MonitorSmartphone, Smartphone, X } from 'lucide-react';
+import { GripVertical, Plus, MonitorSmartphone, Smartphone, X, ArrowUp, ArrowDown, Trash2 } from 'lucide-react';
 
 interface CanvasRowProps {
   row: EmailRow;
@@ -40,7 +40,7 @@ const CanvasRow: React.FC<CanvasRowProps> = ({ row, rowIndex, onMoveRow, onDelet
             className="p-1 rounded hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors"
             title="Переместить вверх"
           >
-            <GripVertical className="h-3.5 w-3.5 rotate-90" />
+            <ArrowUp className="h-3.5 w-3.5" />
           </button>
         )}
         {rowIndex < totalRows - 1 && (
@@ -49,7 +49,7 @@ const CanvasRow: React.FC<CanvasRowProps> = ({ row, rowIndex, onMoveRow, onDelet
             className="p-1 rounded hover:bg-secondary text-muted-foreground hover:text-foreground transition-colors"
             title="Переместить вниз"
           >
-            <GripVertical className="h-3.5 w-3.5 -rotate-90" />
+            <ArrowDown className="h-3.5 w-3.5" />
           </button>
         )}
         <div className="w-full h-px bg-border my-0.5" />
@@ -58,7 +58,7 @@ const CanvasRow: React.FC<CanvasRowProps> = ({ row, rowIndex, onMoveRow, onDelet
           className="p-1 rounded hover:bg-destructive hover:text-destructive-foreground text-muted-foreground transition-colors"
           title="Удалить строку"
         >
-          <X className="h-3.5 w-3.5" />
+          <Trash2 className="h-3.5 w-3.5" />
         </button>
       </div>
       
@@ -89,17 +89,6 @@ const CanvasRow: React.FC<CanvasRowProps> = ({ row, rowIndex, onMoveRow, onDelet
                   cellIndex={cellIndex}
                 />
               ))}
-              <button
-                onClick={() => {
-                  const blockType = prompt('Выберите тип блока:\nheading - заголовок\ntext - текст\nimage - изображение\nbutton - кнопка\nlist - список\nmenu - меню\nsocial - соцсети\ntestimonial - отзыв\nspeaker - спикер\ncontact - контакты\nlinks - ссылки');
-                  if (blockType) {
-                    addBlockToCell(row.id, cellIndex, blockType as any);
-                  }
-                }}
-                className="w-full py-2 text-xs text-muted-foreground border border-dashed border-border rounded-lg hover:border-primary hover:text-primary transition-colors"
-              >
-                + Добавить блок
-              </button>
             </div>
           </div>
         ))}
@@ -125,15 +114,6 @@ const EmailCanvas: React.FC = () => {
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     setDraggedOver(false);
-    const blockType = e.dataTransfer.getData('blockType');
-    if (blockType && template.rows.length > 0) {
-      const lastRow = template.rows[template.rows.length - 1];
-      if (lastRow && lastRow.cells[0]) {
-        // Добавляем блок в первую ячейку последней строки
-        const { addBlockToCell } = useEmailBuilder();
-        addBlockToCell(lastRow.id, 0, blockType as any);
-      }
-    }
   };
   
   return (
@@ -172,6 +152,7 @@ const EmailCanvas: React.FC = () => {
       {/* Область канваса */}
       <div 
         className={`flex-1 overflow-auto p-8 ${draggedOver ? 'bg-primary/5' : ''}`}
+        style={{ backgroundColor: 'hsl(225 20% 7%)' }}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
@@ -187,7 +168,7 @@ const EmailCanvas: React.FC = () => {
               </div>
               <h3 className="text-lg font-medium mb-2">Добавьте строку</h3>
               <p className="text-muted-foreground text-sm mb-4 max-w-md">
-                Выберите структуру на панели слева или нажмите кнопку ниже
+                Выберите структуру на панели слева
               </p>
               <div className="flex gap-2">
                 <button
