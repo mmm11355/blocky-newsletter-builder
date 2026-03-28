@@ -43,7 +43,7 @@ const EmailBuilderContext = createContext<EmailBuilderContextType | null>(null);
 const initialTemplate: EmailTemplate = {
   rows: [],
   globalStyle: {
-    backgroundColor: '#f0f0f0',
+    backgroundColor: '#ffffff',
     maxWidth: 600,
     fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif",
   },
