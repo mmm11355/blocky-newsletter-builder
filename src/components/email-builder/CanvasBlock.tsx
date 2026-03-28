@@ -72,12 +72,12 @@ const CanvasBlock: React.FC<Props> = ({ block, rowId, cellIndex }) => {
     direction: 'ltr',
   };
 
-  const baseStyle: React.CSSProperties = {
+    const baseStyle: React.CSSProperties = {
     color: s.color,
     fontSize: s.fontSize,
     fontWeight: s.fontWeight as any,
     fontFamily: s.fontFamily !== 'inherit' ? s.fontFamily : undefined,
-    textAlign: s.textAlign as any,
+    textAlign: s.textAlign === 'center' ? 'center' : s.textAlign === 'right' ? 'right' : 'left',
     backgroundColor: s.backgroundColor,
     padding: `${s.paddingTop}px ${s.paddingRight}px ${s.paddingBottom}px ${s.paddingLeft}px`,
     border: `${s.borderWidth}px solid ${s.borderColor}`,
