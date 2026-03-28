@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useEmailBuilder } from '@/context/EmailBuilderContext';
+import { EmailBuilderProvider, useEmailBuilder } from '@/context/EmailBuilderContext';
 import ElementsSidebar from '@/components/email-builder/ElementsSidebar';
 import EmailCanvas from '@/components/email-builder/EmailCanvas';
 import PropertyPanel from '@/components/email-builder/PropertyPanel';
@@ -8,7 +8,8 @@ import ArchivePanel from '@/components/email-builder/ArchivePanel';
 import BlockLibrary from '@/components/email-builder/BlockLibrary';
 import { Code2, Mail, Archive, Download, Upload, Package, X } from 'lucide-react';
 
-const Index = () => {
+// Внутренний компонент, который использует useEmailBuilder
+const MainContent = () => {
   const [exportOpen, setExportOpen] = useState(false);
   const [archiveOpen, setArchiveOpen] = useState(false);
   const [libraryOpen, setLibraryOpen] = useState(false);
@@ -35,7 +36,6 @@ const Index = () => {
     reader.onload = (e) => {
       try {
         const importedTemplate = JSON.parse(e.target?.result as string);
-        // Базовая валидация
         if (importedTemplate && typeof importedTemplate === 'object' && Array.isArray(importedTemplate.rows)) {
           setTemplate(importedTemplate);
           alert('✅ Шаблон успешно загружен!');
@@ -47,11 +47,11 @@ const Index = () => {
       }
     };
     reader.readAsText(file);
-    event.target.value = ''; // сброс input
+    event.target.value = '';
   };
 
   return (
-    <div className="h-screen flex flex-col overflow-hidden">
+    <>
       {/* Header */}
       <header className="h-14 bg-card/80 backdrop-blur-xl border-b border-border flex items-center justify-between px-5 shrink-0">
         <div className="flex items-center gap-2.5">
@@ -63,7 +63,6 @@ const Index = () => {
         </div>
         
         <div className="flex items-center gap-2">
-          {/* Кнопка библиотеки блоков */}
           <button
             onClick={() => setLibraryOpen(true)}
             className="flex items-center gap-2 px-4 py-2 rounded-lg bg-secondary text-secondary-foreground hover:bg-secondary/80 text-sm font-semibold transition-all"
@@ -73,7 +72,6 @@ const Index = () => {
             Блоки
           </button>
           
-          {/* Кнопка экспорта шаблона */}
           <button
             onClick={handleExportTemplate}
             className="flex items-center gap-2 px-4 py-2 rounded-lg bg-secondary text-secondary-foreground hover:bg-secondary/80 text-sm font-semibold transition-all"
@@ -83,7 +81,6 @@ const Index = () => {
             Сохранить
           </button>
           
-          {/* Кнопка импорта шаблона */}
           <label className="flex items-center gap-2 px-4 py-2 rounded-lg bg-secondary text-secondary-foreground hover:bg-secondary/80 text-sm font-semibold transition-all cursor-pointer">
             <Upload className="h-4 w-4" />
             Загрузить
@@ -143,7 +140,18 @@ const Index = () => {
           </div>
         </div>
       )}
-    </div>
+    </>
+  );
+};
+
+// Главный компонент с провайдером
+const Index = () => {
+  return (
+    <EmailBuilderProvider>
+      <div className="h-screen flex flex-col overflow-hidden">
+        <MainContent />
+      </div>
+    </EmailBuilderProvider>
   );
 };
 
