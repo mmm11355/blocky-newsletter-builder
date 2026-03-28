@@ -198,7 +198,7 @@ const CanvasBlock: React.FC<Props> = ({ block, rowId, cellIndex }) => {
           </div>
         );
       }
-            case 'social': {
+                  case 'social': {
         const socialBlock = block as SocialBlock;
         return (
           <div style={{ ...baseStyle, margin: 0, direction: 'ltr' }} onClick={handleClick}>
@@ -229,7 +229,7 @@ const CanvasBlock: React.FC<Props> = ({ block, rowId, cellIndex }) => {
                   }}
                   onClick={(e) => e.stopPropagation()}
                   dangerouslySetInnerHTML={{
-                    __html: getSocialIcon(link.network, socialBlock.iconSize * 0.6, socialBlock.iconColor)
+                    __html: getSocialIconHtml(link.network, link.iconName, socialBlock.iconSize, socialBlock.iconColor, socialBlock.iconBgColor)
                   }}
                 />
               ))}
