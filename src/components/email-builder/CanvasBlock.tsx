@@ -1,6 +1,6 @@
 import React from 'react';
 import { useEmailBuilder } from '@/context/EmailBuilderContext';
-import { EmailBlock } from '@/types/email-builder';
+import { EmailBlock, SocialBlock, TestimonialBlock, SpeakerBlock, SocialLink } from '@/types/email-builder';
 import { GripVertical } from 'lucide-react';
 
 interface Props {
@@ -19,12 +19,28 @@ const parseContentToHtml = (content: string): string => {
   html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
   
   // Цвет текста {color:#ff0000}текст{/color}
-  html = html.replace(/\{color:([^}]+)\}(.*?)\{\/color\}/g, '<span style="color: $1;">$2</span>');
+  html = html.replace(/\{color:(#[0-9a-fA-F]{6})\}(.*?)\{\/color\}/g, '<span style="color: $1;">$2</span>');
   
   // Цвет фона {bgcolor:#ffff00}текст{/bgcolor}
-  html = html.replace(/\{bgcolor:([^}]+)\}(.*?)\{\/bgcolor\}/g, '<span style="background-color: $1;">$2</span>');
+  html = html.replace(/\{bgcolor:(#[0-9a-fA-F]{6})\}(.*?)\{\/bgcolor\}/g, '<span style="background-color: $1;">$2</span>');
   
   return html;
+};
+
+// Иконки для соцсетей
+const getSocialIcon = (network: string, size: number): string => {
+  const icons: Record<string, string> = {
+    facebook: 'f',
+    instagram: '📷',
+    twitter: '🐦',
+    linkedin: 'in',
+    youtube: '▶',
+    telegram: '✈',
+    tiktok: '🎵',
+    vk: 'vk',
+    whatsapp: '💬',
+  };
+  return icons[network] || '•';
 };
 
 const CanvasBlock: React.FC<Props> = ({ block, rowId, cellIndex }) => {
@@ -53,7 +69,7 @@ const CanvasBlock: React.FC<Props> = ({ block, rowId, cellIndex }) => {
     marginBottom: s.marginBottom || 0,
     marginLeft: s.textAlign === 'center' ? 'auto' : s.textAlign === 'right' ? 'auto' : (s.marginLeft || 0),
     position: 'relative',
-    direction: 'ltr', // Принудительное направление слева направо
+    direction: 'ltr',
   };
 
   const baseStyle: React.CSSProperties = {
@@ -71,8 +87,7 @@ const CanvasBlock: React.FC<Props> = ({ block, rowId, cellIndex }) => {
     outline: isSelected ? '2px solid hsl(var(--primary))' : 'none',
     outlineOffset: '1px',
     transition: 'outline 0.15s',
-    direction: 'ltr', // Принудительное направление
-    textAlign: s.textAlign === 'center' ? 'center' : s.textAlign === 'right' ? 'right' : 'left',
+    direction: 'ltr',
   };
 
   const renderBullet = (index: number) => {
@@ -101,7 +116,6 @@ const CanvasBlock: React.FC<Props> = ({ block, rowId, cellIndex }) => {
     return <span style={{ ...bulletContainerStyle, color: bs.color, fontSize: bs.size, fontWeight: bs.fontWeight as any }}>•</span>;
   };
 
-  // Парсим контент перед отображением
   const parsedContent = parseContentToHtml(block.content);
 
   const renderContent = () => {
@@ -120,9 +134,7 @@ const CanvasBlock: React.FC<Props> = ({ block, rowId, cellIndex }) => {
         return (
           <div style={{ textAlign: s.textAlign as any, direction: 'ltr' }} onClick={handleClick}>
             <a style={{
-              display: 'block',
-              width: '100%',
-              boxSizing: 'border-box',
+              display: 'inline-block',
               backgroundColor: s.backgroundColor,
               color: s.color,
               fontSize: s.fontSize,
@@ -135,7 +147,7 @@ const CanvasBlock: React.FC<Props> = ({ block, rowId, cellIndex }) => {
               outline: isSelected ? '2px solid hsl(var(--primary))' : 'none',
               outlineOffset: '1px',
               textDecoration: 'none',
-              textAlign: s.textAlign as any,
+              textAlign: 'center',
               lineHeight: s.lineHeight,
               direction: 'ltr',
             }}>
@@ -181,6 +193,98 @@ const CanvasBlock: React.FC<Props> = ({ block, rowId, cellIndex }) => {
           </div>
         );
       }
+      case 'social': {
+        const socialBlock = block as SocialBlock;
+        const iconStyle: React.CSSProperties = {
+          width: socialBlock.iconSize,
+          height: socialBlock.iconSize,
+          backgroundColor: socialBlock.iconBgColor,
+          color: socialBlock.iconColor,
+          borderRadius: '50%',
+          display: 'inline-flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          textDecoration: 'none',
+          fontSize: socialBlock.iconSize * 0.5,
+          fontWeight: 'bold',
+          transition: 'opacity 0.2s',
+        };
+        return (
+          <div style={{ ...baseStyle, margin: 0, direction: 'ltr' }} onClick={handleClick}>
+            <div style={{
+              display: 'flex',
+              flexDirection: socialBlock.layout === 'horizontal' ? 'row' : 'column',
+              gap: socialBlock.gap,
+              justifyContent: s.textAlign === 'center' ? 'center' : s.textAlign === 'right' ? 'flex-end' : 'flex-start',
+              alignItems: 'center',
+              flexWrap: 'wrap',
+              direction: 'ltr',
+            }}>
+              {socialBlock.links.map((link, i) => (
+                <a
+                  key={i}
+                  href={link.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={iconStyle}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  {getSocialIcon(link.network, socialBlock.iconSize)}
+                </a>
+              ))}
+            </div>
+          </div>
+        );
+      }
+      case 'testimonial': {
+        const tb = block as TestimonialBlock;
+        const stars = '★'.repeat(tb.rating) + '☆'.repeat(5 - tb.rating);
+        return (
+          <div style={{ ...baseStyle, margin: 0, direction: 'ltr' }} onClick={handleClick}>
+            <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start', direction: 'ltr' }}>
+              {tb.avatarUrl && (
+                <img src={tb.avatarUrl} alt={tb.authorName} style={{ width: 48, height: 48, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
+              )}
+              <div style={{ flex: 1, direction: 'ltr' }}>
+                <div style={{ color: '#f59e0b', fontSize: 14, marginBottom: 8 }}>{stars}</div>
+                <p style={{ margin: '0 0 12px 0', fontSize: 14, lineHeight: 1.5, fontStyle: 'italic' }}>«{tb.quote}»</p>
+                <p style={{ margin: 0, fontWeight: 'bold' }}>{tb.authorName}</p>
+                {tb.authorTitle && <p style={{ margin: '4px 0 0 0', fontSize: 12, color: '#6b7280' }}>{tb.authorTitle}</p>}
+              </div>
+            </div>
+          </div>
+        );
+      }
+      case 'speaker': {
+        const sp = block as SpeakerBlock;
+        return (
+          <div style={{ ...baseStyle, margin: 0, direction: 'ltr', textAlign: 'center' }} onClick={handleClick}>
+            {sp.photoUrl && (
+              <img src={sp.photoUrl} alt={sp.name} style={{ width: 100, height: 100, borderRadius: '50%', objectFit: 'cover', margin: '0 auto 16px', border: '3px solid rgba(255,255,255,0.5)' }} />
+            )}
+            <h3 style={{ margin: '0 0 8px', fontSize: 20, fontWeight: 'bold' }}>{sp.name}</h3>
+            <p style={{ margin: '0 0 4px', fontSize: 14, opacity: 0.9 }}>{sp.title}</p>
+            {sp.company && <p style={{ margin: '0 0 12px', fontSize: 12, opacity: 0.8 }}>{sp.company}</p>}
+            <p style={{ margin: '0 0 16px', fontSize: 14, lineHeight: 1.5 }}>{sp.bio}</p>
+            <div style={{ display: 'flex', gap: 12, justifyContent: 'center', direction: 'ltr' }}>
+              {sp.socialLinks.map((link, i) => (
+                <a
+                  key={i}
+                  href={link.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ color: 'white', textDecoration: 'none', fontSize: 18 }}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  {getSocialIcon(link.network, 18)}
+                </a>
+              ))}
+            </div>
+          </div>
+        );
+      }
+      default:
+        return null;
     }
   };
 
