@@ -109,6 +109,9 @@ const CanvasBlock: React.FC<Props> = ({ block, rowId, cellIndex }) => {
       flexShrink: 0,
       direction: 'ltr',
     };
+    if (bs.type === 'custom' && bs.fontAwesomeIcon) {
+  return <span style={bulletContainerStyle} dangerouslySetInnerHTML={{ __html: `<i class="${bs.fontAwesomeIcon}" style="color:${bs.color}; font-size:${bs.size}px;"></i>` }} />;
+}
     if (bs.type === 'custom' && bs.customIcon) {
       return <span style={bulletContainerStyle}><img src={bs.customIcon} alt="" style={{ width: bs.size, height: bs.size }} /></span>;
     }
