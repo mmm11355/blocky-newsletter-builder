@@ -1,114 +1,61 @@
-import React, { useState } from 'react';
 import { useEmailBuilder } from '@/context/EmailBuilderContext';
-import { EmailRow } from '@/types/email-builder';
 import CanvasRow from './CanvasRow';
-import { GripVertical, Plus, MonitorSmartphone, Smartphone } from 'lucide-react';
+import { Monitor, Smartphone, Plus } from 'lucide-react';
 
-const EmailCanvas: React.FC = () => {
-  const { template, previewMode, setPreviewMode, addRow, moveRow, deleteRow } = useEmailBuilder();
-  const [draggedOver, setDraggedOver] = useState(false);
-  
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.dataTransfer.dropEffect = 'copy';
-    setDraggedOver(true);
-  };
-  
-  const handleDragLeave = () => {
-    setDraggedOver(false);
-  };
-  
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    setDraggedOver(false);
-  };
-  
+const EmailCanvas = () => {
+  const { template, previewMode, setPreviewMode, setSelection, addRow } = useEmailBuilder();
+  const maxW = previewMode === 'mobile' ? 375 : template.globalStyle.maxWidth;
+
   return (
-    <div className="flex-1 flex flex-col overflow-hidden bg-canvas">
-      {/* Панель переключения режимов */}
-      <div className="flex items-center justify-between px-4 py-2 border-b border-border bg-card/50">
-        <div className="flex items-center gap-2">
-          <span className="text-xs text-muted-foreground">Предпросмотр:</span>
-          <div className="flex gap-1 bg-secondary/50 rounded-lg p-0.5">
-            <button
-              onClick={() => setPreviewMode('desktop')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-md transition-all ${
-                previewMode === 'desktop' 
-                  ? 'bg-primary text-primary-foreground shadow-sm' 
-                  : 'text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              <MonitorSmartphone className="h-3.5 w-3.5" />
-              Desktop
-            </button>
-            <button
-              onClick={() => setPreviewMode('mobile')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-md transition-all ${
-                previewMode === 'mobile' 
-                  ? 'bg-primary text-primary-foreground shadow-sm' 
-                  : 'text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              <Smartphone className="h-3.5 w-3.5" />
-              Mobile
-            </button>
-          </div>
+    <div className="flex-1 flex flex-col h-full overflow-hidden" onClick={() => setSelection(null)}>
+      {/* Toolbar */}
+      <div className="h-12 bg-card/60 backdrop-blur-md border-b border-border flex items-center justify-center gap-1 px-4 shrink-0">
+        <div className="flex bg-secondary rounded-lg p-0.5">
+          <button
+            onClick={() => setPreviewMode('desktop')}
+            className={`px-3 py-1.5 rounded-md transition-all text-xs font-medium flex items-center gap-1.5 ${previewMode === 'desktop' ? 'gradient-primary text-primary-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
+          >
+            <Monitor className="h-3.5 w-3.5" />
+            Desktop
+          </button>
+          <button
+            onClick={() => setPreviewMode('mobile')}
+            className={`px-3 py-1.5 rounded-md transition-all text-xs font-medium flex items-center gap-1.5 ${previewMode === 'mobile' ? 'gradient-primary text-primary-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
+          >
+            <Smartphone className="h-3.5 w-3.5" />
+            Mobile
+          </button>
         </div>
       </div>
-      
-      {/* Область канваса */}
-      <div 
-        className={`flex-1 overflow-auto p-8 ${draggedOver ? 'bg-primary/5' : ''}`}
-        onDragOver={handleDragOver}
-        onDragLeave={handleDragLeave}
-        onDrop={handleDrop}
-      >
-        <div 
-          className="mx-auto transition-all"
-          style={{ maxWidth: previewMode === 'mobile' ? '480px' : '800px' }}
+
+      {/* Canvas area */}
+      <div className="flex-1 overflow-auto bg-canvas p-8">
+        <div
+          className="mx-auto transition-all duration-300 rounded-lg shadow-2xl shadow-black/20 overflow-hidden"
+          style={{
+            maxWidth: maxW,
+            backgroundColor: template.globalStyle.backgroundColor,
+            fontFamily: template.globalStyle.fontFamily,
+          }}
         >
           {template.rows.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-full text-center py-20">
-              <div className="w-20 h-20 rounded-full bg-secondary/50 flex items-center justify-center mb-4">
-                <GripVertical className="h-8 w-8 text-muted-foreground" />
+            <div className="py-24 text-center border-2 border-dashed border-border/50 rounded-lg m-4">
+              <div className="w-14 h-14 rounded-2xl gradient-primary mx-auto flex items-center justify-center mb-4 glow-primary">
+                <Plus className="h-7 w-7 text-primary-foreground" />
               </div>
-              <h3 className="text-lg font-medium mb-2">Добавьте строку</h3>
-              <p className="text-muted-foreground text-sm mb-4 max-w-md">
-                Выберите структуру на панели слева
-              </p>
-              <div className="flex gap-2">
-                <button
-                  onClick={() => addRow(1)}
-                  className="px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm hover:bg-primary/90 transition-colors"
-                >
-                  + Добавить строку
-                </button>
-              </div>
+              <p className="text-lg font-semibold text-foreground/80">Добавьте строку</p>
+              <p className="text-sm mt-1.5 text-muted-foreground">Выберите структуру на панели слева</p>
+              <button
+                onClick={(e) => { e.stopPropagation(); addRow(1); }}
+                className="mt-4 px-4 py-2 rounded-lg bg-secondary text-secondary-foreground hover:bg-secondary/80 text-sm font-medium transition-colors"
+              >
+                + Добавить строку
+              </button>
             </div>
           ) : (
-            <div className="space-y-6">
-              {template.rows.map((row, idx) => (
-                <CanvasRow
-                  key={row.id}
-                  row={row}
-                  rowIndex={idx}
-                  onMoveRow={moveRow}
-                  onDeleteRow={deleteRow}
-                  totalRows={template.rows.length}
-                />
-              ))}
-              
-              {/* Кнопка добавления строки внизу */}
-              <div className="flex justify-center pt-4">
-                <button
-                  onClick={() => addRow(1)}
-                  className="flex items-center gap-2 px-4 py-2 rounded-lg bg-secondary text-secondary-foreground hover:bg-secondary/80 text-sm transition-colors"
-                >
-                  <Plus className="h-4 w-4" />
-                  Добавить строку
-                </button>
-              </div>
-            </div>
+            template.rows.map((row) => (
+              <CanvasRow key={row.id} row={row} isMobile={previewMode === 'mobile'} />
+            ))
           )}
         </div>
       </div>
