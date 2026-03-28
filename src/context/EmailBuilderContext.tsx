@@ -354,8 +354,26 @@ export const EmailBuilderProvider: React.FC<{ children: React.ReactNode }> = ({ 
         case 'list': {
   const bs = block.bulletStyle || { type: 'disc', color: '#333333', size: 16, fontWeight: '400', customIcon: '', fontAwesomeIcon: '', offsetX: 0, offsetY: 0 };
   
-  // Создаём стиль для маркера (без flex, только inline)
-  const bulletStyle = `color:${bs.color}; font-size:${bs.size}px; font-weight:${bs.fontWeight}; line-height:${s.lineHeight}; width:${bs.size + 8}px; display:inline-block; vertical-align:middle; text-align:center;`;
+  // Стиль для ячейки с маркером с учетом сдвигов
+  const bulletTdStyle = `
+    color: ${bs.color};
+    font-size: ${bs.size}px;
+    font-weight: ${bs.fontWeight};
+    line-height: ${s.lineHeight};
+    width: ${bs.size + 12}px;
+    padding-right: 8px;
+    vertical-align: top;
+    text-align: left;
+  `;
+  
+  // Стиль для контейнера маркера с учетом сдвигов
+  const bulletContainerStyle = `
+    display: inline-block;
+    position: relative;
+    left: ${bs.offsetX}px;
+    top: ${bs.offsetY}px;
+    line-height: 1;
+  `;
   
   const items = (block.listItems || []).map((item, i) => {
     let bulletContent = '';
@@ -363,7 +381,7 @@ export const EmailBuilderProvider: React.FC<{ children: React.ReactNode }> = ({ 
     if (bs.type === 'custom' && bs.fontAwesomeIcon) {
       bulletContent = `<i class="${bs.fontAwesomeIcon}" style="color:${bs.color}; font-size:${bs.size}px;"></i>`;
     } else if (bs.type === 'custom' && bs.customIcon) {
-      bulletContent = `<img src="${bs.customIcon}" alt="" width="${bs.size}" height="${bs.size}" style="display:inline-block; vertical-align:middle;" />`;
+      bulletContent = `<img src="${bs.customIcon}" alt="" width="${bs.size}" height="${bs.size}" style="display:block;" />`;
     } else if (bs.type === 'check') {
       bulletContent = '✓';
     } else if (bs.type === 'number') {
@@ -374,10 +392,10 @@ export const EmailBuilderProvider: React.FC<{ children: React.ReactNode }> = ({ 
     
     return `
       <tr>
-        <td style="${bulletStyle} width:${bs.size + 12}px; padding-right:8px; vertical-align:middle;">
-          ${bulletContent}
+        <td style="${bulletTdStyle}">
+          <span style="${bulletContainerStyle}">${bulletContent}</span>
         </td>
-        <td style="color:${s.color}; font-size:${s.fontSize}px; line-height:${s.lineHeight}; ${fontFamilyStr} padding-bottom:${i < (block.listItems?.length || 0) - 1 ? '8' : '0'}px; vertical-align:middle;">
+        <td style="color:${s.color}; font-size:${s.fontSize}px; line-height:${s.lineHeight}; ${fontFamilyStr} padding-bottom:${i < (block.listItems?.length || 0) - 1 ? '8' : '0'}px; vertical-align:top;">
           ${item}
         </td>
       </tr>
