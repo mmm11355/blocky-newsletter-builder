@@ -933,7 +933,7 @@ const MenuFields: React.FC<{
       </Section>
 
 
-        {/* Social Links */}
+                {/* Social Links - РЕДАКТОР */}
         {block.type === 'social' && (
           <>
             <Section title="Социальные сети">
@@ -990,15 +990,19 @@ const MenuFields: React.FC<{
             <Section title="Оформление">
               <Field label="Размер иконок" compact>
                 <div className="flex items-center gap-2">
-                  <input type="range" min={16} max={48} value={block.iconSize} onChange={(e) => updBlock({ iconSize: +e.target.value })} className="flex-1" />
+                  <input type="range" min={24} max={56} value={block.iconSize} onChange={(e) => updBlock({ iconSize: +e.target.value })} className="flex-1" />
                   <span className="text-xs w-12">{block.iconSize}px</span>
                 </div>
               </Field>
               <Field label="Цвет иконок" compact>
-                <input type="color" value={block.iconColor} onChange={(e) => updBlock({ iconColor: e.target.value })} className="w-full h-8 rounded border" />
+                <div className="relative">
+                  <input type="color" value={block.iconColor} onChange={(e) => updBlock({ iconColor: e.target.value })} className="w-full h-8 rounded border cursor-pointer" />
+                </div>
               </Field>
               <Field label="Цвет фона" compact>
-                <input type="color" value={block.iconBgColor} onChange={(e) => updBlock({ iconBgColor: e.target.value })} className="w-full h-8 rounded border" />
+                <div className="relative">
+                  <input type="color" value={block.iconBgColor} onChange={(e) => updBlock({ iconBgColor: e.target.value })} className="w-full h-8 rounded border cursor-pointer" />
+                </div>
               </Field>
               <Field label="Расположение" compact>
                 <div className="flex gap-1">
@@ -1007,38 +1011,46 @@ const MenuFields: React.FC<{
                 </div>
               </Field>
               <Field label="Отступ" compact>
-                <input type="number" value={block.gap} onChange={(e) => updBlock({ gap: +e.target.value })} className="w-full rounded border px-2 py-1.5 text-sm" />
+                <div className="flex items-center gap-2">
+                  <input type="range" min={4} max={32} value={block.gap} onChange={(e) => updBlock({ gap: +e.target.value })} className="flex-1" />
+                  <span className="text-xs w-12">{block.gap}px</span>
+                </div>
               </Field>
             </Section>
           </>
         )}
 
-        {/* Testimonial */}
+        {/* Testimonial - РЕДАКТОР */}
         {block.type === 'testimonial' && (
           <>
             <Field label="Текст отзыва">
-              <textarea rows={3} value={block.quote} onChange={(e) => updBlock({ quote: e.target.value })} className="w-full rounded-lg border border-input bg-secondary/50 px-3 py-2 text-sm" />
+              <textarea rows={4} value={block.quote} onChange={(e) => updBlock({ quote: e.target.value })} className="w-full rounded-lg border border-input bg-secondary/50 px-3 py-2 text-sm" placeholder="Текст отзыва..." />
             </Field>
             <Field label="Имя автора">
-              <input type="text" value={block.authorName} onChange={(e) => updBlock({ authorName: e.target.value })} className="w-full rounded-lg border border-input bg-secondary/50 px-3 py-2 text-sm" />
+              <input type="text" value={block.authorName} onChange={(e) => updBlock({ authorName: e.target.value })} className="w-full rounded-lg border border-input bg-secondary/50 px-3 py-2 text-sm" placeholder="Анна Иванова" />
             </Field>
-            <Field label="Должность">
-              <input type="text" value={block.authorTitle} onChange={(e) => updBlock({ authorTitle: e.target.value })} className="w-full rounded-lg border border-input bg-secondary/50 px-3 py-2 text-sm" />
+            <Field label="Должность / Компания">
+              <input type="text" value={block.authorTitle} onChange={(e) => updBlock({ authorTitle: e.target.value })} className="w-full rounded-lg border border-input bg-secondary/50 px-3 py-2 text-sm" placeholder="Менеджер проектов" />
             </Field>
             <Field label="Фото (URL)">
-              <input type="text" value={block.avatarUrl} onChange={(e) => updBlock({ avatarUrl: e.target.value })} className="w-full rounded-lg border border-input bg-secondary/50 px-3 py-2 text-sm" />
+              <input type="text" value={block.avatarUrl} onChange={(e) => updBlock({ avatarUrl: e.target.value })} className="w-full rounded-lg border border-input bg-secondary/50 px-3 py-2 text-sm" placeholder="https://example.com/avatar.jpg" />
+              {block.avatarUrl && (
+                <div className="mt-2 flex justify-center">
+                  <img src={block.avatarUrl} alt="avatar" className="w-12 h-12 rounded-full object-cover" />
+                </div>
+              )}
             </Field>
             <Field label="Рейтинг">
               <div className="flex gap-1">
                 {[1,2,3,4,5].map(star => (
-                  <button key={star} onClick={() => updBlock({ rating: star })} className={`w-8 h-8 rounded text-lg ${block.rating >= star ? 'text-yellow-500' : 'text-gray-400'}`}>★</button>
+                  <button key={star} onClick={() => updBlock({ rating: star })} className={`w-8 h-8 rounded text-xl ${block.rating >= star ? 'text-yellow-500' : 'text-gray-500'}`}>★</button>
                 ))}
               </div>
             </Field>
           </>
         )}
 
-        {/* Speaker */}
+        {/* Speaker - РЕДАКТОР */}
         {block.type === 'speaker' && (
           <>
             <Field label="Имя спикера">
@@ -1052,6 +1064,11 @@ const MenuFields: React.FC<{
             </Field>
             <Field label="Фото (URL)">
               <input type="text" value={block.photoUrl} onChange={(e) => updBlock({ photoUrl: e.target.value })} className="w-full rounded-lg border border-input bg-secondary/50 px-3 py-2 text-sm" />
+              {block.photoUrl && (
+                <div className="mt-2 flex justify-center">
+                  <img src={block.photoUrl} alt="speaker" className="w-16 h-16 rounded-full object-cover" />
+                </div>
+              )}
             </Field>
             <Field label="Биография">
               <textarea rows={3} value={block.bio} onChange={(e) => updBlock({ bio: e.target.value })} className="w-full rounded-lg border border-input bg-secondary/50 px-3 py-2 text-sm" />
