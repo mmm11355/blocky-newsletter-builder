@@ -208,100 +208,136 @@ const PropertyPanel = () => {
         )}
 
         {/* Social Links */}
-        {block.type === 'social' && (
-          <>
-            <Section title="Социальные сети">
-              <div className="space-y-2">
-                {(block.links || []).map((link: any, i: number) => (
-                  <div key={i} className="flex flex-col gap-2 p-2 rounded-lg bg-secondary/30">
-                    <div className="flex items-center gap-2">
-                      <select
-                        value={link.network}
-                        onChange={(e) => {
-                          const newLinks = [...block.links];
-                          newLinks[i] = { ...newLinks[i], network: e.target.value };
-                          updBlock({ links: newLinks });
-                        }}
-                        className="flex-1 rounded-lg border border-input bg-secondary/50 px-2 py-1.5 text-sm"
-                      >
-                        <option value="facebook">Facebook</option>
-                        <option value="instagram">Instagram</option>
-                        <option value="twitter">Twitter</option>
-                        <option value="linkedin">LinkedIn</option>
-                        <option value="youtube">YouTube</option>
-                        <option value="telegram">Telegram</option>
-                        <option value="vk">VK</option>
-                      </select>
-                      <button
-                        onClick={() => {
-                          const newLinks = block.links.filter((_: any, idx: number) => idx !== i);
-                          updBlock({ links: newLinks });
-                        }}
-                        className="p-1.5 rounded hover:bg-destructive"
-                      >
-                        <X className="h-4 w-4" />
-                      </button>
-                    </div>
-                    <input
-                      type="text"
-                      value={link.url}
-                      onChange={(e) => {
-                        const newLinks = [...block.links];
-                        newLinks[i] = { ...newLinks[i], url: e.target.value };
-                        updBlock({ links: newLinks });
-                      }}
-                      placeholder="https://"
-                      className="w-full rounded-lg border border-input bg-secondary/50 px-2 py-1.5 text-sm"
-                    />
-                    <Field label="Font Awesome класс (опционально)" compact>
-                      <input
-                        type="text"
-                        value={link.iconName || ''}
-                        onChange={(e) => {
-                          const newLinks = [...block.links];
-                          newLinks[i] = { ...newLinks[i], iconName: e.target.value };
-                          updBlock({ links: newLinks });
-                        }}
-                        placeholder="fa-brands fa-facebook"
-                        className="w-full rounded-lg border border-input bg-secondary/50 px-2 py-1.5 text-sm"
-                      />
-                      <p className="text-[10px] text-muted-foreground mt-1">Примеры: fa-brands fa-facebook, fa-solid fa-star</p>
-                    </Field>
-                  </div>
-                ))}
-                <button
-                  onClick={() => updBlock({ links: [...(block.links || []), { network: 'facebook', url: '#', iconName: '' }] })}
-                  className="w-full flex items-center justify-center gap-1.5 py-2 rounded-lg bg-secondary text-sm"
-                >
-                  <Plus className="h-3.5 w-3.5" /> Добавить соцсеть
-                </button>
-              </div>
-            </Section>
-            <Section title="Оформление">
-              <Field label="Размер иконок" compact>
-                <div className="flex items-center gap-2">
-                  <input type="range" min={24} max={56} value={block.iconSize} onChange={(e) => updBlock({ iconSize: +e.target.value })} className="flex-1" />
-                  <span className="text-xs w-12">{block.iconSize}px</span>
-                </div>
-              </Field>
-              <Field label="Цвет иконок" compact>
-                <input type="color" value={block.iconColor} onChange={(e) => updBlock({ iconColor: e.target.value })} className="w-full h-8 rounded border" />
+        {/* Social Links */}
+{block.type === 'social' && (
+  <>
+    <Section title="Социальные сети">
+      <div className="space-y-2">
+        {(block.links || []).map((link: any, i: number) => (
+          <div key={i} className="flex flex-col gap-2 p-2 rounded-lg bg-secondary/30">
+            {/* Основные поля */}
+            <div className="flex items-center gap-2">
+              <select
+                value={link.network}
+                onChange={(e) => {
+                  const newLinks = [...block.links];
+                  newLinks[i] = { ...newLinks[i], network: e.target.value };
+                  updBlock({ links: newLinks });
+                }}
+                className="flex-1 rounded-lg border border-input bg-secondary/50 px-2 py-1.5 text-sm"
+              >
+                <option value="facebook">Facebook</option>
+                <option value="instagram">Instagram</option>
+                <option value="twitter">Twitter</option>
+                <option value="linkedin">LinkedIn</option>
+                <option value="youtube">YouTube</option>
+                <option value="telegram">Telegram</option>
+                <option value="vk">VK</option>
+              </select>
+              <button
+                onClick={() => {
+                  const newLinks = block.links.filter((_: any, idx: number) => idx !== i);
+                  updBlock({ links: newLinks });
+                }}
+                className="p-1.5 rounded hover:bg-destructive"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+            
+            <input
+              type="text"
+              value={link.url}
+              onChange={(e) => {
+                const newLinks = [...block.links];
+                newLinks[i] = { ...newLinks[i], url: e.target.value };
+                updBlock({ links: newLinks });
+              }}
+              placeholder="https://"
+              className="w-full rounded-lg border border-input bg-secondary/50 px-2 py-1.5 text-sm"
+            />
+            
+            <Field label="Font Awesome класс (опционально)" compact>
+              <input
+                type="text"
+                value={link.iconName || ''}
+                onChange={(e) => {
+                  const newLinks = [...block.links];
+                  newLinks[i] = { ...newLinks[i], iconName: e.target.value };
+                  updBlock({ links: newLinks });
+                }}
+                placeholder="fa-brands fa-facebook"
+                className="w-full rounded-lg border border-input bg-secondary/50 px-2 py-1.5 text-sm"
+              />
+            </Field>
+            
+            {/* 🔥 ИНДИВИДУАЛЬНЫЕ ЦВЕТА (добавьте это) */}
+            <div className="grid grid-cols-2 gap-2 mt-1">
+              <Field label="Цвет иконки" compact>
+                <input
+                  type="color"
+                  value={link.iconColor || block.iconColor}
+                  onChange={(e) => {
+                    const newLinks = [...block.links];
+                    newLinks[i] = { ...newLinks[i], iconColor: e.target.value };
+                    updBlock({ links: newLinks });
+                  }}
+                  className="w-full h-8 rounded border cursor-pointer"
+                />
               </Field>
               <Field label="Цвет фона" compact>
-                <input type="color" value={block.iconBgColor} onChange={(e) => updBlock({ iconBgColor: e.target.value })} className="w-full h-8 rounded border" />
+                <input
+                  type="color"
+                  value={link.bgColor || block.iconBgColor}
+                  onChange={(e) => {
+                    const newLinks = [...block.links];
+                    newLinks[i] = { ...newLinks[i], bgColor: e.target.value };
+                    updBlock({ links: newLinks });
+                  }}
+                  className="w-full h-8 rounded border cursor-pointer"
+                />
               </Field>
-              <Field label="Расположение" compact>
-                <div className="flex gap-1">
-                  <button onClick={() => updBlock({ layout: 'horizontal' })} className={`flex-1 py-1.5 text-xs rounded ${block.layout === 'horizontal' ? 'bg-primary text-white' : 'bg-secondary'}`}>Горизонтально</button>
-                  <button onClick={() => updBlock({ layout: 'vertical' })} className={`flex-1 py-1.5 text-xs rounded ${block.layout === 'vertical' ? 'bg-primary text-white' : 'bg-secondary'}`}>Вертикально</button>
-                </div>
-              </Field>
-              <Field label="Отступ" compact>
-                <input type="number" value={block.gap} onChange={(e) => updBlock({ gap: +e.target.value })} className="w-full rounded border px-2 py-1.5 text-sm" />
-              </Field>
-            </Section>
-          </>
-        )}
+            </div>
+          </div>
+        ))}
+        
+        <button
+          onClick={() => updBlock({ links: [...(block.links || []), { network: 'facebook', url: '#', iconName: '', iconColor: block.iconColor, bgColor: block.iconBgColor }] })}
+          className="w-full flex items-center justify-center gap-1.5 py-2 rounded-lg bg-secondary text-sm"
+        >
+          <Plus className="h-3.5 w-3.5" /> Добавить соцсеть
+        </button>
+      </div>
+    </Section>
+    
+    <Section title="Глобальное оформление">
+      <Field label="Размер иконок" compact>
+        <div className="flex items-center gap-2">
+          <input type="range" min={24} max={56} value={block.iconSize} onChange={(e) => updBlock({ iconSize: +e.target.value })} className="flex-1" />
+          <span className="text-xs w-12">{block.iconSize}px</span>
+        </div>
+      </Field>
+      
+      {/* 🔥 ГЛОБАЛЬНЫЕ ЦВЕТА (оставьте это для установки значений по умолчанию) */}
+      <Field label="Цвет иконок (по умолчанию)" compact>
+        <input type="color" value={block.iconColor} onChange={(e) => updBlock({ iconColor: e.target.value })} className="w-full h-8 rounded border" />
+      </Field>
+      <Field label="Цвет фона (по умолчанию)" compact>
+        <input type="color" value={block.iconBgColor} onChange={(e) => updBlock({ iconBgColor: e.target.value })} className="w-full h-8 rounded border" />
+      </Field>
+      
+      <Field label="Расположение" compact>
+        <div className="flex gap-1">
+          <button onClick={() => updBlock({ layout: 'horizontal' })} className={`flex-1 py-1.5 text-xs rounded ${block.layout === 'horizontal' ? 'bg-primary text-white' : 'bg-secondary'}`}>Горизонтально</button>
+          <button onClick={() => updBlock({ layout: 'vertical' })} className={`flex-1 py-1.5 text-xs rounded ${block.layout === 'vertical' ? 'bg-primary text-white' : 'bg-secondary'}`}>Вертикально</button>
+        </div>
+      </Field>
+      <Field label="Отступ" compact>
+        <input type="number" value={block.gap} onChange={(e) => updBlock({ gap: +e.target.value })} className="w-full rounded border px-2 py-1.5 text-sm" />
+      </Field>
+    </Section>
+  </>
+)}
 
         {/* Testimonial */}
         {block.type === 'testimonial' && (
