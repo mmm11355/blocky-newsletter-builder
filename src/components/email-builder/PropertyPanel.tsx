@@ -932,6 +932,183 @@ const MenuFields: React.FC<{
         </div>
       </Section>
 
+
+        {/* Social Links */}
+        {block.type === 'social' && (
+          <>
+            <Section title="Социальные сети">
+              <div className="space-y-2">
+                {(block.links || []).map((link, i) => (
+                  <div key={i} className="flex items-center gap-2 p-2 rounded-lg bg-secondary/30">
+                    <select
+                      value={link.network}
+                      onChange={(e) => {
+                        const newLinks = [...block.links];
+                        newLinks[i] = { ...newLinks[i], network: e.target.value as any };
+                        updBlock({ links: newLinks });
+                      }}
+                      className="flex-1 rounded-lg border border-input bg-secondary/50 px-2 py-1.5 text-sm"
+                    >
+                      <option value="facebook">Facebook</option>
+                      <option value="instagram">Instagram</option>
+                      <option value="twitter">Twitter</option>
+                      <option value="linkedin">LinkedIn</option>
+                      <option value="youtube">YouTube</option>
+                      <option value="telegram">Telegram</option>
+                      <option value="vk">VK</option>
+                    </select>
+                    <input
+                      type="text"
+                      value={link.url}
+                      onChange={(e) => {
+                        const newLinks = [...block.links];
+                        newLinks[i] = { ...newLinks[i], url: e.target.value };
+                        updBlock({ links: newLinks });
+                      }}
+                      placeholder="https://"
+                      className="flex-1 rounded-lg border border-input bg-secondary/50 px-2 py-1.5 text-sm"
+                    />
+                    <button
+                      onClick={() => {
+                        const newLinks = block.links.filter((_, idx) => idx !== i);
+                        updBlock({ links: newLinks });
+                      }}
+                      className="p-1.5 rounded hover:bg-destructive"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  </div>
+                ))}
+                <button
+                  onClick={() => updBlock({ links: [...(block.links || []), { network: 'facebook', url: '#' }] })}
+                  className="w-full flex items-center justify-center gap-1.5 py-2 rounded-lg bg-secondary text-sm"
+                >
+                  <Plus className="h-3.5 w-3.5" /> Добавить соцсеть
+                </button>
+              </div>
+            </Section>
+            <Section title="Оформление">
+              <Field label="Размер иконок" compact>
+                <div className="flex items-center gap-2">
+                  <input type="range" min={16} max={48} value={block.iconSize} onChange={(e) => updBlock({ iconSize: +e.target.value })} className="flex-1" />
+                  <span className="text-xs w-12">{block.iconSize}px</span>
+                </div>
+              </Field>
+              <Field label="Цвет иконок" compact>
+                <input type="color" value={block.iconColor} onChange={(e) => updBlock({ iconColor: e.target.value })} className="w-full h-8 rounded border" />
+              </Field>
+              <Field label="Цвет фона" compact>
+                <input type="color" value={block.iconBgColor} onChange={(e) => updBlock({ iconBgColor: e.target.value })} className="w-full h-8 rounded border" />
+              </Field>
+              <Field label="Расположение" compact>
+                <div className="flex gap-1">
+                  <button onClick={() => updBlock({ layout: 'horizontal' })} className={`flex-1 py-1.5 text-xs rounded ${block.layout === 'horizontal' ? 'bg-primary text-white' : 'bg-secondary'}`}>Горизонтально</button>
+                  <button onClick={() => updBlock({ layout: 'vertical' })} className={`flex-1 py-1.5 text-xs rounded ${block.layout === 'vertical' ? 'bg-primary text-white' : 'bg-secondary'}`}>Вертикально</button>
+                </div>
+              </Field>
+              <Field label="Отступ" compact>
+                <input type="number" value={block.gap} onChange={(e) => updBlock({ gap: +e.target.value })} className="w-full rounded border px-2 py-1.5 text-sm" />
+              </Field>
+            </Section>
+          </>
+        )}
+
+        {/* Testimonial */}
+        {block.type === 'testimonial' && (
+          <>
+            <Field label="Текст отзыва">
+              <textarea rows={3} value={block.quote} onChange={(e) => updBlock({ quote: e.target.value })} className="w-full rounded-lg border border-input bg-secondary/50 px-3 py-2 text-sm" />
+            </Field>
+            <Field label="Имя автора">
+              <input type="text" value={block.authorName} onChange={(e) => updBlock({ authorName: e.target.value })} className="w-full rounded-lg border border-input bg-secondary/50 px-3 py-2 text-sm" />
+            </Field>
+            <Field label="Должность">
+              <input type="text" value={block.authorTitle} onChange={(e) => updBlock({ authorTitle: e.target.value })} className="w-full rounded-lg border border-input bg-secondary/50 px-3 py-2 text-sm" />
+            </Field>
+            <Field label="Фото (URL)">
+              <input type="text" value={block.avatarUrl} onChange={(e) => updBlock({ avatarUrl: e.target.value })} className="w-full rounded-lg border border-input bg-secondary/50 px-3 py-2 text-sm" />
+            </Field>
+            <Field label="Рейтинг">
+              <div className="flex gap-1">
+                {[1,2,3,4,5].map(star => (
+                  <button key={star} onClick={() => updBlock({ rating: star })} className={`w-8 h-8 rounded text-lg ${block.rating >= star ? 'text-yellow-500' : 'text-gray-400'}`}>★</button>
+                ))}
+              </div>
+            </Field>
+          </>
+        )}
+
+        {/* Speaker */}
+        {block.type === 'speaker' && (
+          <>
+            <Field label="Имя спикера">
+              <input type="text" value={block.name} onChange={(e) => updBlock({ name: e.target.value })} className="w-full rounded-lg border border-input bg-secondary/50 px-3 py-2 text-sm" />
+            </Field>
+            <Field label="Должность">
+              <input type="text" value={block.title} onChange={(e) => updBlock({ title: e.target.value })} className="w-full rounded-lg border border-input bg-secondary/50 px-3 py-2 text-sm" />
+            </Field>
+            <Field label="Компания">
+              <input type="text" value={block.company} onChange={(e) => updBlock({ company: e.target.value })} className="w-full rounded-lg border border-input bg-secondary/50 px-3 py-2 text-sm" />
+            </Field>
+            <Field label="Фото (URL)">
+              <input type="text" value={block.photoUrl} onChange={(e) => updBlock({ photoUrl: e.target.value })} className="w-full rounded-lg border border-input bg-secondary/50 px-3 py-2 text-sm" />
+            </Field>
+            <Field label="Биография">
+              <textarea rows={3} value={block.bio} onChange={(e) => updBlock({ bio: e.target.value })} className="w-full rounded-lg border border-input bg-secondary/50 px-3 py-2 text-sm" />
+            </Field>
+            <Section title="Социальные сети спикера">
+              <div className="space-y-2">
+                {(block.socialLinks || []).map((link, i) => (
+                  <div key={i} className="flex items-center gap-2 p-2 rounded-lg bg-secondary/30">
+                    <select
+                      value={link.network}
+                      onChange={(e) => {
+                        const newLinks = [...(block.socialLinks || [])];
+                        newLinks[i] = { ...newLinks[i], network: e.target.value as any };
+                        updBlock({ socialLinks: newLinks });
+                      }}
+                      className="flex-1 rounded-lg border border-input bg-secondary/50 px-2 py-1.5 text-sm"
+                    >
+                      <option value="linkedin">LinkedIn</option>
+                      <option value="twitter">Twitter</option>
+                      <option value="facebook">Facebook</option>
+                      <option value="instagram">Instagram</option>
+                    </select>
+                    <input
+                      type="text"
+                      value={link.url}
+                      onChange={(e) => {
+                        const newLinks = [...(block.socialLinks || [])];
+                        newLinks[i] = { ...newLinks[i], url: e.target.value };
+                        updBlock({ socialLinks: newLinks });
+                      }}
+                      placeholder="https://"
+                      className="flex-1 rounded-lg border border-input bg-secondary/50 px-2 py-1.5 text-sm"
+                    />
+                    <button
+                      onClick={() => {
+                        const newLinks = (block.socialLinks || []).filter((_, idx) => idx !== i);
+                        updBlock({ socialLinks: newLinks });
+                      }}
+                      className="p-1.5 rounded hover:bg-destructive"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  </div>
+                ))}
+                <button
+                  onClick={() => updBlock({ socialLinks: [...(block.socialLinks || []), { network: 'linkedin', url: '#' }] })}
+                  className="w-full flex items-center justify-center gap-1.5 py-2 rounded-lg bg-secondary text-sm"
+                >
+                  <Plus className="h-3.5 w-3.5" /> Добавить соцсеть
+                </button>
+              </div>
+            </Section>
+          </>
+        )}
+
+
+      
       <Field label="Отступ между элементами" compact>
         <div className="flex items-center gap-2">
           <input type="range" min={4} max={40} value={gap} onChange={(e) => onUpdate({ menuGap: +e.target.value })} className="flex-1 h-2 accent-primary" />
