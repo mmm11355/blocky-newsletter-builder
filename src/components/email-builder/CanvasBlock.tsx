@@ -1,7 +1,7 @@
 import React from 'react';
 import { useEmailBuilder } from '@/context/EmailBuilderContext';
-import { EmailBlock, SocialBlock, TestimonialBlock, SpeakerBlock, SocialLink } from '@/types/email-builder';
-import { GripVertical } from 'lucide-react';
+import { EmailBlock, SocialBlock, TestimonialBlock, SpeakerBlock, SocialLink, ContactBlock, LinksBlock } from '@/types/email-builder';
+import { GripVertical, Mail, Phone, MapPin } from 'lucide-react';
 
 interface Props {
   block: EmailBlock;
@@ -21,8 +21,7 @@ const parseContentToHtml = (content: string): string => {
   return html;
 };
 
-// Функция получения иконки (SVG для стандартных, или Font Awesome через i-тег)
-// Функция получения иконки (SVG для стандартных, или Font Awesome через i-тег, или своя картинка)
+// Функция получения иконки для соцсетей
 const getSocialIconHtml = (link: any, size: number, defaultColor: string): string => {
   const color = link.iconColor || defaultColor;
   const iconSize = size * 0.6;
@@ -50,7 +49,7 @@ const getSocialIconHtml = (link: any, size: number, defaultColor: string): strin
     tenchat: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="${color}" width="${iconSize}" height="${iconSize}"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zM8 12c0-1.1.9-2 2-2s2 .9 2 2-.9 2-2 2-2-.9-2-2zm6 4c0-1.1.9-2 2-2s2 .9 2 2-.9 2-2 2-2-.9-2-2z"/></svg>`,
     dzen: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="${color}" width="${iconSize}" height="${iconSize}"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>`,
     rutube: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="${color}" width="${iconSize}" height="${iconSize}"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15h-2v-4H6v4H4V7h2v4h2V7h2v10zm6-5c0 1.1-.9 2-2 2h-2v3h-2V7h4c1.1 0 2 .9 2 2v3z"/></svg>`,
-    setka: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="${color}" width="${iconSize}" height="${iconSize}"><rect x="3" y="3" width="18" height="18" rx="2" stroke="none"/><line x1="3" y1="9" x2="21" y2="9" stroke="none"/><line x1="3" y1="15" x2="21" y2="15" stroke="none"/><line x1="9" y1="3" x2="9" y2="21" stroke="none"/><line x1="15" y1="3" x2="15" y2="21" stroke="none"/></svg>`,
+    setka: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="${color}" width="${iconSize}" height="${iconSize}"><rect x="3" y="3" width="18" height="18" rx="2" fill="none" stroke="${color}" stroke-width="1"/><line x1="3" y1="9" x2="21" y2="9" stroke="${color}" stroke-width="1"/><line x1="3" y1="15" x2="21" y2="15" stroke="${color}" stroke-width="1"/><line x1="9" y1="3" x2="9" y2="21" stroke="${color}" stroke-width="1"/><line x1="15" y1="3" x2="15" y2="21" stroke="${color}" stroke-width="1"/></svg>`,
   };
   
   if (icons[link.network]) {
@@ -59,6 +58,83 @@ const getSocialIconHtml = (link: any, size: number, defaultColor: string): strin
   
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="${color}" width="${iconSize}" height="${iconSize}"><circle cx="12" cy="12" r="10"/></svg>`;
 };
+
+const CanvasBlock: React.FC<Props> = ({ block, rowId, cellIndex }) => {
+  const { selection, setSelection, previewMode } = useEmailBuilder();
+  const isSelected = selection?.blockId === block.id;
+  const s = block.style;
+
+  const handleClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setSelection({ rowId, cellIndex, blockId: block.id });
+  };
+
+  const handleDragStart = (e: React.DragEvent) => {
+    e.stopPropagation();
+    e.dataTransfer.setData('moveBlock', JSON.stringify({ rowId, cellIndex, blockId: block.id }));
+    e.dataTransfer.effectAllowed = 'move';
+  };
+
+  const activeWidth = previewMode === 'mobile' ? (s.mobileWidth || '100%') : (s.width || '100%');
+
+  const wrapperStyle: React.CSSProperties = {
+    width: activeWidth,
+    maxWidth: '100%',
+    marginTop: s.marginTop || 0,
+    marginRight: s.textAlign === 'center' ? 'auto' : s.textAlign === 'right' ? 0 : (s.marginRight || 0),
+    marginBottom: s.marginBottom || 0,
+    marginLeft: s.textAlign === 'center' ? 'auto' : s.textAlign === 'right' ? 'auto' : (s.marginLeft || 0),
+    position: 'relative',
+    direction: 'ltr',
+  };
+
+  const baseStyle: React.CSSProperties = {
+    color: s.color,
+    fontSize: s.fontSize,
+    fontWeight: s.fontWeight as any,
+    fontFamily: s.fontFamily !== 'inherit' ? s.fontFamily : undefined,
+    textAlign: s.textAlign === 'center' ? 'center' : s.textAlign === 'right' ? 'right' : 'left',
+    backgroundColor: s.backgroundColor,
+    padding: `${s.paddingTop}px ${s.paddingRight}px ${s.paddingBottom}px ${s.paddingLeft}px`,
+    border: `${s.borderWidth}px solid ${s.borderColor}`,
+    borderRadius: s.borderRadius,
+    lineHeight: s.lineHeight,
+    cursor: 'pointer',
+    outline: isSelected ? '2px solid hsl(var(--primary))' : 'none',
+    outlineOffset: '1px',
+    transition: 'outline 0.15s',
+    direction: 'ltr',
+  };
+
+  const renderBullet = (index: number) => {
+    const bs = (block as any).bulletStyle;
+    if (!bs) return null;
+    const bulletContainerStyle: React.CSSProperties = {
+      display: 'inline-flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginRight: 8,
+      position: 'relative',
+      left: bs.offsetX,
+      top: bs.offsetY,
+      flexShrink: 0,
+      direction: 'ltr',
+    };
+    
+    if (bs.type === 'custom' && bs.fontAwesomeIcon) {
+      return <span style={bulletContainerStyle} dangerouslySetInnerHTML={{ __html: `<i class="${bs.fontAwesomeIcon}" style="color:${bs.color}; font-size:${bs.size}px;"></i>` }} />;
+    }
+    if (bs.type === 'custom' && bs.customIcon) {
+      return <span style={bulletContainerStyle}><img src={bs.customIcon} alt="" style={{ width: bs.size, height: bs.size }} /></span>;
+    }
+    if (bs.type === 'check') {
+      return <span style={{ ...bulletContainerStyle, color: bs.color, fontSize: bs.size, fontWeight: bs.fontWeight as any }}>✓</span>;
+    }
+    if (bs.type === 'number') {
+      return <span style={{ ...bulletContainerStyle, color: bs.color, fontSize: bs.size, fontWeight: bs.fontWeight as any }}>{index + 1}.</span>;
+    }
+    return <span style={{ ...bulletContainerStyle, color: bs.color, fontSize: bs.size, fontWeight: bs.fontWeight as any }}>•</span>;
+  };
 
   const parsedContent = parseContentToHtml(block.content);
 
@@ -71,7 +147,7 @@ const getSocialIconHtml = (link: any, size: number, defaultColor: string): strin
       case 'image':
         return (
           <div style={baseStyle} onClick={handleClick}>
-            <img src={block.src} alt={block.alt} style={{ maxWidth: '100%', height: 'auto', display: 'block', margin: '0 auto', borderRadius: s.borderRadius }} />
+            <img src={(block as any).src} alt={(block as any).alt} style={{ maxWidth: '100%', height: 'auto', display: 'block', margin: '0 auto', borderRadius: s.borderRadius }} />
           </div>
         );
       case 'button':
@@ -102,8 +178,8 @@ const getSocialIconHtml = (link: any, size: number, defaultColor: string): strin
       case 'list':
         return (
           <div style={{ ...baseStyle, margin: 0, direction: 'ltr' }} onClick={handleClick}>
-            {(block.listItems || []).map((item, i) => (
-              <div key={i} style={{ display: 'flex', alignItems: 'flex-start', marginBottom: i < (block.listItems?.length || 0) - 1 ? 6 : 0, direction: 'ltr' }}>
+            {((block as any).listItems || []).map((item: string, i: number) => (
+              <div key={i} style={{ display: 'flex', alignItems: 'flex-start', marginBottom: i < ((block as any).listItems?.length || 0) - 1 ? 6 : 0, direction: 'ltr' }}>
                 {renderBullet(i)}
                 <span style={{ direction: 'ltr' }}>{item}</span>
               </div>
@@ -111,8 +187,8 @@ const getSocialIconHtml = (link: any, size: number, defaultColor: string): strin
           </div>
         );
       case 'menu': {
-        const layout = block.menuLayout || 'horizontal';
-        const gap = block.menuGap || 16;
+        const layout = (block as any).menuLayout || 'horizontal';
+        const gap = (block as any).menuGap || 16;
         const isHorizontal = layout === 'horizontal';
         return (
           <div style={{ ...baseStyle, margin: 0, direction: 'ltr' }} onClick={handleClick}>
@@ -125,10 +201,10 @@ const getSocialIconHtml = (link: any, size: number, defaultColor: string): strin
               flexWrap: 'wrap',
               direction: 'ltr',
             }}>
-              {block.menuLogoSrc && (
-                <img src={block.menuLogoSrc} alt="Logo" style={{ width: block.menuLogoWidth || 120, height: 'auto', flexShrink: 0 }} />
+              {(block as any).menuLogoSrc && (
+                <img src={(block as any).menuLogoSrc} alt="Logo" style={{ width: (block as any).menuLogoWidth || 120, height: 'auto', flexShrink: 0 }} />
               )}
-              {(block.menuItems || []).map((item, i) => (
+              {((block as any).menuItems || []).map((item: any, i: number) => (
                 <a key={i} style={{ color: s.color, fontSize: s.fontSize, fontWeight: s.fontWeight as any, textDecoration: 'none', whiteSpace: 'nowrap', direction: 'ltr' }}>
                   {item.label}
                 </a>
@@ -138,44 +214,44 @@ const getSocialIconHtml = (link: any, size: number, defaultColor: string): strin
         );
       }
       case 'social': {
-  const socialBlock = block as SocialBlock;
-  return (
-    <div style={{ ...baseStyle, margin: 0, direction: 'ltr' }} onClick={handleClick}>
-      <div style={{
-        display: 'flex',
-        flexDirection: socialBlock.layout === 'horizontal' ? 'row' : 'column',
-        gap: socialBlock.gap,
-        justifyContent: s.textAlign === 'center' ? 'center' : s.textAlign === 'right' ? 'flex-end' : 'flex-start',
-        alignItems: 'center',
-        flexWrap: 'wrap',
-        direction: 'ltr',
-      }}>
-        {socialBlock.links.map((link, i) => (
-          <a
-            key={i}
-            href={link.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{
-              display: 'inline-flex',
-              textDecoration: 'none',
-              backgroundColor: link.bgColor || socialBlock.iconBgColor,
-              borderRadius: '50%',
-              width: socialBlock.iconSize,
-              height: socialBlock.iconSize,
+        const socialBlock = block as SocialBlock;
+        return (
+          <div style={{ ...baseStyle, margin: 0, direction: 'ltr' }} onClick={handleClick}>
+            <div style={{
+              display: 'flex',
+              flexDirection: socialBlock.layout === 'horizontal' ? 'row' : 'column',
+              gap: socialBlock.gap,
+              justifyContent: s.textAlign === 'center' ? 'center' : s.textAlign === 'right' ? 'flex-end' : 'flex-start',
               alignItems: 'center',
-              justifyContent: 'center',
-            }}
-            onClick={(e) => e.stopPropagation()}
-            dangerouslySetInnerHTML={{
-              __html: getSocialIconHtml(link, socialBlock.iconSize, socialBlock.iconColor)
-            }}
-          />
-        ))}
-      </div>
-    </div>
-  );
-}
+              flexWrap: 'wrap',
+              direction: 'ltr',
+            }}>
+              {socialBlock.links.map((link, i) => (
+                <a
+                  key={i}
+                  href={link.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    display: 'inline-flex',
+                    textDecoration: 'none',
+                    backgroundColor: link.bgColor || socialBlock.iconBgColor,
+                    borderRadius: '50%',
+                    width: socialBlock.iconSize,
+                    height: socialBlock.iconSize,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                  onClick={(e) => e.stopPropagation()}
+                  dangerouslySetInnerHTML={{
+                    __html: getSocialIconHtml(link, socialBlock.iconSize, socialBlock.iconColor)
+                  }}
+                />
+              ))}
+            </div>
+          </div>
+        );
+      }
       case 'testimonial': {
         const tb = block as TestimonialBlock;
         const stars = '★'.repeat(tb.rating) + '☆'.repeat(5 - tb.rating);
@@ -220,6 +296,61 @@ const getSocialIconHtml = (link: any, size: number, defaultColor: string): strin
                     <i className={link.iconName} style={{ fontSize: 18 }} /> : 
                     (link.network === 'linkedin' ? 'in' : link.network === 'twitter' ? '🐦' : '•')
                   }
+                </a>
+              ))}
+            </div>
+          </div>
+        );
+      }
+      case 'contact': {
+        const cb = block as ContactBlock;
+        return (
+          <div style={{ ...baseStyle, margin: 0, direction: 'ltr' }} onClick={handleClick}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              {cb.email && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <Mail size={18} />
+                  <a href={`mailto:${cb.email}`} style={{ color: s.color, textDecoration: 'none' }}>{cb.email}</a>
+                </div>
+              )}
+              {cb.phone && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <Phone size={18} />
+                  <a href={`tel:${cb.phone}`} style={{ color: s.color, textDecoration: 'none' }}>{cb.phone}</a>
+                </div>
+              )}
+              {cb.address && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <MapPin size={18} />
+                  <span>{cb.address}</span>
+                </div>
+              )}
+              {cb.workHours && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, opacity: 0.8 }}>
+                  <span>🕒</span>
+                  <span>{cb.workHours}</span>
+                </div>
+              )}
+            </div>
+          </div>
+        );
+      }
+      case 'links': {
+        const lb = block as LinksBlock;
+        const isHorizontal = lb.layout === 'horizontal';
+        return (
+          <div style={{ ...baseStyle, margin: 0, direction: 'ltr' }} onClick={handleClick}>
+            <div style={{
+              display: 'flex',
+              flexDirection: isHorizontal ? 'row' : 'column',
+              gap: lb.gap,
+              justifyContent: s.textAlign === 'center' ? 'center' : s.textAlign === 'right' ? 'flex-end' : 'flex-start',
+              alignItems: 'center',
+              flexWrap: 'wrap',
+            }}>
+              {lb.links.map((link, i) => (
+                <a key={i} href={link.url} target="_blank" rel="noopener noreferrer" style={{ color: s.color, textDecoration: 'none', fontSize: s.fontSize }}>
+                  {link.label}
                 </a>
               ))}
             </div>
