@@ -1,6 +1,6 @@
 import React from 'react';
 import { useEmailBuilder } from '@/context/EmailBuilderContext';
-import { EmailBlock, SocialBlock, TestimonialBlock, SpeakerBlock, SocialLink, ContactBlock, LinksBlock } from '@/types/email-builder';
+import { EmailBlock, SocialBlock, TestimonialBlock, SpeakerBlock, ContactBlock, LinksBlock } from '@/types/email-builder';
 import { GripVertical, Mail, Phone, MapPin } from 'lucide-react';
 
 interface Props {
@@ -26,17 +26,14 @@ const getSocialIconHtml = (link: any, size: number, defaultColor: string): strin
   const color = link.iconColor || defaultColor;
   const iconSize = size * 0.6;
   
-  // Если указана своя иконка URL
   if (link.customIconUrl) {
     return `<img src="${link.customIconUrl}" style="width:${iconSize}px; height:${iconSize}px;" />`;
   }
   
-  // Если указан Font Awesome класс
   if (link.iconName) {
     return `<i class="${link.iconName}" style="font-size:${iconSize}px; color:${color}; display:flex; align-items:center; justify-content:center;"></i>`;
   }
   
-  // Стандартные SVG иконки по сети
   const icons: Record<string, string> = {
     facebook: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="${color}" width="${iconSize}" height="${iconSize}"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>`,
     instagram: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="${color}" width="${iconSize}" height="${iconSize}"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zM5.838 12c0-3.402 2.76-6.162 6.162-6.162s6.162 2.76 6.162 6.162-2.76 6.162-6.162 6.162-6.162-2.76-6.162-6.162zM12 16c-2.209 0-4-1.791-4-4s1.791-4 4-4 4 1.791 4 4-1.791 4-4 4zm4.965-10.405c0 .796-.645 1.441-1.441 1.441-.795 0-1.44-.645-1.44-1.441 0-.795.645-1.44 1.44-1.44.796 0 1.441.645 1.441 1.44z"/></svg>`,
@@ -60,7 +57,7 @@ const getSocialIconHtml = (link: any, size: number, defaultColor: string): strin
 };
 
 const CanvasBlock: React.FC<Props> = ({ block, rowId, cellIndex }) => {
-  const { selection, setSelection, previewMode } = useEmailBuilder();
+  const { selection, setSelection, previewMode, moveBlock } = useEmailBuilder();
   const isSelected = selection?.blockId === block.id;
   const s = block.style;
 
@@ -73,6 +70,35 @@ const CanvasBlock: React.FC<Props> = ({ block, rowId, cellIndex }) => {
     e.stopPropagation();
     e.dataTransfer.setData('moveBlock', JSON.stringify({ rowId, cellIndex, blockId: block.id }));
     e.dataTransfer.effectAllowed = 'move';
+    // Визуальный эффект при перетаскивании
+    if (e.currentTarget) {
+      (e.currentTarget as HTMLElement).style.opacity = '0.4';
+    }
+  };
+
+  const handleDragEnd = (e: React.DragEvent) => {
+    // Возвращаем прозрачность
+    if (e.currentTarget) {
+      (e.currentTarget as HTMLElement).style.opacity = '';
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const data = e.dataTransfer.getData('moveBlock');
+    if (data) {
+      try {
+        const { rowId: fromRowId, cellIndex: fromCellIndex, blockId } = JSON.parse(data);
+        if (fromRowId === rowId && fromCellIndex === cellIndex) return;
+        // Здесь логика перемещения блока
+      } catch (err) {}
+    }
   };
 
   const activeWidth = previewMode === 'mobile' ? (s.mobileWidth || '100%') : (s.width || '100%');
@@ -110,15 +136,12 @@ const CanvasBlock: React.FC<Props> = ({ block, rowId, cellIndex }) => {
     const bs = (block as any).bulletStyle;
     if (!bs) return null;
     const bulletContainerStyle: React.CSSProperties = {
-      display: 'inline-flex',
-      alignItems: 'center',
-      justifyContent: 'center',
+      display: 'inline-block',
       marginRight: 8,
       position: 'relative',
       left: bs.offsetX,
       top: bs.offsetY,
-      flexShrink: 0,
-      direction: 'ltr',
+      lineHeight: 1,
     };
     
     if (bs.type === 'custom' && bs.fontAwesomeIcon) {
@@ -128,12 +151,12 @@ const CanvasBlock: React.FC<Props> = ({ block, rowId, cellIndex }) => {
       return <span style={bulletContainerStyle}><img src={bs.customIcon} alt="" style={{ width: bs.size, height: bs.size }} /></span>;
     }
     if (bs.type === 'check') {
-      return <span style={{ ...bulletContainerStyle, color: bs.color, fontSize: bs.size, fontWeight: bs.fontWeight as any }}>✓</span>;
+      return <span style={{ ...bulletContainerStyle, color: bs.color, fontSize: bs.size }}>✓</span>;
     }
     if (bs.type === 'number') {
-      return <span style={{ ...bulletContainerStyle, color: bs.color, fontSize: bs.size, fontWeight: bs.fontWeight as any }}>{index + 1}.</span>;
+      return <span style={{ ...bulletContainerStyle, color: bs.color, fontSize: bs.size, fontWeight: bs.fontWeight }}>{index + 1}.</span>;
     }
-    return <span style={{ ...bulletContainerStyle, color: bs.color, fontSize: bs.size, fontWeight: bs.fontWeight as any }}>•</span>;
+    return <span style={{ ...bulletContainerStyle, color: bs.color, fontSize: bs.size }}>•</span>;
   };
 
   const parsedContent = parseContentToHtml(block.content);
@@ -175,64 +198,44 @@ const CanvasBlock: React.FC<Props> = ({ block, rowId, cellIndex }) => {
             </a>
           </div>
         );
-     case 'list': {
-  const bs = (block as any).bulletStyle || { type: 'disc', color: '#333333', size: 16, fontWeight: '400', customIcon: '', fontAwesomeIcon: '', offsetX: 0, offsetY: 0 };
-  const listItems = (block as any).listItems || [];
-  
-  return (
-    <div style={{ ...baseStyle, margin: 0, direction: 'ltr' }} onClick={handleClick}>
-      <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-        <tbody>
-          {listItems.map((item: string, i: number) => {
-            let bulletContent = null;
-            
-            if (bs.type === 'custom' && bs.fontAwesomeIcon) {
-              bulletContent = <i className={bs.fontAwesomeIcon} style={{ color: bs.color, fontSize: bs.size }} />;
-            } else if (bs.type === 'custom' && bs.customIcon) {
-              bulletContent = <img src={bs.customIcon} alt="" style={{ width: bs.size, height: bs.size, display: 'block' }} />;
-            } else if (bs.type === 'check') {
-              bulletContent = <span style={{ color: bs.color, fontSize: bs.size }}>✓</span>;
-            } else if (bs.type === 'number') {
-              bulletContent = <span style={{ color: bs.color, fontSize: bs.size, fontWeight: bs.fontWeight }}>{i + 1}.</span>;
-            } else {
-              bulletContent = <span style={{ color: bs.color, fontSize: bs.size }}>•</span>;
-            }
-            
-            return (
-              <tr key={i} style={{ verticalAlign: 'top' }}>
-                <td style={{ 
-                  width: bs.size + 12, 
-                  paddingRight: 8, 
-                  verticalAlign: 'top',
-                  textAlign: 'left'
-                }}>
-                  <span style={{
-                    display: 'inline-block',
-                    position: 'relative',
-                    left: bs.offsetX,
-                    top: bs.offsetY,
-                    lineHeight: 1,
-                  }}>
-                    {bulletContent}
-                  </span>
-                </td>
-                <td style={{ 
-                  color: s.color, 
-                  fontSize: s.fontSize, 
-                  lineHeight: s.lineHeight, 
-                  paddingBottom: i < listItems.length - 1 ? 6 : 0,
-                  verticalAlign: 'top'
-                }}>
-                  {item}
-                </td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
-    </div>
-  );
-}
+      case 'list':
+        return (
+          <div style={{ ...baseStyle, margin: 0, direction: 'ltr' }} onClick={handleClick}>
+            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+              <tbody>
+                {((block as any).listItems || []).map((item: string, i: number) => {
+                  const bs = (block as any).bulletStyle || { type: 'disc', color: '#333333', size: 16, fontWeight: '400', customIcon: '', fontAwesomeIcon: '', offsetX: 0, offsetY: 0 };
+                  let bulletContent = null;
+                  
+                  if (bs.type === 'custom' && bs.fontAwesomeIcon) {
+                    bulletContent = <i className={bs.fontAwesomeIcon} style={{ color: bs.color, fontSize: bs.size }} />;
+                  } else if (bs.type === 'custom' && bs.customIcon) {
+                    bulletContent = <img src={bs.customIcon} alt="" style={{ width: bs.size, height: bs.size, display: 'block' }} />;
+                  } else if (bs.type === 'check') {
+                    bulletContent = <span style={{ color: bs.color, fontSize: bs.size }}>✓</span>;
+                  } else if (bs.type === 'number') {
+                    bulletContent = <span style={{ color: bs.color, fontSize: bs.size, fontWeight: bs.fontWeight }}>{i + 1}.</span>;
+                  } else {
+                    bulletContent = <span style={{ color: bs.color, fontSize: bs.size }}>•</span>;
+                  }
+                  
+                  return (
+                    <tr key={i} style={{ verticalAlign: 'top' }}>
+                      <td style={{ width: bs.size + 12, paddingRight: 8, verticalAlign: 'top', textAlign: 'left' }}>
+                        <span style={{ display: 'inline-block', position: 'relative', left: bs.offsetX, top: bs.offsetY, lineHeight: 1 }}>
+                          {bulletContent}
+                        </span>
+                      </td>
+                      <td style={{ color: s.color, fontSize: s.fontSize, lineHeight: s.lineHeight, paddingBottom: i < ((block as any).listItems?.length || 0) - 1 ? 6 : 0, verticalAlign: 'top' }}>
+                        {item}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        );
       case 'menu': {
         const layout = (block as any).menuLayout || 'horizontal';
         const gap = (block as any).menuGap || 16;
@@ -410,10 +413,16 @@ const CanvasBlock: React.FC<Props> = ({ block, rowId, cellIndex }) => {
   };
 
   return (
-    <div style={wrapperStyle} className="group/block relative">
+    <div 
+      style={wrapperStyle} 
+      className="group/block relative"
+      draggable
+      onDragStart={handleDragStart}
+      onDragEnd={handleDragEnd}
+      onDragOver={handleDragOver}
+      onDrop={handleDrop}
+    >
       <div
-        draggable
-        onDragStart={handleDragStart}
         className="absolute -left-5 top-1/2 -translate-y-1/2 opacity-0 group-hover/block:opacity-100 cursor-grab active:cursor-grabbing z-10 p-0.5 rounded bg-muted/80 text-muted-foreground hover:text-foreground transition-opacity"
         title="Перетащить"
       >
