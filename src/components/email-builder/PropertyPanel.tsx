@@ -199,6 +199,18 @@ const PropertyPanel = () => {
             onUpdateItems={(listItems) => updBlock({ listItems })}
             onUpdateBullet={(bulletStyle) => updBlock({ bulletStyle })}
           />
+      <Field label="Font Awesome иконка (для кастомного маркера)" compact>
+  <input
+    type="text"
+    value={bs.fontAwesomeIcon || ''}
+    onChange={(e) => onUpdateBullet({ ...bs, fontAwesomeIcon: e.target.value, type: 'custom' })}
+    placeholder="fa-solid fa-check"
+    className="w-full rounded-lg border border-input bg-secondary/50 px-2 py-1.5 text-sm"
+  />
+  <p className="text-[10px] text-muted-foreground mt-1">
+    Примеры: fa-solid fa-check, fa-regular fa-star, fa-solid fa-arrow-right
+  </p>
+</Field>
         )}
 
         {/* Menu Items */}
