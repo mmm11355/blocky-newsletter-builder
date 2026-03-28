@@ -179,7 +179,9 @@ const CanvasBlock: React.FC<Props> = ({ block, rowId, cellIndex }) => {
   return (
     <div style={{ textAlign: s.textAlign as any, direction: 'ltr' }} onClick={handleClick}>
       <a style={{
-        display: 'inline-block',
+        display: 'block',
+        width: '100%',
+        boxSizing: 'border-box',
         backgroundColor: s.backgroundColor,
         color: s.color,
         fontSize: s.fontSize,
