@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useEmailBuilder } from '@/context/EmailBuilderContext';
 import { EmailRow, BlockType } from '@/types/email-builder';
 import CanvasBlock from './CanvasBlock';
-import { Trash2, ArrowUp, ArrowDown, GripVertical } from 'lucide-react';
+import { Trash2, ArrowUp, ArrowDown } from 'lucide-react';
 
 interface Props {
   row: EmailRow;
@@ -24,7 +24,7 @@ const CanvasRow: React.FC<Props> = ({ row, isMobile }) => {
 
     if (isMoveBlock) {
       const cellEl = e.currentTarget as HTMLElement;
-      const children = Array.from(cellEl.querySelectorAll(':scope > [style], :scope > .group\\/block'));
+      const children = Array.from(cellEl.querySelectorAll(':scope > [style], :scope > .group\\/block, :scope > button'));
       const rect = cellEl.getBoundingClientRect();
       const y = e.clientY - rect.top;
       
@@ -122,23 +122,34 @@ const CanvasRow: React.FC<Props> = ({ row, isMobile }) => {
                 onDragLeave={handleDragLeave}
                 onDrop={(e) => handleDrop(e, cellIndex)}
               >
-                {cell.length === 0 ? (
-                  <div className="h-full min-h-[60px] border border-dashed border-border/30 rounded-md flex items-center justify-center text-xs text-muted-foreground/50 m-1">
-                    Перетащите сюда
-                  </div>
-                ) : (
-                  cell.map((block, blockIndex) => (
-                    <React.Fragment key={block.id}>
-                      {dropIndicator?.cellIndex === cellIndex && dropIndicator.position === blockIndex && (
-                        <div className="h-0.5 bg-primary rounded-full mx-2 my-1" />
-                      )}
-                      <CanvasBlock block={block} rowId={row.id} cellIndex={cellIndex} />
-                    </React.Fragment>
-                  ))
-                )}
+                {/* Существующие блоки */}
+                {cell.map((block, blockIndex) => (
+                  <React.Fragment key={block.id}>
+                    {dropIndicator?.cellIndex === cellIndex && dropIndicator.position === blockIndex && (
+                      <div className="h-0.5 bg-primary rounded-full mx-2 my-1" />
+                    )}
+                    <CanvasBlock block={block} rowId={row.id} cellIndex={cellIndex} />
+                  </React.Fragment>
+                ))}
+                
+                {/* Индикатор drop в конце */}
                 {dropIndicator?.cellIndex === cellIndex && dropIndicator.position === cell.length && cell.length > 0 && (
                   <div className="h-0.5 bg-primary rounded-full mx-2 my-1" />
                 )}
+                
+                {/* Кнопка добавления нового блока */}
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    const blockType = prompt('Выберите тип блока:\nheading - заголовок\ntext - текст\nimage - изображение\nbutton - кнопка\nlist - список\nmenu - меню\nsocial - соцсети\ntestimonial - отзыв\nspeaker - спикер\ncontact - контакты\nlinks - ссылки');
+                    if (blockType) {
+                      addBlockToCell(row.id, cellIndex, blockType as any);
+                    }
+                  }}
+                  className="w-full mt-2 py-2 text-xs text-muted-foreground border border-dashed border-border rounded-lg hover:border-primary hover:text-primary transition-colors"
+                >
+                  + Добавить блок
+                </button>
               </div>
             );
           })}
