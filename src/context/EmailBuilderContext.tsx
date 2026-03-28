@@ -352,29 +352,50 @@ export const EmailBuilderProvider: React.FC<{ children: React.ReactNode }> = ({ 
            </table>`;
         }
         case 'list': {
-          const bs = block.bulletStyle || { type: 'disc', color: '#333333', size: 16, fontWeight: '400', customIcon: '', offsetX: 0, offsetY: 0 };
-          const items = (block.listItems || []).map((item, i) => {
-            let bulletHtml = '';
-            const bulletTdStyle = `color:${bs.color};font-size:${bs.size}px;font-weight:${bs.fontWeight};vertical-align:top;padding-right:8px;white-space:nowrap;`;
-            if (bs.type === 'custom' && bs.customIcon) {
-              bulletHtml = `<td style="${bulletTdStyle}"><img src="${bs.customIcon}" alt="" width="${bs.size}" height="${bs.size}" style="display:block;border:0;" /></td>`;
-            } else if (bs.type === 'check') {
-              bulletHtml = `<td style="${bulletTdStyle}">&#10003;</td>`;
-            } else if (bs.type === 'number') {
-              bulletHtml = `<td style="${bulletTdStyle}">${i + 1}.</td>`;
-            } else {
-              bulletHtml = `<td style="${bulletTdStyle}">&bull;</td>`;
-            }
-            return `<tr>${bulletHtml}<td style="color:${s.color};font-size:${s.fontSize}px;line-height:${s.lineHeight};${fontFamilyStr}padding-bottom:${i < (block.listItems?.length || 0) - 1 ? '6' : '0'}px;">${item}</td></tr>`;
-          }).join('');
-          return `<table role="presentation" cellpadding="0" cellspacing="0" border="0" class="${blockClass}" width="100%" style="${wrapStyle}">
-             <tr>
-               <td style="${baseStyle}">
-                 <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">${items}</table>
-               </td>
-             </tr>
-           </table>`;
-        }
+  const bs = block.bulletStyle || { type: 'disc', color: '#333333', size: 16, fontWeight: '400', customIcon: '', fontAwesomeIcon: '', offsetX: 0, offsetY: 0 };
+  
+  // Создаём стиль для маркера (без flex, только inline)
+  const bulletStyle = `color:${bs.color}; font-size:${bs.size}px; font-weight:${bs.fontWeight}; line-height:${s.lineHeight}; width:${bs.size + 8}px; display:inline-block; vertical-align:middle; text-align:center;`;
+  
+  const items = (block.listItems || []).map((item, i) => {
+    let bulletContent = '';
+    
+    if (bs.type === 'custom' && bs.fontAwesomeIcon) {
+      bulletContent = `<i class="${bs.fontAwesomeIcon}" style="color:${bs.color}; font-size:${bs.size}px;"></i>`;
+    } else if (bs.type === 'custom' && bs.customIcon) {
+      bulletContent = `<img src="${bs.customIcon}" alt="" width="${bs.size}" height="${bs.size}" style="display:inline-block; vertical-align:middle;" />`;
+    } else if (bs.type === 'check') {
+      bulletContent = '✓';
+    } else if (bs.type === 'number') {
+      bulletContent = `${i + 1}.`;
+    } else {
+      bulletContent = '•';
+    }
+    
+    return `
+      <tr>
+        <td style="${bulletStyle} width:${bs.size + 12}px; padding-right:8px; vertical-align:middle;">
+          ${bulletContent}
+        </td>
+        <td style="color:${s.color}; font-size:${s.fontSize}px; line-height:${s.lineHeight}; ${fontFamilyStr} padding-bottom:${i < (block.listItems?.length || 0) - 1 ? '8' : '0'}px; vertical-align:middle;">
+          ${item}
+        </td>
+      </tr>
+    `;
+  }).join('');
+  
+  return `<table role="presentation" cellpadding="0" cellspacing="0" border="0" class="${blockClass}" width="100%" style="${wrapStyle}">
+    <tr>
+      <td style="${baseStyle}">
+        <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+          ${items}
+        </table>
+      </td>
+    </tr>
+  </table>`;
+}
+
+          
         case 'menu': {
           const menuLayout = block.menuLayout || 'horizontal';
           const isH = menuLayout === 'horizontal';
