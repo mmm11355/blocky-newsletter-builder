@@ -4,7 +4,7 @@ import { EMAIL_FONTS, BulletType, MenuItem, MenuLayout } from '@/types/email-bui
 import { Trash2, ArrowUp, ArrowDown, Settings2, Upload, ClipboardPaste, Link, Plus, X, Bold, Palette, Highlighter } from 'lucide-react';
 
 const PropertyPanel = () => {
-  const { getSelectedBlock, updateBlock, updateBlockStyle, deleteBlock, moveBlock, selection, template, updateCellStyle, updateCellGap, updateRowMobileStack } = useEmailBuilder();
+  const { getSelectedBlock, updateBlock, updateBlockStyle, deleteBlock, moveBlock, selection, template, updateCellStyle, updateCellGap, updateRowMobileStack, updateGlobalStyle } = useEmailBuilder();
   const selected = getSelectedBlock();
 
   if (!selected || !selection) {
@@ -20,6 +20,8 @@ const PropertyPanel = () => {
 
   const { block, rowId, cellIndex } = selected;
   const s = block.style;
+  const row = template.rows.find(r => r.id === rowId);
+  const cellStyle = row?.cellStyles?.[cellIndex] || { backgroundColor: 'transparent', borderRadius: 0, paddingTop: 0, paddingRight: 0, paddingBottom: 0, paddingLeft: 0 };
 
   const upd = (style: Record<string, any>) => updateBlockStyle(rowId, cellIndex, block.id, style);
   const updBlock = (updates: Record<string, any>) => updateBlock(rowId, cellIndex, block.id, updates);
@@ -30,7 +32,6 @@ const PropertyPanel = () => {
     speaker: 'Спикер', contact: 'Контакты', links: 'Ссылки' 
   };
 
-  // Функция для очистки HTML тегов
   const stripHtml = (html: string) => {
     const temp = document.createElement('div');
     temp.innerHTML = html;
@@ -83,21 +84,21 @@ const PropertyPanel = () => {
           <h3 className="text-sm font-semibold text-card-foreground">{typeLabels[block.type] || block.type}</h3>
         </div>
         <div className="flex gap-0.5">
-          <button onClick={() => moveBlock(rowId, cellIndex, block.id, 'up')} className="p-1.5 rounded-md hover:bg-secondary text-muted-foreground hover:text-secondary-foreground transition-colors"><ArrowUp className="h-3.5 w-3.5" /></button>
-          <button onClick={() => moveBlock(rowId, cellIndex, block.id, 'down')} className="p-1.5 rounded-md hover:bg-secondary text-muted-foreground hover:text-secondary-foreground transition-colors"><ArrowDown className="h-3.5 w-3.5" /></button>
-          <button onClick={() => deleteBlock(rowId, cellIndex, block.id)} className="p-1.5 rounded-md hover:bg-destructive hover:text-destructive-foreground text-muted-foreground transition-colors"><Trash2 className="h-3.5 w-3.5" /></button>
+          <button onClick={() => moveBlock(rowId, cellIndex, block.id, 'up')} className="p-1.5 rounded-md hover:bg-secondary"><ArrowUp className="h-3.5 w-3.5" /></button>
+          <button onClick={() => moveBlock(rowId, cellIndex, block.id, 'down')} className="p-1.5 rounded-md hover:bg-secondary"><ArrowDown className="h-3.5 w-3.5" /></button>
+          <button onClick={() => deleteBlock(rowId, cellIndex, block.id)} className="p-1.5 rounded-md hover:bg-destructive"><Trash2 className="h-3.5 w-3.5" /></button>
         </div>
       </div>
 
       <div className="p-4 space-y-5">
-        {/* Content - простое текстовое поле с кнопками */}
+        {/* Content */}
         {(block.type === 'heading' || block.type === 'text' || block.type === 'button') && (
           <Field label="Контент">
             <div className="space-y-1.5">
               <div className="flex items-center gap-1 p-1 rounded-lg bg-secondary/50 border border-input flex-wrap">
                 <button type="button" onMouseDown={(e) => { e.preventDefault(); wrapText('**', '**'); }} className="p-1.5 rounded hover:bg-secondary"><Bold className="h-3.5 w-3.5" /></button>
                 <div className="relative">
-                  <button type="button" onMouseDown={(e) => { e.preventDefault(); setShowColorPicker(!showColorPicker); setShowBgColorPicker(false); }} className="p-1.5 rounded hover:bg-secondary"><Palette className="h-3.5 w-3.5" /></button>
+                  <button type="button" onMouseDown={(e) => { e.preventDefault(); setShowColorPicker(!showColorPicker); }} className="p-1.5 rounded hover:bg-secondary"><Palette className="h-3.5 w-3.5" /></button>
                   {showColorPicker && (
                     <div className="absolute top-full left-0 mt-1 z-20 p-2 rounded-lg bg-card border border-border shadow-lg">
                       <input type="color" value={selectedColor} onChange={(e) => { setSelectedColor(e.target.value); applyColor(e.target.value); }} className="w-8 h-8 cursor-pointer border-0" />
@@ -110,7 +111,7 @@ const PropertyPanel = () => {
                   )}
                 </div>
                 <div className="relative">
-                  <button type="button" onMouseDown={(e) => { e.preventDefault(); setShowBgColorPicker(!showBgColorPicker); setShowColorPicker(false); }} className="p-1.5 rounded hover:bg-secondary"><Highlighter className="h-3.5 w-3.5" /></button>
+                  <button type="button" onMouseDown={(e) => { e.preventDefault(); setShowBgColorPicker(!showBgColorPicker); }} className="p-1.5 rounded hover:bg-secondary"><Highlighter className="h-3.5 w-3.5" /></button>
                   {showBgColorPicker && (
                     <div className="absolute top-full left-0 mt-1 z-20 p-2 rounded-lg bg-card border border-border shadow-lg">
                       <input type="color" value={selectedBgColor} onChange={(e) => { setSelectedBgColor(e.target.value); applyBgColor(e.target.value); }} className="w-8 h-8 cursor-pointer border-0" />
@@ -124,15 +125,15 @@ const PropertyPanel = () => {
                 </div>
               </div>
               {block.type === 'text' ? (
-                <textarea ref={textareaRef as React.RefObject<HTMLTextAreaElement>} value={textValue} onChange={(e) => updateText(e.target.value)} rows={8} className="w-full rounded-lg border border-input bg-secondary/50 px-3 py-2 text-sm" />
+                <textarea ref={textareaRef as any} value={textValue} onChange={(e) => updateText(e.target.value)} rows={8} className="w-full rounded-lg border border-input bg-secondary/50 px-3 py-2 text-sm" />
               ) : (
-                <input ref={textareaRef as React.RefObject<HTMLInputElement>} type="text" value={textValue} onChange={(e) => updateText(e.target.value)} className="w-full rounded-lg border border-input bg-secondary/50 px-3 py-2 text-sm" />
+                <input ref={textareaRef as any} type="text" value={textValue} onChange={(e) => updateText(e.target.value)} className="w-full rounded-lg border border-input bg-secondary/50 px-3 py-2 text-sm" />
               )}
             </div>
           </Field>
         )}
 
-        {/* List Items */}
+        {/* ==================== LIST BLOCK ==================== */}
         {block.type === 'list' && (
           <ListFields
             items={block.listItems || []}
@@ -142,7 +143,7 @@ const PropertyPanel = () => {
           />
         )}
 
-        {/* Menu Items */}
+        {/* ==================== MENU BLOCK ==================== */}
         {block.type === 'menu' && (
           <MenuFields
             items={block.menuItems || []}
@@ -155,10 +156,12 @@ const PropertyPanel = () => {
           />
         )}
 
+        {/* ==================== IMAGE BLOCK ==================== */}
         {block.type === 'image' && (
           <ImageFields src={block.src || ''} alt={block.alt || ''} href={block.href || ''} onUpdate={updBlock} />
         )}
 
+        {/* ==================== BUTTON BLOCK ==================== */}
         {block.type === 'button' && (
           <Field label="Ссылка (href)">
             <input type="text" value={block.href || ''} onChange={(e) => updBlock({ href: e.target.value })} className="w-full rounded-lg border border-input bg-secondary/50 px-3 py-2 text-sm" />
@@ -411,7 +414,99 @@ const PropertyPanel = () => {
           </>
         )}
 
-        {/* ==================== COMMON STYLES ==================== */}
+        {/* ==================== COLUMN STYLES ==================== */}
+        {row && row.columns > 1 && (
+          <Section title={`Колонка ${(cellIndex || 0) + 1}`}>
+            <Field label="Фон колонки" compact>
+              <div className="relative">
+                <input type="color" value={cellStyle.backgroundColor === 'transparent' ? '#ffffff' : cellStyle.backgroundColor} onChange={(e) => updateCellStyle(rowId, cellIndex, { backgroundColor: e.target.value })} className="w-full h-9 rounded-lg border border-input cursor-pointer opacity-0 absolute inset-0" />
+                <div className="w-full h-9 rounded-lg border border-input flex items-center gap-2 px-2">
+                  <div className="w-5 h-5 rounded-md border border-border" style={{ backgroundColor: cellStyle.backgroundColor === 'transparent' ? '#ffffff' : cellStyle.backgroundColor }} />
+                  <span className="text-xs text-muted-foreground font-mono">{cellStyle.backgroundColor === 'transparent' ? 'прозрачный' : cellStyle.backgroundColor}</span>
+                  {cellStyle.backgroundColor !== 'transparent' && (
+                    <button onClick={() => updateCellStyle(rowId, cellIndex, { backgroundColor: 'transparent' })} className="ml-auto text-[10px] text-muted-foreground hover:text-foreground">✕</button>
+                  )}
+                </div>
+              </div>
+            </Field>
+            <Field label="Закругление" compact>
+              <div className="flex items-center gap-2">
+                <input type="range" min={0} max={40} value={cellStyle.borderRadius || 0} onChange={(e) => updateCellStyle(rowId, cellIndex, { borderRadius: +e.target.value })} className="flex-1 h-2 accent-primary" />
+                <span className="text-xs w-12">{cellStyle.borderRadius || 0}px</span>
+              </div>
+            </Field>
+            <div className="grid grid-cols-2 gap-2">
+              {([['paddingTop', '↑ Верх'], ['paddingRight', '→ Право'], ['paddingBottom', '↓ Низ'], ['paddingLeft', '← Лево']] as const).map(([key, label]) => (
+                <Field key={key} label={label} compact>
+                  <div className="flex items-center gap-1">
+                    <button onClick={() => updateCellStyle(rowId, cellIndex, { [key]: Math.max(0, (cellStyle as any)[key] - 5) })} className="w-6 h-6 rounded bg-secondary">-</button>
+                    <input type="number" value={(cellStyle as any)[key] || 0} onChange={(e) => updateCellStyle(rowId, cellIndex, { [key]: +e.target.value })} className="w-16 rounded-lg border border-input bg-secondary/50 px-2 py-1.5 text-sm text-center" />
+                    <button onClick={() => updateCellStyle(rowId, cellIndex, { [key]: ((cellStyle as any)[key] || 0) + 5 })} className="w-6 h-6 rounded bg-secondary">+</button>
+                  </div>
+                </Field>
+              ))}
+            </div>
+          </Section>
+        )}
+
+        {/* ==================== ROW STYLES ==================== */}
+        {row && (
+          <Section title="Строка">
+            <Field label="Мобильная версия" compact>
+              <div className="flex gap-1">
+                <button onClick={() => updateRowMobileStack(rowId, true)} className={`flex-1 py-1.5 text-xs rounded ${row.mobileStack !== false ? 'bg-primary text-white' : 'bg-secondary'}`}>В 1 колонку</button>
+                <button onClick={() => updateRowMobileStack(rowId, false)} className={`flex-1 py-1.5 text-xs rounded ${row.mobileStack === false ? 'bg-primary text-white' : 'bg-secondary'}`}>Оставить колонки</button>
+              </div>
+            </Field>
+            <Field label="Отступ между колонками" compact>
+              <div className="flex items-center gap-2">
+                <input type="range" min={0} max={40} value={row.cellGap || 0} onChange={(e) => updateCellGap(rowId, +e.target.value)} className="flex-1 h-2 accent-primary" />
+                <span className="text-xs w-12">{row.cellGap || 0}px</span>
+              </div>
+            </Field>
+            <Field label="Фон строки" compact>
+              <div className="relative">
+                <input type="color" value={row.style.backgroundColor === 'transparent' ? '#ffffff' : row.style.backgroundColor} onChange={(e) => updateRowStyle(rowId, { backgroundColor: e.target.value })} className="w-full h-9 rounded-lg border border-input cursor-pointer opacity-0 absolute inset-0" />
+                <div className="w-full h-9 rounded-lg border border-input flex items-center gap-2 px-2">
+                  <div className="w-5 h-5 rounded-md border border-border" style={{ backgroundColor: row.style.backgroundColor === 'transparent' ? '#ffffff' : row.style.backgroundColor }} />
+                  <span className="text-xs text-muted-foreground font-mono">{row.style.backgroundColor === 'transparent' ? 'прозрачный' : row.style.backgroundColor}</span>
+                </div>
+              </div>
+            </Field>
+            <div className="grid grid-cols-2 gap-2">
+              {([['paddingTop', '↑ Верх'], ['paddingRight', '→ Право'], ['paddingBottom', '↓ Низ'], ['paddingLeft', '← Лево']] as const).map(([key, label]) => (
+                <Field key={key} label={label} compact>
+                  <div className="flex items-center gap-1">
+                    <button onClick={() => updateRowStyle(rowId, { [key]: Math.max(0, (row.style as any)[key] - 5) })} className="w-6 h-6 rounded bg-secondary">-</button>
+                    <input type="number" value={(row.style as any)[key] || 0} onChange={(e) => updateRowStyle(rowId, { [key]: +e.target.value })} className="w-16 rounded-lg border border-input bg-secondary/50 px-2 py-1.5 text-sm text-center" />
+                    <button onClick={() => updateRowStyle(rowId, { [key]: ((row.style as any)[key] || 0) + 5 })} className="w-6 h-6 rounded bg-secondary">+</button>
+                  </div>
+                </Field>
+              ))}
+            </div>
+          </Section>
+        )}
+
+        {/* ==================== GLOBAL STYLES ==================== */}
+        <Section title="Глобальные настройки">
+          <Field label="Фон письма" compact>
+            <div className="relative">
+              <input type="color" value={template.globalStyle.backgroundColor} onChange={(e) => updateGlobalStyle({ backgroundColor: e.target.value })} className="w-full h-9 rounded-lg border border-input cursor-pointer opacity-0 absolute inset-0" />
+              <div className="w-full h-9 rounded-lg border border-input flex items-center gap-2 px-2">
+                <div className="w-5 h-5 rounded-md border border-border" style={{ backgroundColor: template.globalStyle.backgroundColor }} />
+                <span className="text-xs text-muted-foreground font-mono">{template.globalStyle.backgroundColor}</span>
+              </div>
+            </div>
+          </Field>
+          <Field label="Максимальная ширина" compact>
+            <div className="flex items-center gap-2">
+              <input type="range" min={320} max={800} step={10} value={template.globalStyle.maxWidth} onChange={(e) => updateGlobalStyle({ maxWidth: +e.target.value })} className="flex-1 h-2 accent-primary" />
+              <span className="text-xs w-12">{template.globalStyle.maxWidth}px</span>
+            </div>
+          </Field>
+        </Section>
+
+        {/* ==================== COMMON BLOCK STYLES ==================== */}
         {(block.type === 'heading' || block.type === 'text' || block.type === 'button' || block.type === 'social' || block.type === 'testimonial' || block.type === 'speaker' || block.type === 'contact' || block.type === 'links') && (
           <Section title="Шрифт">
             <Field label="Семейство шрифта" compact>
@@ -465,13 +560,13 @@ const PropertyPanel = () => {
             <Field label="Текст" compact>
               <input type="color" value={s.color} onChange={(e) => upd({ color: e.target.value })} className="w-full h-9 rounded border border-input cursor-pointer" />
             </Field>
-            <Field label="Фон" compact>
+            <Field label="Фон блока" compact>
               <input type="color" value={s.backgroundColor === 'transparent' ? '#ffffff' : s.backgroundColor} onChange={(e) => upd({ backgroundColor: e.target.value })} className="w-full h-9 rounded border border-input cursor-pointer" />
             </Field>
           </div>
         </Section>
 
-        <Section title="Размер">
+        <Section title="Размер блока">
           <Field label="Ширина (десктоп)" compact>
             <div className="flex items-center gap-2">
               <button onClick={() => upd({ width: `${Math.max(10, (parseInt(s.width) || 100) - 5)}%` })} className="w-6 h-6 rounded bg-secondary">-</button>
@@ -539,26 +634,6 @@ const PropertyPanel = () => {
             <input type="color" value={s.borderColor} onChange={(e) => upd({ borderColor: e.target.value })} className="w-full h-9 rounded border border-input cursor-pointer" />
           </Field>
         </Section>
-
-        {/* Per-column styles */}
-        {(() => {
-          const row = template.rows.find(r => r.id === rowId);
-          if (!row || row.columns <= 1) return null;
-          return (
-            <Section title="Колонки">
-              <Field label="Мобильная версия" compact>
-                <div className="flex gap-1">
-                  <button onClick={() => updateRowMobileStack(rowId, true)} className={`flex-1 py-1.5 text-xs rounded ${row.mobileStack !== false ? 'bg-primary text-white' : 'bg-secondary'}`}>В 1 колонку</button>
-                  <button onClick={() => updateRowMobileStack(rowId, false)} className={`flex-1 py-1.5 text-xs rounded ${row.mobileStack === false ? 'bg-primary text-white' : 'bg-secondary'}`}>Оставить колонки</button>
-                </div>
-              </Field>
-              <Field label="Отступ между колонками" compact>
-                <input type="range" min={0} max={40} value={row.cellGap || 0} onChange={(e) => updateCellGap(rowId, +e.target.value)} className="w-full h-2 accent-primary" />
-                <span className="text-xs">{row.cellGap || 0}px</span>
-              </Field>
-            </Section>
-          );
-        })()}
       </div>
     </div>
   );
