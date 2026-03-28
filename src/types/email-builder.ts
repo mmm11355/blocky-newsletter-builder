@@ -307,3 +307,15 @@ export const createRow = (columns: ColumnLayout): EmailRow => {
     mobileStack: true,
   };
 };
+
+export const EMAIL_FONTS = [
+  { value: 'inherit', label: 'По умолчанию' },
+  { value: 'Arial, sans-serif', label: 'Arial' },
+  { value: 'Helvetica, sans-serif', label: 'Helvetica' },
+  { value: 'Georgia, serif', label: 'Georgia' },
+  { value: 'Times New Roman, serif', label: 'Times New Roman' },
+  { value: 'Verdana, sans-serif', label: 'Verdana' },
+  { value: 'Tahoma, sans-serif', label: 'Tahoma' },
+  { value: "'Trebuchet MS', sans-serif", label: 'Trebuchet MS' },
+  { value: "'Courier New', monospace", label: 'Courier New' },
+];
