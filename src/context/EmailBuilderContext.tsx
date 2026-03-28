@@ -1,5 +1,9 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
-import { EmailTemplate, EmailRow, EmailBlock, BlockType, ColumnLayout, createBlock, createRow, BlockStyle, CellStyle } from '@/types/email-builder';
+import { 
+  EmailTemplate, EmailRow, EmailBlock, BlockType, ColumnLayout, 
+  createBlock, createRow, BlockStyle, CellStyle, 
+  SocialBlock, TestimonialBlock, SpeakerBlock, ContactBlock, LinksBlock 
+} from '@/types/email-builder';
 
 interface Selection {
   rowId: string;
@@ -292,12 +296,12 @@ export const EmailBuilderProvider: React.FC<{ children: React.ReactNode }> = ({ 
         case 'heading': {
           const formattedContent = formatContent(block.content);
           return `<table role="presentation" cellpadding="0" cellspacing="0" border="0" class="${blockClass}" width="100%" style="${wrapStyle}">
-             <tr>
-               <td>
-                 <h1 style="${baseStyle}margin:0;mso-line-height-rule:exactly;">${formattedContent}</h1>
-               </td>
-             </tr>
-           </table>`;
+              <tr>
+                <td>
+                  <h1 style="${baseStyle}margin:0;mso-line-height-rule:exactly;">${formattedContent}</h1>
+                </td>
+              </tr>
+            </table>`;
         }
         case 'text': {
           const formattedContent = formatContent(block.content);
@@ -313,22 +317,22 @@ export const EmailBuilderProvider: React.FC<{ children: React.ReactNode }> = ({ 
               .join('');
           }
           return `<table role="presentation" cellpadding="0" cellspacing="0" border="0" class="${blockClass}" width="100%" style="${wrapStyle}">
-             <tr>
-               <td>
-                 <div style="${baseStyle}margin:0;mso-line-height-rule:exactly;">${finalContent}</div>
-               </td>
-             </tr>
-           </table>`;
+              <tr>
+                <td>
+                  <div style="${baseStyle}margin:0;mso-line-height-rule:exactly;">${finalContent}</div>
+                </td>
+              </tr>
+            </table>`;
         }
         case 'image': {
           const imgWidth = s.width && s.width !== '100%' ? s.width.replace('px', '').replace('%', '') : '100%';
-          const imgTag = `<img src="${block.src}" alt="${block.alt || ''}" width="${imgWidth}" style="max-width:100%;height:auto;display:block;border:0;outline:none;border-radius:${s.borderRadius}px;${s.textAlign === 'center' ? 'margin:0 auto;' : ''}" />`;
-          const wrapped = block.href ? `<a href="${block.href}" target="_blank" style="text-decoration:none;border:0;">${imgTag}</a>` : imgTag;
+          const imgTag = `<img src="${(block as any).src}" alt="${(block as any).alt || ''}" width="${imgWidth}" style="max-width:100%;height:auto;display:block;border:0;outline:none;border-radius:${s.borderRadius}px;${s.textAlign === 'center' ? 'margin:0 auto;' : ''}" />`;
+          const wrapped = (block as any).href ? `<a href="${(block as any).href}" target="_blank" style="text-decoration:none;border:0;">${imgTag}</a>` : imgTag;
           return `<table role="presentation" cellpadding="0" cellspacing="0" border="0" class="${blockClass}" width="100%" style="${wrapStyle}">
-             <tr>
-               <td style="padding:${s.paddingTop}px ${s.paddingRight}px ${s.paddingBottom}px ${s.paddingLeft}px;text-align:${s.textAlign};">${wrapped}</td>
-             </tr>
-           </table>`;
+              <tr>
+                <td style="padding:${s.paddingTop}px ${s.paddingRight}px ${s.paddingBottom}px ${s.paddingLeft}px;text-align:${s.textAlign};">${wrapped}</td>
+              </tr>
+            </table>`;
         }
         case 'button': {
           const btnAlign = s.textAlign === 'center' ? 'center' : s.textAlign === 'right' ? 'right' : 'left';
@@ -336,122 +340,198 @@ export const EmailBuilderProvider: React.FC<{ children: React.ReactNode }> = ({ 
           const buttonWidth = s.width ? `width:${s.width};` : '';
           const buttonMargin = s.textAlign === 'center' ? 'margin:0 auto;' : s.textAlign === 'right' ? 'margin:0 0 0 auto;' : '';
           return `<table role="presentation" cellpadding="0" cellspacing="0" border="0" class="${blockClass}" width="100%" style="${wrapStyle}">
-             <tr>
-               <td align="${btnAlign}" style="padding:4px 0;">
-                 <!--[if mso]>
-                 <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="${block.href || '#'}" style="height:auto;v-text-anchor:middle;width:auto;" arcsize="${Math.round(s.borderRadius / 40 * 100)}%" strokecolor="${s.borderColor}" fillcolor="${s.backgroundColor}">
-                   <w:anchorlock/>
-                   <center style="color:${s.color};font-family:${s.fontFamily !== 'inherit' ? s.fontFamily : globalStyle.fontFamily};font-size:${s.fontSize}px;font-weight:${s.fontWeight};">${formattedContent}</center>
-                 </v:roundrect>
-                 <![endif]-->
-                 <!--[if !mso]><!-->
-                 <a href="${block.href || '#'}" target="_blank" style="display:inline-block;background-color:${s.backgroundColor};color:${s.color};font-size:${s.fontSize}px;font-weight:${s.fontWeight};padding:${s.paddingTop}px ${s.paddingRight}px ${s.paddingBottom}px ${s.paddingLeft}px;border-radius:${s.borderRadius}px;text-decoration:none;text-align:center;${fontFamilyStr}${borderStr}line-height:${s.lineHeight};${buttonWidth}${buttonMargin}">${formattedContent}</a>
-                 <!--<![endif]-->
-               </td>
-             </tr>
-           </table>`;
+              <tr>
+                <td align="${btnAlign}" style="padding:4px 0;">
+                  <!--[if mso]>
+                  <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="${(block as any).href || '#'}" style="height:auto;v-text-anchor:middle;width:auto;" arcsize="${Math.round(s.borderRadius / 40 * 100)}%" strokecolor="${s.borderColor}" fillcolor="${s.backgroundColor}">
+                    <w:anchorlock/>
+                    <center style="color:${s.color};font-family:${s.fontFamily !== 'inherit' ? s.fontFamily : globalStyle.fontFamily};font-size:${s.fontSize}px;font-weight:${s.fontWeight};">${formattedContent}</center>
+                  </v:roundrect>
+                  <![endif]-->
+                  <!--[if !mso]><!-->
+                  <a href="${(block as any).href || '#'}" target="_blank" style="display:inline-block;background-color:${s.backgroundColor};color:${s.color};font-size:${s.fontSize}px;font-weight:${s.fontWeight};padding:${s.paddingTop}px ${s.paddingRight}px ${s.paddingBottom}px ${s.paddingLeft}px;border-radius:${s.borderRadius}px;text-decoration:none;text-align:center;${fontFamilyStr}${borderStr}line-height:${s.lineHeight};${buttonWidth}${buttonMargin}">${formattedContent}</a>
+                  <!--<![endif]-->
+                </td>
+              </tr>
+            </table>`;
         }
         case 'list': {
-  const bs = block.bulletStyle || { type: 'disc', color: '#333333', size: 16, fontWeight: '400', customIcon: '', fontAwesomeIcon: '', offsetX: 0, offsetY: 0 };
-  
-  // Стиль для ячейки с маркером с учетом сдвигов
-  const bulletTdStyle = `
-    color: ${bs.color};
-    font-size: ${bs.size}px;
-    font-weight: ${bs.fontWeight};
-    line-height: ${s.lineHeight};
-    width: ${bs.size + 12}px;
-    padding-right: 8px;
-    vertical-align: top;
-    text-align: left;
-  `;
-  
-  // Стиль для контейнера маркера с учетом сдвигов
-  const bulletContainerStyle = `
-    display: inline-block;
-    position: relative;
-    left: ${bs.offsetX}px;
-    top: ${bs.offsetY}px;
-    line-height: 1;
-  `;
-  
-  const items = (block.listItems || []).map((item, i) => {
-    let bulletContent = '';
-    
-    if (bs.type === 'custom' && bs.fontAwesomeIcon) {
-      bulletContent = `<i class="${bs.fontAwesomeIcon}" style="color:${bs.color}; font-size:${bs.size}px;"></i>`;
-    } else if (bs.type === 'custom' && bs.customIcon) {
-      bulletContent = `<img src="${bs.customIcon}" alt="" width="${bs.size}" height="${bs.size}" style="display:block;" />`;
-    } else if (bs.type === 'check') {
-      bulletContent = '✓';
-    } else if (bs.type === 'number') {
-      bulletContent = `${i + 1}.`;
-    } else {
-      bulletContent = '•';
-    }
-    
-    return `
-      <tr>
-        <td style="${bulletTdStyle}">
-          <span style="${bulletContainerStyle}">${bulletContent}</span>
-        </td>
-        <td style="color:${s.color}; font-size:${s.fontSize}px; line-height:${s.lineHeight}; ${fontFamilyStr} padding-bottom:${i < (block.listItems?.length || 0) - 1 ? '8' : '0'}px; vertical-align:top;">
-          ${item}
-        </td>
-      </tr>
-    `;
-  }).join('');
-  
-  return `<table role="presentation" cellpadding="0" cellspacing="0" border="0" class="${blockClass}" width="100%" style="${wrapStyle}">
-    <tr>
-      <td style="${baseStyle}">
-        <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
-          ${items}
-        </table>
-      </td>
-    </tr>
-  </table>`;
-}
-
-          
+          const bs = (block as any).bulletStyle || { type: 'disc', color: '#333333', size: 16, fontWeight: '400', customIcon: '', fontAwesomeIcon: '', offsetX: 0, offsetY: 0 };
+          const bulletTdStyle = `color:${bs.color};font-size:${bs.size}px;font-weight:${bs.fontWeight};width:${bs.size + 12}px;padding-right:8px;vertical-align:top;text-align:left;`;
+          const bulletContainerStyle = `display:inline-block;position:relative;left:${bs.offsetX}px;top:${bs.offsetY}px;line-height:1;`;
+          const items = ((block as any).listItems || []).map((item: string, i: number) => {
+            let bulletContent = '';
+            if (bs.type === 'custom' && bs.fontAwesomeIcon) {
+              bulletContent = `<i class="${bs.fontAwesomeIcon}" style="color:${bs.color}; font-size:${bs.size}px;"></i>`;
+            } else if (bs.type === 'custom' && bs.customIcon) {
+              bulletContent = `<img src="${bs.customIcon}" alt="" width="${bs.size}" height="${bs.size}" style="display:block;" />`;
+            } else if (bs.type === 'check') {
+              bulletContent = '✓';
+            } else if (bs.type === 'number') {
+              bulletContent = `${i + 1}.`;
+            } else {
+              bulletContent = '•';
+            }
+            return `<tr>
+              <td style="${bulletTdStyle}"><span style="${bulletContainerStyle}">${bulletContent}</span></td>
+              <td style="color:${s.color};font-size:${s.fontSize}px;line-height:${s.lineHeight};${fontFamilyStr}padding-bottom:${i < ((block as any).listItems?.length || 0) - 1 ? '8' : '0'}px;vertical-align:top;">${item}</td>
+            </tr>`;
+          }).join('');
+          return `<table role="presentation" cellpadding="0" cellspacing="0" border="0" class="${blockClass}" width="100%" style="${wrapStyle}">
+              <tr>
+                <td style="${baseStyle}">
+                  <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">${items}</table>
+                </td>
+              </tr>
+            </table>`;
+        }
         case 'menu': {
-          const menuLayout = block.menuLayout || 'horizontal';
+          const menuLayout = (block as any).menuLayout || 'horizontal';
           const isH = menuLayout === 'horizontal';
-          const gap = block.menuGap || 16;
+          const gap = (block as any).menuGap || 16;
           const btnAlign = s.textAlign === 'center' ? 'center' : s.textAlign === 'right' ? 'right' : 'left';
-          const logoHtml = block.menuLogoSrc
-            ? `<td style="padding-right:${isH ? gap : 0}px;padding-bottom:${!isH ? gap : 0}px;">${block.menuLogoHref
-              ? `<a href="${block.menuLogoHref}" target="_blank" style="text-decoration:none;border:0;"><img src="${block.menuLogoSrc}" alt="Logo" width="${block.menuLogoWidth || 120}" style="display:block;border:0;height:auto;" /></a>`
-              : `<img src="${block.menuLogoSrc}" alt="Logo" width="${block.menuLogoWidth || 120}" style="display:block;border:0;height:auto;" />`}</td>`
+          const logoHtml = (block as any).menuLogoSrc
+            ? `<td style="padding-right:${isH ? gap : 0}px;padding-bottom:${!isH ? gap : 0}px;">${(block as any).menuLogoHref
+              ? `<a href="${(block as any).menuLogoHref}" target="_blank" style="text-decoration:none;border:0;"><img src="${(block as any).menuLogoSrc}" alt="Logo" width="${(block as any).menuLogoWidth || 120}" style="display:block;border:0;height:auto;" /></a>`
+              : `<img src="${(block as any).menuLogoSrc}" alt="Logo" width="${(block as any).menuLogoWidth || 120}" style="display:block;border:0;height:auto;" />`}</td>`
             : '';
-          const linksHtml = (block.menuItems || []).map((item, i) =>
-            `<td style="padding:${isH ? `0 ${i < (block.menuItems?.length || 0) - 1 ? gap / 2 : 0}px 0 ${i > 0 ? gap / 2 : 0}px` : `${i > 0 ? gap / 2 : 0}px 0 ${i < (block.menuItems?.length || 0) - 1 ? gap / 2 : 0}px 0`};"><a href="${item.href || '#'}" target="_blank" style="color:${s.color};font-size:${s.fontSize}px;font-weight:${s.fontWeight};text-decoration:none;white-space:nowrap;${fontFamilyStr}">${item.label}</a></td>`
+          const linksHtml = ((block as any).menuItems || []).map((item: any, i: number) =>
+            `<td style="padding:${isH ? `0 ${i < ((block as any).menuItems?.length || 0) - 1 ? gap / 2 : 0}px 0 ${i > 0 ? gap / 2 : 0}px` : `${i > 0 ? gap / 2 : 0}px 0 ${i < ((block as any).menuItems?.length || 0) - 1 ? gap / 2 : 0}px 0`};"><a href="${item.href || '#'}" target="_blank" style="color:${s.color};font-size:${s.fontSize}px;font-weight:${s.fontWeight};text-decoration:none;white-space:nowrap;${fontFamilyStr}">${item.label}</a></td>`
           ).join('');
-
           if (isH) {
             return `<table role="presentation" cellpadding="0" cellspacing="0" border="0" class="${blockClass}" width="100%" style="${wrapStyle}">
-               <tr>
-                 <td style="${baseStyle}" align="${btnAlign}">
-                   <table role="presentation" cellpadding="0" cellspacing="0" border="0">
-                     <tr>${logoHtml}${linksHtml}</tr>
-                   </table>
-                 </td>
-               </tr>
-             </table>`;
+                <tr>
+                  <td style="${baseStyle}" align="${btnAlign}">
+                    <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+                      <tr>${logoHtml}${linksHtml}</tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>`;
           } else {
             const allItems = [];
             if (logoHtml) allItems.push(`<tr>${logoHtml}</tr>`);
-            (block.menuItems || []).forEach((item, i) => {
-              allItems.push(`<tr><td style="padding:${i > 0 ? gap / 2 : 0}px 0 ${i < (block.menuItems?.length || 0) - 1 ? gap / 2 : 0}px 0;"><a href="${item.href || '#'}" target="_blank" style="color:${s.color};font-size:${s.fontSize}px;font-weight:${s.fontWeight};text-decoration:none;white-space:nowrap;${fontFamilyStr}">${item.label}</a></td></tr>`);
+            ((block as any).menuItems || []).forEach((item: any, i: number) => {
+              allItems.push(`<tr><td style="padding:${i > 0 ? gap / 2 : 0}px 0 ${i < ((block as any).menuItems?.length || 0) - 1 ? gap / 2 : 0}px 0;"><a href="${item.href || '#'}" target="_blank" style="color:${s.color};font-size:${s.fontSize}px;font-weight:${s.fontWeight};text-decoration:none;white-space:nowrap;${fontFamilyStr}">${item.label}</a></td></tr>`);
             });
             return `<table role="presentation" cellpadding="0" cellspacing="0" border="0" class="${blockClass}" width="100%" style="${wrapStyle}">
-               <tr>
-                 <td style="${baseStyle}" align="${btnAlign}">
-                   <table role="presentation" cellpadding="0" cellspacing="0" border="0">${allItems.join('')}</table>
-                 </td>
-               </tr>
-             </table>`;
+                <tr>
+                  <td style="${baseStyle}" align="${btnAlign}">
+                    <table role="presentation" cellpadding="0" cellspacing="0" border="0">${allItems.join('')}</table>
+                  </td>
+                </tr>
+              </table>`;
           }
+        }
+        case 'social': {
+          const socialBlock = block as SocialBlock;
+          const iconSize = socialBlock.iconSize;
+          const iconColor = socialBlock.iconColor;
+          const iconBgColor = socialBlock.iconBgColor;
+          const layout = socialBlock.layout;
+          const gap = socialBlock.gap;
+          
+          const getIconHtml = (link: any) => {
+            const color = link.iconColor || iconColor;
+            const size = iconSize * 0.6;
+            
+            if (link.customIconUrl) {
+              return `<img src="${link.customIconUrl}" width="${size}" height="${size}" style="display:block;" />`;
+            }
+            if (link.iconName) {
+              return `<i class="${link.iconName}" style="font-size:${size}px; color:${color};"></i>`;
+            }
+            return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="${color}"><circle cx="12" cy="12" r="10"/></svg>`;
+          };
+          
+          const linksHtml = socialBlock.links.map(link => `
+            <a href="${link.url}" target="_blank" style="display:inline-flex; align-items:center; justify-content:center; width:${iconSize}px; height:${iconSize}px; background-color:${link.bgColor || iconBgColor}; border-radius:50%; text-decoration:none;">
+              ${getIconHtml(link)}
+            </a>
+          `).join('');
+          
+          const flexDirection = layout === 'horizontal' ? 'row' : 'column';
+          
+          return `<table role="presentation" cellpadding="0" cellspacing="0" border="0" class="${blockClass}" width="100%" style="${wrapStyle}">
+              <tr>
+                <td style="${baseStyle}" align="${s.textAlign}">
+                  <div style="display:flex; flex-direction:${flexDirection}; gap:${gap}px; justify-content:${s.textAlign}; align-items:center; flex-wrap:wrap;">
+                    ${linksHtml}
+                  </div>
+                </td>
+              </tr>
+            </table>`;
+        }
+        case 'testimonial': {
+          const tb = block as TestimonialBlock;
+          const stars = '★'.repeat(tb.rating) + '☆'.repeat(5 - tb.rating);
+          return `<table role="presentation" cellpadding="0" cellspacing="0" border="0" class="${blockClass}" width="100%" style="${wrapStyle}">
+              <tr>
+                <td style="${baseStyle}">
+                  <div style="display:flex; gap:12px; align-items:flex-start;">
+                    ${tb.avatarUrl ? `<img src="${tb.avatarUrl}" width="48" height="48" style="border-radius:50%; object-fit:cover;" />` : ''}
+                    <div>
+                      <div style="color:#f59e0b; font-size:14px; margin-bottom:8px;">${stars}</div>
+                      <p style="margin:0 0 12px 0; font-size:14px; font-style:italic;">«${tb.quote}»</p>
+                      <p style="margin:0; font-weight:bold;">${tb.authorName}</p>
+                      ${tb.authorTitle ? `<p style="margin:4px 0 0 0; font-size:12px; color:#6b7280;">${tb.authorTitle}</p>` : ''}
+                    </div>
+                  </div>
+                </td>
+              </tr>
+            </table>`;
+        }
+        case 'speaker': {
+          const sp = block as SpeakerBlock;
+          return `<table role="presentation" cellpadding="0" cellspacing="0" border="0" class="${blockClass}" width="100%" style="${wrapStyle}">
+              <tr>
+                <td style="${baseStyle}" align="center">
+                  ${sp.photoUrl ? `<img src="${sp.photoUrl}" width="100" height="100" style="border-radius:50%; margin:0 auto 16px;" />` : ''}
+                  <h3 style="margin:0 0 8px; font-size:20px; font-weight:bold;">${sp.name}</h3>
+                  <p style="margin:0 0 4px; font-size:14px;">${sp.title}</p>
+                  ${sp.company ? `<p style="margin:0 0 12px; font-size:12px;">${sp.company}</p>` : ''}
+                  <p style="margin:0 0 16px; font-size:14px;">${sp.bio}</p>
+                  <div style="display:flex; gap:12px; justify-content:center;">
+                    ${(sp.socialLinks || []).map(link => `
+                      <a href="${link.url}" target="_blank" style="color:inherit; text-decoration:none;">
+                        ${link.iconName ? `<i class="${link.iconName}" style="font-size:18px;"></i>` : '•'}
+                      </a>
+                    `).join('')}
+                  </div>
+                </td>
+              </tr>
+            </table>`;
+        }
+        case 'contact': {
+          const cb = block as ContactBlock;
+          return `<table role="presentation" cellpadding="0" cellspacing="0" border="0" class="${blockClass}" width="100%" style="${wrapStyle}">
+              <tr>
+                <td style="${baseStyle}">
+                  <div style="display:flex; flex-direction:column; gap:12px;">
+                    ${cb.email ? `<div>📧 <a href="mailto:${cb.email}" style="color:${s.color};">${cb.email}</a></div>` : ''}
+                    ${cb.phone ? `<div>📞 <a href="tel:${cb.phone}" style="color:${s.color};">${cb.phone}</a></div>` : ''}
+                    ${cb.address ? `<div>📍 ${cb.address}</div>` : ''}
+                    ${cb.workHours ? `<div>🕒 ${cb.workHours}</div>` : ''}
+                  </div>
+                </td>
+              </tr>
+            </table>`;
+        }
+        case 'links': {
+          const lb = block as LinksBlock;
+          const isHorizontal = lb.layout === 'horizontal';
+          const linksHtml = lb.links.map(link => `
+            <a href="${link.url}" target="_blank" style="color:${s.color}; text-decoration:none; font-size:${s.fontSize}px;">${link.label}</a>
+          `).join('');
+          return `<table role="presentation" cellpadding="0" cellspacing="0" border="0" class="${blockClass}" width="100%" style="${wrapStyle}">
+              <tr>
+                <td style="${baseStyle}" align="${s.textAlign}">
+                  <div style="display:flex; flex-direction:${isHorizontal ? 'row' : 'column'}; gap:${lb.gap}px; justify-content:${s.textAlign}; align-items:center; flex-wrap:wrap;">
+                    ${linksHtml}
+                  </div>
+                </td>
+              </tr>
+            </table>`;
         }
         default:
           return '';
@@ -488,7 +568,6 @@ export const EmailBuilderProvider: React.FC<{ children: React.ReactNode }> = ({ 
         return `<td style="width:${colWidth}%;vertical-align:top;${cellBgStyle}${cellBr}${cellPad}" valign="top">${cell.map(renderBlock).join('')}</td>`;
       }).join('');
       
-      // Определяем класс для мобильной версии
       const stackClass = (row.mobileStack !== false && row.columns > 1) ? 'mobile-stack' : '';
       
       return `<table role="presentation" width="100%" cellpadding="0" cellspacing="${gap}" border="0" class="${stackClass}" style="background-color:${row.style.backgroundColor};padding:${row.style.paddingTop}px ${row.style.paddingRight}px ${row.style.paddingBottom}px ${row.style.paddingLeft}px;border-collapse:separate;border-spacing:${gap}px;">
@@ -532,27 +611,28 @@ export const EmailBuilderProvider: React.FC<{ children: React.ReactNode }> = ({ 
       display:block!important;
       width:100%!important;
       box-sizing:border-box!important;
-      margin-bottom:${row => row.cellGap || 0}px!important;
+      margin-bottom:${(row: any) => row?.cellGap || 0}px!important;
     }
     ${mobileCSS}
   }
 </style>
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.5.1/css/all.css">
 </head>
 <body id="body" style="margin:0;padding:0;background-color:${globalStyle.backgroundColor};word-spacing:normal;">
 <div style="display:none;font-size:1px;color:${globalStyle.backgroundColor};line-height:1px;max-height:0;max-width:0;opacity:0;overflow:hidden;">&#8199;&#65279;&#847;</div>
 <center style="width:100%;background-color:${globalStyle.backgroundColor};">
 <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color:${globalStyle.backgroundColor};">
-  <tr>
+   <tr>
     <td align="center" valign="top">
       <table role="presentation" class="email-container" cellpadding="0" cellspacing="0" border="0" width="${globalStyle.maxWidth}" style="margin:0 auto;max-width:${globalStyle.maxWidth}px;width:100%;">
-        <tr>
-          <td>
+         <tr>
+           <td>
             ${rows.map(renderRow).join('\n')}
-          </td>
-        </tr>
-      </table>
-    </td>
-  </tr>
+           </td>
+         </tr>
+       </table>
+     </td>
+   </tr>
 </table>
 </center>
 </body>
