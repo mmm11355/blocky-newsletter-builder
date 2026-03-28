@@ -173,31 +173,35 @@ const CanvasBlock: React.FC<Props> = ({ block, rowId, cellIndex }) => {
             <img src={(block as any).src} alt={(block as any).alt} style={{ maxWidth: '100%', height: 'auto', display: 'block', margin: '0 auto', borderRadius: s.borderRadius }} />
           </div>
         );
-      case 'button':
-        return (
-          <div style={{ textAlign: s.textAlign as any, direction: 'ltr' }} onClick={handleClick}>
-            <a style={{
-              display: 'inline-block',
-              backgroundColor: s.backgroundColor,
-              color: s.color,
-              fontSize: s.fontSize,
-              fontWeight: s.fontWeight as any,
-              fontFamily: s.fontFamily !== 'inherit' ? s.fontFamily : undefined,
-              padding: `${s.paddingTop}px ${s.paddingRight}px ${s.paddingBottom}px ${s.paddingLeft}px`,
-              borderRadius: s.borderRadius,
-              border: `${s.borderWidth}px solid ${s.borderColor}`,
-              cursor: 'pointer',
-              outline: isSelected ? '2px solid hsl(var(--primary))' : 'none',
-              outlineOffset: '1px',
-              textDecoration: 'none',
-              textAlign: 'center',
-              lineHeight: s.lineHeight,
-              direction: 'ltr',
-            }}>
-              <span dangerouslySetInnerHTML={{ __html: parsedContent }} />
-            </a>
-          </div>
-        );
+     
+
+        case 'button':
+  return (
+    <div style={{ textAlign: s.textAlign as any, direction: 'ltr' }} onClick={handleClick}>
+      <a style={{
+        display: 'inline-block',
+        backgroundColor: s.backgroundColor,
+        color: s.color,
+        fontSize: s.fontSize,
+        fontWeight: s.fontWeight as any,
+        fontFamily: s.fontFamily !== 'inherit' ? s.fontFamily : undefined,
+        padding: `${s.paddingTop}px ${s.paddingRight}px ${s.paddingBottom}px ${s.paddingLeft}px`,
+        borderRadius: s.borderRadius,
+        border: `${s.borderWidth}px solid ${s.borderColor}`,
+        cursor: 'pointer',
+        outline: isSelected ? '2px solid hsl(var(--primary))' : 'none',
+        outlineOffset: '1px',
+        textDecoration: 'none',
+        textAlign: 'center',
+        lineHeight: s.lineHeight,
+        direction: 'ltr',
+      }}>
+        <span dangerouslySetInnerHTML={{ __html: parsedContent }} />
+      </a>
+    </div>
+  );
+
+        
       case 'list':
         return (
           <div style={{ ...baseStyle, margin: 0, direction: 'ltr' }} onClick={handleClick}>
