@@ -988,6 +988,24 @@ const MenuFields: React.FC<{
               </div>
             </Section>
             <Section title="Оформление">
+
+              <Field label="Иконка (Font Awesome класс)" compact>
+  <input
+    type="text"
+    value={link.iconName || ''}
+    onChange={(e) => {
+      const newLinks = [...block.links];
+      newLinks[i] = { ...newLinks[i], iconName: e.target.value };
+      updBlock({ links: newLinks });
+    }}
+    placeholder="fa-brands fa-facebook"
+    className="w-full rounded-lg border border-input bg-secondary/50 px-2 py-1.5 text-sm"
+  />
+  <p className="text-[10px] text-muted-foreground mt-1">
+    Примеры: fa-brands fa-facebook, fa-brands fa-instagram, fa-solid fa-star
+  </p>
+</Field>
+              
               <Field label="Размер иконок" compact>
                 <div className="flex items-center gap-2">
                   <input type="range" min={24} max={56} value={block.iconSize} onChange={(e) => updBlock({ iconSize: +e.target.value })} className="flex-1" />
