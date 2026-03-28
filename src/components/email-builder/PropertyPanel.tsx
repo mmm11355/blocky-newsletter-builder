@@ -9,7 +9,7 @@ const PropertyPanel = () => {
 
   if (!selected || !selection) {
     return (
-      <div className="w-[28rem] bg-card border-l border-border p-6 h-full overflow-y-auto scrollbar-thin flex flex-col items-center justify-center">
+      <div className="w-[400px] bg-card border-l border-border p-6 h-full overflow-y-auto scrollbar-thin flex flex-col items-center justify-center">
         <div className="w-12 h-12 rounded-xl bg-secondary flex items-center justify-center mb-3">
           <Settings2 className="h-5 w-5 text-muted-foreground" />
         </div>
@@ -24,7 +24,7 @@ const PropertyPanel = () => {
   const upd = (style: Record<string, any>) => updateBlockStyle(rowId, cellIndex, block.id, style);
   const updBlock = (updates: Record<string, any>) => updateBlock(rowId, cellIndex, block.id, updates);
 
-  const typeLabels: Record<string, string> = { heading: 'Заголовок', text: 'Текст', image: 'Изображение', button: 'Кнопка', list: 'Список', menu: 'Меню' };
+  const typeLabels: Record<string, string> = { heading: 'Заголовок', text: 'Текст', image: 'Изображение', button: 'Кнопка', list: 'Список', menu: 'Меню', social: 'Соцсети', testimonial: 'Отзыв', speaker: 'Спикер' };
 
   // Функция для очистки HTML тегов
   const stripHtml = (html: string) => {
@@ -72,11 +72,11 @@ const PropertyPanel = () => {
   };
 
   return (
-    <div className="w-[28rem] bg-card border-l border-border h-full overflow-y-auto scrollbar-thin">
+    <div className="w-[400px] bg-card border-l border-border h-full overflow-y-auto scrollbar-thin">
       <div className="p-4 border-b border-border flex items-center justify-between">
         <div className="flex items-center gap-2">
           <div className="w-2 h-2 rounded-full gradient-primary" />
-          <h3 className="text-sm font-semibold text-card-foreground">{typeLabels[block.type]}</h3>
+          <h3 className="text-sm font-semibold text-card-foreground">{typeLabels[block.type] || block.type}</h3>
         </div>
         <div className="flex gap-0.5">
           <button onClick={() => moveBlock(rowId, cellIndex, block.id, 'up')} className="p-1.5 rounded-md hover:bg-secondary text-muted-foreground hover:text-secondary-foreground transition-colors"><ArrowUp className="h-3.5 w-3.5" /></button>
@@ -90,7 +90,6 @@ const PropertyPanel = () => {
         {(block.type === 'heading' || block.type === 'text' || block.type === 'button') && (
           <Field label="Контент">
             <div className="space-y-1.5">
-              {/* Панель инструментов */}
               <div className="flex items-center gap-1 p-1 rounded-lg bg-secondary/50 border border-input flex-wrap">
                 <button
                   type="button"
@@ -120,12 +119,7 @@ const PropertyPanel = () => {
                       />
                       <div className="flex gap-1 mt-2">
                         {['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff', '#000000', '#ffffff'].map(c => (
-                          <button
-                            key={c}
-                            onClick={() => applyColor(c)}
-                            className="w-5 h-5 rounded border border-border"
-                            style={{ backgroundColor: c }}
-                          />
+                          <button key={c} onClick={() => applyColor(c)} className="w-5 h-5 rounded border border-border" style={{ backgroundColor: c }} />
                         ))}
                       </div>
                     </div>
@@ -151,12 +145,7 @@ const PropertyPanel = () => {
                       />
                       <div className="flex gap-1 mt-2">
                         {['#ffff00', '#ffcc00', '#ff9900', '#ff6600', '#ff3300', '#00ff00', '#00ccff', '#ff00ff'].map(c => (
-                          <button
-                            key={c}
-                            onClick={() => applyBgColor(c)}
-                            className="w-5 h-5 rounded border border-border"
-                            style={{ backgroundColor: c }}
-                          />
+                          <button key={c} onClick={() => applyBgColor(c)} className="w-5 h-5 rounded border border-border" style={{ backgroundColor: c }} />
                         ))}
                       </div>
                     </div>
@@ -164,7 +153,6 @@ const PropertyPanel = () => {
                 </div>
               </div>
 
-              {/* Поле ввода */}
               {block.type === 'text' ? (
                 <textarea
                   ref={textareaRef as React.RefObject<HTMLTextAreaElement>}
@@ -172,7 +160,6 @@ const PropertyPanel = () => {
                   onChange={(e) => updateText(e.target.value)}
                   rows={8}
                   className="w-full rounded-lg border border-input bg-secondary/50 px-3 py-2 text-sm text-card-foreground focus:outline-none focus:ring-1 focus:ring-primary/50 transition-all"
-                  placeholder="Введите текст... Выделите слово и нажмите кнопки форматирования"
                 />
               ) : (
                 <input
@@ -183,10 +170,6 @@ const PropertyPanel = () => {
                   className="w-full rounded-lg border border-input bg-secondary/50 px-3 py-2 text-sm text-card-foreground focus:outline-none focus:ring-1 focus:ring-primary/50 transition-all"
                 />
               )}
-              
-              <p className="text-[10px] text-muted-foreground">
-                📝 Выделите слово → нажмите <strong>B</strong> для жирного, 🎨 для цвета, 🖌️ для фона
-              </p>
             </div>
           </Field>
         )}
@@ -195,22 +178,10 @@ const PropertyPanel = () => {
         {block.type === 'list' && (
           <ListFields
             items={block.listItems || []}
-            bulletStyle={block.bulletStyle || { type: 'disc', color: '#333333', size: 16, fontWeight: '400', customIcon: '', offsetX: 0, offsetY: 0 }}
+            bulletStyle={block.bulletStyle || { type: 'disc', color: '#333333', size: 16, fontWeight: '400', customIcon: '', fontAwesomeIcon: '', offsetX: 0, offsetY: 0 }}
             onUpdateItems={(listItems) => updBlock({ listItems })}
             onUpdateBullet={(bulletStyle) => updBlock({ bulletStyle })}
           />
-      <Field label="Font Awesome иконка (для кастомного маркера)" compact>
-  <input
-    type="text"
-    value={bs.fontAwesomeIcon || ''}
-    onChange={(e) => onUpdateBullet({ ...bs, fontAwesomeIcon: e.target.value, type: 'custom' })}
-    placeholder="fa-solid fa-check"
-    className="w-full rounded-lg border border-input bg-secondary/50 px-2 py-1.5 text-sm"
-  />
-  <p className="text-[10px] text-muted-foreground mt-1">
-    Примеры: fa-solid fa-check, fa-regular fa-star, fa-solid fa-arrow-right
-  </p>
-</Field>
         )}
 
         {/* Menu Items */}
@@ -236,6 +207,196 @@ const PropertyPanel = () => {
           </Field>
         )}
 
+        {/* Social Links */}
+        {block.type === 'social' && (
+          <>
+            <Section title="Социальные сети">
+              <div className="space-y-2">
+                {(block.links || []).map((link: any, i: number) => (
+                  <div key={i} className="flex flex-col gap-2 p-2 rounded-lg bg-secondary/30">
+                    <div className="flex items-center gap-2">
+                      <select
+                        value={link.network}
+                        onChange={(e) => {
+                          const newLinks = [...block.links];
+                          newLinks[i] = { ...newLinks[i], network: e.target.value };
+                          updBlock({ links: newLinks });
+                        }}
+                        className="flex-1 rounded-lg border border-input bg-secondary/50 px-2 py-1.5 text-sm"
+                      >
+                        <option value="facebook">Facebook</option>
+                        <option value="instagram">Instagram</option>
+                        <option value="twitter">Twitter</option>
+                        <option value="linkedin">LinkedIn</option>
+                        <option value="youtube">YouTube</option>
+                        <option value="telegram">Telegram</option>
+                        <option value="vk">VK</option>
+                      </select>
+                      <button
+                        onClick={() => {
+                          const newLinks = block.links.filter((_: any, idx: number) => idx !== i);
+                          updBlock({ links: newLinks });
+                        }}
+                        className="p-1.5 rounded hover:bg-destructive"
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
+                    </div>
+                    <input
+                      type="text"
+                      value={link.url}
+                      onChange={(e) => {
+                        const newLinks = [...block.links];
+                        newLinks[i] = { ...newLinks[i], url: e.target.value };
+                        updBlock({ links: newLinks });
+                      }}
+                      placeholder="https://"
+                      className="w-full rounded-lg border border-input bg-secondary/50 px-2 py-1.5 text-sm"
+                    />
+                    <Field label="Font Awesome класс (опционально)" compact>
+                      <input
+                        type="text"
+                        value={link.iconName || ''}
+                        onChange={(e) => {
+                          const newLinks = [...block.links];
+                          newLinks[i] = { ...newLinks[i], iconName: e.target.value };
+                          updBlock({ links: newLinks });
+                        }}
+                        placeholder="fa-brands fa-facebook"
+                        className="w-full rounded-lg border border-input bg-secondary/50 px-2 py-1.5 text-sm"
+                      />
+                      <p className="text-[10px] text-muted-foreground mt-1">Примеры: fa-brands fa-facebook, fa-solid fa-star</p>
+                    </Field>
+                  </div>
+                ))}
+                <button
+                  onClick={() => updBlock({ links: [...(block.links || []), { network: 'facebook', url: '#', iconName: '' }] })}
+                  className="w-full flex items-center justify-center gap-1.5 py-2 rounded-lg bg-secondary text-sm"
+                >
+                  <Plus className="h-3.5 w-3.5" /> Добавить соцсеть
+                </button>
+              </div>
+            </Section>
+            <Section title="Оформление">
+              <Field label="Размер иконок" compact>
+                <div className="flex items-center gap-2">
+                  <input type="range" min={24} max={56} value={block.iconSize} onChange={(e) => updBlock({ iconSize: +e.target.value })} className="flex-1" />
+                  <span className="text-xs w-12">{block.iconSize}px</span>
+                </div>
+              </Field>
+              <Field label="Цвет иконок" compact>
+                <input type="color" value={block.iconColor} onChange={(e) => updBlock({ iconColor: e.target.value })} className="w-full h-8 rounded border" />
+              </Field>
+              <Field label="Цвет фона" compact>
+                <input type="color" value={block.iconBgColor} onChange={(e) => updBlock({ iconBgColor: e.target.value })} className="w-full h-8 rounded border" />
+              </Field>
+              <Field label="Расположение" compact>
+                <div className="flex gap-1">
+                  <button onClick={() => updBlock({ layout: 'horizontal' })} className={`flex-1 py-1.5 text-xs rounded ${block.layout === 'horizontal' ? 'bg-primary text-white' : 'bg-secondary'}`}>Горизонтально</button>
+                  <button onClick={() => updBlock({ layout: 'vertical' })} className={`flex-1 py-1.5 text-xs rounded ${block.layout === 'vertical' ? 'bg-primary text-white' : 'bg-secondary'}`}>Вертикально</button>
+                </div>
+              </Field>
+              <Field label="Отступ" compact>
+                <input type="number" value={block.gap} onChange={(e) => updBlock({ gap: +e.target.value })} className="w-full rounded border px-2 py-1.5 text-sm" />
+              </Field>
+            </Section>
+          </>
+        )}
+
+        {/* Testimonial */}
+        {block.type === 'testimonial' && (
+          <>
+            <Field label="Текст отзыва">
+              <textarea rows={4} value={block.quote} onChange={(e) => updBlock({ quote: e.target.value })} className="w-full rounded-lg border border-input bg-secondary/50 px-3 py-2 text-sm" />
+            </Field>
+            <Field label="Имя автора">
+              <input type="text" value={block.authorName} onChange={(e) => updBlock({ authorName: e.target.value })} className="w-full rounded-lg border border-input bg-secondary/50 px-3 py-2 text-sm" />
+            </Field>
+            <Field label="Должность / Компания">
+              <input type="text" value={block.authorTitle} onChange={(e) => updBlock({ authorTitle: e.target.value })} className="w-full rounded-lg border border-input bg-secondary/50 px-3 py-2 text-sm" />
+            </Field>
+            <Field label="Фото (URL)">
+              <input type="text" value={block.avatarUrl} onChange={(e) => updBlock({ avatarUrl: e.target.value })} className="w-full rounded-lg border border-input bg-secondary/50 px-3 py-2 text-sm" />
+            </Field>
+            <Field label="Рейтинг">
+              <div className="flex gap-1">
+                {[1,2,3,4,5].map(star => (
+                  <button key={star} onClick={() => updBlock({ rating: star })} className={`w-8 h-8 rounded text-xl ${block.rating >= star ? 'text-yellow-500' : 'text-gray-500'}`}>★</button>
+                ))}
+              </div>
+            </Field>
+          </>
+        )}
+
+        {/* Speaker */}
+        {block.type === 'speaker' && (
+          <>
+            <Field label="Имя спикера">
+              <input type="text" value={block.name} onChange={(e) => updBlock({ name: e.target.value })} className="w-full rounded-lg border border-input bg-secondary/50 px-3 py-2 text-sm" />
+            </Field>
+            <Field label="Должность">
+              <input type="text" value={block.title} onChange={(e) => updBlock({ title: e.target.value })} className="w-full rounded-lg border border-input bg-secondary/50 px-3 py-2 text-sm" />
+            </Field>
+            <Field label="Компания">
+              <input type="text" value={block.company} onChange={(e) => updBlock({ company: e.target.value })} className="w-full rounded-lg border border-input bg-secondary/50 px-3 py-2 text-sm" />
+            </Field>
+            <Field label="Фото (URL)">
+              <input type="text" value={block.photoUrl} onChange={(e) => updBlock({ photoUrl: e.target.value })} className="w-full rounded-lg border border-input bg-secondary/50 px-3 py-2 text-sm" />
+            </Field>
+            <Field label="Биография">
+              <textarea rows={3} value={block.bio} onChange={(e) => updBlock({ bio: e.target.value })} className="w-full rounded-lg border border-input bg-secondary/50 px-3 py-2 text-sm" />
+            </Field>
+            <Section title="Социальные сети спикера">
+              <div className="space-y-2">
+                {(block.socialLinks || []).map((link: any, i: number) => (
+                  <div key={i} className="flex items-center gap-2 p-2 rounded-lg bg-secondary/30">
+                    <select
+                      value={link.network}
+                      onChange={(e) => {
+                        const newLinks = [...(block.socialLinks || [])];
+                        newLinks[i] = { ...newLinks[i], network: e.target.value };
+                        updBlock({ socialLinks: newLinks });
+                      }}
+                      className="flex-1 rounded-lg border border-input bg-secondary/50 px-2 py-1.5 text-sm"
+                    >
+                      <option value="linkedin">LinkedIn</option>
+                      <option value="twitter">Twitter</option>
+                      <option value="facebook">Facebook</option>
+                      <option value="instagram">Instagram</option>
+                    </select>
+                    <input
+                      type="text"
+                      value={link.url}
+                      onChange={(e) => {
+                        const newLinks = [...(block.socialLinks || [])];
+                        newLinks[i] = { ...newLinks[i], url: e.target.value };
+                        updBlock({ socialLinks: newLinks });
+                      }}
+                      placeholder="https://"
+                      className="flex-1 rounded-lg border border-input bg-secondary/50 px-2 py-1.5 text-sm"
+                    />
+                    <button
+                      onClick={() => {
+                        const newLinks = (block.socialLinks || []).filter((_: any, idx: number) => idx !== i);
+                        updBlock({ socialLinks: newLinks });
+                      }}
+                      className="p-1.5 rounded hover:bg-destructive"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  </div>
+                ))}
+                <button
+                  onClick={() => updBlock({ socialLinks: [...(block.socialLinks || []), { network: 'linkedin', url: '#' }] })}
+                  className="w-full flex items-center justify-center gap-1.5 py-2 rounded-lg bg-secondary text-sm"
+                >
+                  <Plus className="h-3.5 w-3.5" /> Добавить соцсеть
+                </button>
+              </div>
+            </Section>
+          </>
+        )}
+
         {/* Font Family */}
         {(block.type === 'heading' || block.type === 'text' || block.type === 'button') && (
           <Section title="Шрифт">
@@ -243,7 +404,7 @@ const PropertyPanel = () => {
               <select
                 value={s.fontFamily}
                 onChange={(e) => upd({ fontFamily: e.target.value })}
-                className="w-full rounded-lg border border-input bg-secondary/50 px-2 py-1.5 text-sm text-card-foreground focus:outline-none focus:ring-1 focus:ring-primary/50"
+                className="w-full rounded-lg border border-input bg-secondary/50 px-2 py-1.5 text-sm"
               >
                 {EMAIL_FONTS.map(f => (
                   <option key={f.value} value={f.value}>{f.label}</option>
@@ -258,70 +419,23 @@ const PropertyPanel = () => {
           <div className="grid grid-cols-2 gap-2">
             <Field label="Размер" compact>
               <div className="flex items-center gap-1">
-                <button
-                  onClick={() => upd({ fontSize: Math.max(8, (s.fontSize || 16) - 2) })}
-                  className="w-6 h-6 rounded bg-secondary hover:bg-secondary/80 flex items-center justify-center text-sm"
-                >
-                  -
-                </button>
-                <input
-                  type="range"
-                  min={8}
-                  max={72}
-                  value={s.fontSize}
-                  onChange={(e) => upd({ fontSize: +e.target.value })}
-                  className="flex-1 h-2 accent-primary cursor-pointer"
-                />
-                <button
-                  onClick={() => upd({ fontSize: Math.min(72, (s.fontSize || 16) + 2) })}
-                  className="w-6 h-6 rounded bg-secondary hover:bg-secondary/80 flex items-center justify-center text-sm"
-                >
-                  +
-                </button>
-                <input
-                  type="number"
-                  value={s.fontSize}
-                  onChange={(e) => upd({ fontSize: +e.target.value })}
-                  className="w-14 rounded-lg border border-input bg-secondary/50 px-2 py-1.5 text-sm text-card-foreground text-center"
-                />
+                <button onClick={() => upd({ fontSize: Math.max(8, (s.fontSize || 16) - 2) })} className="w-6 h-6 rounded bg-secondary hover:bg-secondary/80 flex items-center justify-center text-sm">-</button>
+                <input type="range" min={8} max={72} value={s.fontSize} onChange={(e) => upd({ fontSize: +e.target.value })} className="flex-1 h-2 accent-primary cursor-pointer" />
+                <button onClick={() => upd({ fontSize: Math.min(72, (s.fontSize || 16) + 2) })} className="w-6 h-6 rounded bg-secondary hover:bg-secondary/80 flex items-center justify-center text-sm">+</button>
+                <input type="number" value={s.fontSize} onChange={(e) => upd({ fontSize: +e.target.value })} className="w-14 rounded-lg border border-input bg-secondary/50 px-2 py-1.5 text-sm text-center" />
               </div>
             </Field>
-            
             <Field label="Высота строки" compact>
               <div className="flex items-center gap-1">
-                <button
-                  onClick={() => upd({ lineHeight: Math.max(0.8, (s.lineHeight || 1.5) - 0.1) })}
-                  className="w-6 h-6 rounded bg-secondary hover:bg-secondary/80 flex items-center justify-center text-sm"
-                >
-                  -
-                </button>
-                <input
-                  type="range"
-                  min={0.8}
-                  max={2.5}
-                  step={0.1}
-                  value={s.lineHeight}
-                  onChange={(e) => upd({ lineHeight: +e.target.value })}
-                  className="flex-1 h-2 accent-primary cursor-pointer"
-                />
-                <button
-                  onClick={() => upd({ lineHeight: Math.min(2.5, (s.lineHeight || 1.5) + 0.1) })}
-                  className="w-6 h-6 rounded bg-secondary hover:bg-secondary/80 flex items-center justify-center text-sm"
-                >
-                  +
-                </button>
-                <input
-                  type="number"
-                  step={0.1}
-                  value={s.lineHeight}
-                  onChange={(e) => upd({ lineHeight: +e.target.value })}
-                  className="w-14 rounded-lg border border-input bg-secondary/50 px-2 py-1.5 text-sm text-card-foreground text-center"
-                />
+                <button onClick={() => upd({ lineHeight: Math.max(0.8, (s.lineHeight || 1.5) - 0.1) })} className="w-6 h-6 rounded bg-secondary hover:bg-secondary/80 flex items-center justify-center text-sm">-</button>
+                <input type="range" min={0.8} max={2.5} step={0.1} value={s.lineHeight} onChange={(e) => upd({ lineHeight: +e.target.value })} className="flex-1 h-2 accent-primary cursor-pointer" />
+                <button onClick={() => upd({ lineHeight: Math.min(2.5, (s.lineHeight || 1.5) + 0.1) })} className="w-6 h-6 rounded bg-secondary hover:bg-secondary/80 flex items-center justify-center text-sm">+</button>
+                <input type="number" step={0.1} value={s.lineHeight} onChange={(e) => upd({ lineHeight: +e.target.value })} className="w-14 rounded-lg border border-input bg-secondary/50 px-2 py-1.5 text-sm text-center" />
               </div>
             </Field>
           </div>
           <Field label="Жирность" compact>
-            <select value={s.fontWeight} onChange={(e) => upd({ fontWeight: e.target.value })} className="w-full rounded-lg border border-input bg-secondary/50 px-2 py-1.5 text-sm text-card-foreground focus:outline-none focus:ring-1 focus:ring-primary/50">
+            <select value={s.fontWeight} onChange={(e) => upd({ fontWeight: e.target.value })} className="w-full rounded-lg border border-input bg-secondary/50 px-2 py-1.5 text-sm">
               <option value="400">Обычный</option>
               <option value="500">Средний</option>
               <option value="600">Полужирный</option>
@@ -331,7 +445,7 @@ const PropertyPanel = () => {
           <Field label="Выравнивание" compact>
             <div className="flex gap-1">
               {(['left', 'center', 'right'] as const).map(a => (
-                <button key={a} onClick={() => upd({ textAlign: a })} className={`flex-1 py-1.5 text-xs rounded-lg font-medium transition-all ${s.textAlign === a ? 'gradient-primary text-primary-foreground shadow-sm' : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'}`}>
+                <button key={a} onClick={() => upd({ textAlign: a })} className={`flex-1 py-1.5 text-xs rounded-lg font-medium transition-all ${s.textAlign === a ? 'bg-primary text-white' : 'bg-secondary'}`}>
                   {a === 'left' ? 'Лево' : a === 'center' ? 'Центр' : 'Право'}
                 </button>
               ))}
@@ -343,22 +457,10 @@ const PropertyPanel = () => {
         <Section title="Цвета">
           <div className="grid grid-cols-2 gap-2">
             <Field label="Текст" compact>
-              <div className="relative">
-                <input type="color" value={s.color} onChange={(e) => upd({ color: e.target.value })} className="w-full h-9 rounded-lg border border-input cursor-pointer opacity-0 absolute inset-0" />
-                <div className="w-full h-9 rounded-lg border border-input flex items-center gap-2 px-2">
-                  <div className="w-5 h-5 rounded-md border border-border" style={{ backgroundColor: s.color }} />
-                  <span className="text-xs text-muted-foreground font-mono">{s.color}</span>
-                </div>
-              </div>
+              <input type="color" value={s.color} onChange={(e) => upd({ color: e.target.value })} className="w-full h-9 rounded border border-input cursor-pointer" />
             </Field>
             <Field label="Фон" compact>
-              <div className="relative">
-                <input type="color" value={s.backgroundColor === 'transparent' ? '#ffffff' : s.backgroundColor} onChange={(e) => upd({ backgroundColor: e.target.value })} className="w-full h-9 rounded-lg border border-input cursor-pointer opacity-0 absolute inset-0" />
-                <div className="w-full h-9 rounded-lg border border-input flex items-center gap-2 px-2">
-                  <div className="w-5 h-5 rounded-md border border-border" style={{ backgroundColor: s.backgroundColor === 'transparent' ? '#ffffff' : s.backgroundColor }} />
-                  <span className="text-xs text-muted-foreground font-mono">{s.backgroundColor === 'transparent' ? '#fff' : s.backgroundColor}</span>
-                </div>
-              </div>
+              <input type="color" value={s.backgroundColor === 'transparent' ? '#ffffff' : s.backgroundColor} onChange={(e) => upd({ backgroundColor: e.target.value })} className="w-full h-9 rounded border border-input cursor-pointer" />
             </Field>
           </div>
         </Section>
@@ -367,53 +469,18 @@ const PropertyPanel = () => {
         <Section title="Размер">
           <Field label="Ширина (десктоп)" compact>
             <div className="flex items-center gap-2">
-              <button
-                onClick={() => upd({ width: `${Math.max(10, (parseInt(s.width) || 100) - 5)}%` })}
-                className="w-6 h-6 rounded bg-secondary hover:bg-secondary/80 flex items-center justify-center text-sm"
-              >
-                -
-              </button>
-              <input
-                type="range"
-                min={10}
-                max={100}
-                value={parseInt(s.width) || 100}
-                onChange={(e) => upd({ width: `${e.target.value}%` })}
-                className="flex-1 h-2 accent-primary cursor-pointer"
-              />
-              <button
-                onClick={() => upd({ width: `${Math.min(100, (parseInt(s.width) || 100) + 5)}%` })}
-                className="w-6 h-6 rounded bg-secondary hover:bg-secondary/80 flex items-center justify-center text-sm"
-              >
-                +
-              </button>
-              <span className="text-xs text-muted-foreground font-mono w-10 text-right">{s.width || '100%'}</span>
+              <button onClick={() => upd({ width: `${Math.max(10, (parseInt(s.width) || 100) - 5)}%` })} className="w-6 h-6 rounded bg-secondary">-</button>
+              <input type="range" min={10} max={100} value={parseInt(s.width) || 100} onChange={(e) => upd({ width: `${e.target.value}%` })} className="flex-1 h-2 accent-primary" />
+              <button onClick={() => upd({ width: `${Math.min(100, (parseInt(s.width) || 100) + 5)}%` })} className="w-6 h-6 rounded bg-secondary">+</button>
+              <span className="text-xs w-10 text-right">{s.width || '100%'}</span>
             </div>
           </Field>
-          
           <Field label="Ширина (мобильная)" compact>
             <div className="flex items-center gap-2">
-              <button
-                onClick={() => upd({ mobileWidth: `${Math.max(10, (parseInt(s.mobileWidth) || 100) - 5)}%` })}
-                className="w-6 h-6 rounded bg-secondary hover:bg-secondary/80 flex items-center justify-center text-sm"
-              >
-                -
-              </button>
-              <input
-                type="range"
-                min={10}
-                max={100}
-                value={parseInt(s.mobileWidth) || 100}
-                onChange={(e) => upd({ mobileWidth: `${e.target.value}%` })}
-                className="flex-1 h-2 accent-primary cursor-pointer"
-              />
-              <button
-                onClick={() => upd({ mobileWidth: `${Math.min(100, (parseInt(s.mobileWidth) || 100) + 5)}%` })}
-                className="w-6 h-6 rounded bg-secondary hover:bg-secondary/80 flex items-center justify-center text-sm"
-              >
-                +
-              </button>
-              <span className="text-xs text-muted-foreground font-mono w-10 text-right">{s.mobileWidth || '100%'}</span>
+              <button onClick={() => upd({ mobileWidth: `${Math.max(10, (parseInt(s.mobileWidth) || 100) - 5)}%` })} className="w-6 h-6 rounded bg-secondary">-</button>
+              <input type="range" min={10} max={100} value={parseInt(s.mobileWidth) || 100} onChange={(e) => upd({ mobileWidth: `${e.target.value}%` })} className="flex-1 h-2 accent-primary" />
+              <button onClick={() => upd({ mobileWidth: `${Math.min(100, (parseInt(s.mobileWidth) || 100) + 5)}%` })} className="w-6 h-6 rounded bg-secondary">+</button>
+              <span className="text-xs w-10 text-right">{s.mobileWidth || '100%'}</span>
             </div>
           </Field>
         </Section>
@@ -424,24 +491,9 @@ const PropertyPanel = () => {
             {([['paddingTop', '↑ Верх'], ['paddingRight', '→ Право'], ['paddingBottom', '↓ Низ'], ['paddingLeft', '← Лево']] as const).map(([key, label]) => (
               <Field key={key} label={label} compact>
                 <div className="flex items-center gap-1">
-                  <button
-                    onClick={() => upd({ [key]: Math.max(0, (s[key] || 0) - 5) })}
-                    className="w-6 h-6 rounded bg-secondary hover:bg-secondary/80 flex items-center justify-center text-sm"
-                  >
-                    -
-                  </button>
-                  <input
-                    type="number"
-                    value={s[key] || 0}
-                    onChange={(e) => upd({ [key]: +e.target.value })}
-                    className="w-16 rounded-lg border border-input bg-secondary/50 px-2 py-1.5 text-sm text-card-foreground text-center focus:outline-none focus:ring-1 focus:ring-primary/50"
-                  />
-                  <button
-                    onClick={() => upd({ [key]: (s[key] || 0) + 5 })}
-                    className="w-6 h-6 rounded bg-secondary hover:bg-secondary/80 flex items-center justify-center text-sm"
-                  >
-                    +
-                  </button>
+                  <button onClick={() => upd({ [key]: Math.max(0, (s[key] || 0) - 5) })} className="w-6 h-6 rounded bg-secondary">-</button>
+                  <input type="number" value={s[key] || 0} onChange={(e) => upd({ [key]: +e.target.value })} className="w-16 rounded-lg border border-input bg-secondary/50 px-2 py-1.5 text-sm text-center" />
+                  <button onClick={() => upd({ [key]: (s[key] || 0) + 5 })} className="w-6 h-6 rounded bg-secondary">+</button>
                 </div>
               </Field>
             ))}
@@ -454,24 +506,9 @@ const PropertyPanel = () => {
             {([['marginTop', '↑ Верх'], ['marginRight', '→ Право'], ['marginBottom', '↓ Низ'], ['marginLeft', '← Лево']] as const).map(([key, label]) => (
               <Field key={key} label={label} compact>
                 <div className="flex items-center gap-1">
-                  <button
-                    onClick={() => upd({ [key]: Math.max(0, (s[key] || 0) - 5) })}
-                    className="w-6 h-6 rounded bg-secondary hover:bg-secondary/80 flex items-center justify-center text-sm"
-                  >
-                    -
-                  </button>
-                  <input
-                    type="number"
-                    value={s[key] || 0}
-                    onChange={(e) => upd({ [key]: +e.target.value })}
-                    className="w-16 rounded-lg border border-input bg-secondary/50 px-2 py-1.5 text-sm text-card-foreground text-center focus:outline-none focus:ring-1 focus:ring-primary/50"
-                  />
-                  <button
-                    onClick={() => upd({ [key]: (s[key] || 0) + 5 })}
-                    className="w-6 h-6 rounded bg-secondary hover:bg-secondary/80 flex items-center justify-center text-sm"
-                  >
-                    +
-                  </button>
+                  <button onClick={() => upd({ [key]: Math.max(0, (s[key] || 0) - 5) })} className="w-6 h-6 rounded bg-secondary">-</button>
+                  <input type="number" value={s[key] || 0} onChange={(e) => upd({ [key]: +e.target.value })} className="w-16 rounded-lg border border-input bg-secondary/50 px-2 py-1.5 text-sm text-center" />
+                  <button onClick={() => upd({ [key]: (s[key] || 0) + 5 })} className="w-6 h-6 rounded bg-secondary">+</button>
                 </div>
               </Field>
             ))}
@@ -483,57 +520,21 @@ const PropertyPanel = () => {
           <div className="grid grid-cols-2 gap-2">
             <Field label="Толщина" compact>
               <div className="flex items-center gap-1">
-                <button
-                  onClick={() => upd({ borderWidth: Math.max(0, (s.borderWidth || 0) - 1) })}
-                  className="w-6 h-6 rounded bg-secondary hover:bg-secondary/80 flex items-center justify-center text-sm"
-                >
-                  -
-                </button>
-                <input
-                  type="number"
-                  value={s.borderWidth || 0}
-                  onChange={(e) => upd({ borderWidth: +e.target.value })}
-                  className="w-16 rounded-lg border border-input bg-secondary/50 px-2 py-1.5 text-sm text-card-foreground text-center focus:outline-none focus:ring-1 focus:ring-primary/50"
-                />
-                <button
-                  onClick={() => upd({ borderWidth: (s.borderWidth || 0) + 1 })}
-                  className="w-6 h-6 rounded bg-secondary hover:bg-secondary/80 flex items-center justify-center text-sm"
-                >
-                  +
-                </button>
+                <button onClick={() => upd({ borderWidth: Math.max(0, (s.borderWidth || 0) - 1) })} className="w-6 h-6 rounded bg-secondary">-</button>
+                <input type="number" value={s.borderWidth || 0} onChange={(e) => upd({ borderWidth: +e.target.value })} className="w-16 rounded-lg border border-input bg-secondary/50 px-2 py-1.5 text-sm text-center" />
+                <button onClick={() => upd({ borderWidth: (s.borderWidth || 0) + 1 })} className="w-6 h-6 rounded bg-secondary">+</button>
               </div>
             </Field>
             <Field label="Радиус" compact>
               <div className="flex items-center gap-1">
-                <button
-                  onClick={() => upd({ borderRadius: Math.max(0, (s.borderRadius || 0) - 2) })}
-                  className="w-6 h-6 rounded bg-secondary hover:bg-secondary/80 flex items-center justify-center text-sm"
-                >
-                  -
-                </button>
-                <input
-                  type="number"
-                  value={s.borderRadius || 0}
-                  onChange={(e) => upd({ borderRadius: +e.target.value })}
-                  className="w-16 rounded-lg border border-input bg-secondary/50 px-2 py-1.5 text-sm text-card-foreground text-center focus:outline-none focus:ring-1 focus:ring-primary/50"
-                />
-                <button
-                  onClick={() => upd({ borderRadius: (s.borderRadius || 0) + 2 })}
-                  className="w-6 h-6 rounded bg-secondary hover:bg-secondary/80 flex items-center justify-center text-sm"
-                >
-                  +
-                </button>
+                <button onClick={() => upd({ borderRadius: Math.max(0, (s.borderRadius || 0) - 2) })} className="w-6 h-6 rounded bg-secondary">-</button>
+                <input type="number" value={s.borderRadius || 0} onChange={(e) => upd({ borderRadius: +e.target.value })} className="w-16 rounded-lg border border-input bg-secondary/50 px-2 py-1.5 text-sm text-center" />
+                <button onClick={() => upd({ borderRadius: (s.borderRadius || 0) + 2 })} className="w-6 h-6 rounded bg-secondary">+</button>
               </div>
             </Field>
           </div>
           <Field label="Цвет обводки" compact>
-            <div className="relative">
-              <input type="color" value={s.borderColor} onChange={(e) => upd({ borderColor: e.target.value })} className="w-full h-9 rounded-lg border border-input cursor-pointer opacity-0 absolute inset-0" />
-              <div className="w-full h-9 rounded-lg border border-input flex items-center gap-2 px-2">
-                <div className="w-5 h-5 rounded-md border border-border" style={{ backgroundColor: s.borderColor }} />
-                <span className="text-xs text-muted-foreground font-mono">{s.borderColor}</span>
-              </div>
-            </div>
+            <input type="color" value={s.borderColor} onChange={(e) => upd({ borderColor: e.target.value })} className="w-full h-9 rounded border border-input cursor-pointer" />
           </Field>
         </Section>
 
@@ -545,76 +546,14 @@ const PropertyPanel = () => {
             <Section title="Колонки">
               <Field label="Мобильная версия" compact>
                 <div className="flex gap-1">
-                  <button
-                    onClick={() => updateRowMobileStack(rowId, true)}
-                    className={`flex-1 py-1.5 text-xs rounded-lg font-medium transition-all ${row.mobileStack !== false ? 'gradient-primary text-primary-foreground shadow-sm' : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'}`}
-                  >
-                    В 1 колонку
-                  </button>
-                  <button
-                    onClick={() => updateRowMobileStack(rowId, false)}
-                    className={`flex-1 py-1.5 text-xs rounded-lg font-medium transition-all ${row.mobileStack === false ? 'gradient-primary text-primary-foreground shadow-sm' : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'}`}
-                  >
-                    Оставить колонки
-                  </button>
+                  <button onClick={() => updateRowMobileStack(rowId, true)} className={`flex-1 py-1.5 text-xs rounded ${row.mobileStack !== false ? 'bg-primary text-white' : 'bg-secondary'}`}>В 1 колонку</button>
+                  <button onClick={() => updateRowMobileStack(rowId, false)} className={`flex-1 py-1.5 text-xs rounded ${row.mobileStack === false ? 'bg-primary text-white' : 'bg-secondary'}`}>Оставить колонки</button>
                 </div>
               </Field>
               <Field label="Отступ между колонками" compact>
-                <div className="flex items-center gap-2">
-                  <input
-                    type="range"
-                    min={0}
-                    max={40}
-                    value={row.cellGap || 0}
-                    onChange={(e) => updateCellGap(rowId, +e.target.value)}
-                    className="flex-1 h-2 accent-primary"
-                  />
-                  <span className="text-xs text-muted-foreground font-mono w-10 text-right">{row.cellGap || 0}px</span>
-                </div>
+                <input type="range" min={0} max={40} value={row.cellGap || 0} onChange={(e) => updateCellGap(rowId, +e.target.value)} className="w-full h-2 accent-primary" />
+                <span className="text-xs text-muted-foreground">{row.cellGap || 0}px</span>
               </Field>
-              <div className="space-y-3">
-                {row.cells.map((_, ci) => {
-                  const cs = row.cellStyles?.[ci] || { backgroundColor: 'transparent', borderRadius: 0, paddingTop: 0, paddingRight: 0, paddingBottom: 0, paddingLeft: 0 };
-                  return (
-                    <div key={ci} className="space-y-2 p-2 rounded-lg bg-secondary/30 border border-border/30">
-                      <span className="text-[11px] font-semibold text-card-foreground/60 uppercase tracking-widest">Колонка {ci + 1}</span>
-                      <Field label="Фон" compact>
-                        <div className="relative">
-                          <input
-                            type="color"
-                            value={cs.backgroundColor === 'transparent' ? '#ffffff' : cs.backgroundColor}
-                            onChange={(e) => updateCellStyle(rowId, ci, { backgroundColor: e.target.value })}
-                            className="w-full h-8 rounded-lg border border-input cursor-pointer opacity-0 absolute inset-0"
-                          />
-                          <div className="w-full h-8 rounded-lg border border-input flex items-center gap-2 px-2">
-                            <div className="w-4 h-4 rounded border border-border" style={{ backgroundColor: cs.backgroundColor === 'transparent' ? '#ffffff' : cs.backgroundColor }} />
-                            <span className="text-xs text-muted-foreground font-mono">{cs.backgroundColor === 'transparent' ? 'прозр.' : cs.backgroundColor}</span>
-                            {cs.backgroundColor !== 'transparent' && (
-                              <button
-                                onClick={(e) => { e.stopPropagation(); updateCellStyle(rowId, ci, { backgroundColor: 'transparent' }); }}
-                                className="ml-auto text-[10px] text-muted-foreground hover:text-foreground"
-                              >✕</button>
-                            )}
-                          </div>
-                        </div>
-                      </Field>
-                      <Field label="Закругление" compact>
-                        <div className="flex items-center gap-2">
-                          <input type="range" min={0} max={40} value={cs.borderRadius || 0} onChange={(e) => updateCellStyle(rowId, ci, { borderRadius: +e.target.value })} className="flex-1 h-2 accent-primary" />
-                          <span className="text-xs text-muted-foreground font-mono w-10 text-right">{cs.borderRadius || 0}px</span>
-                        </div>
-                      </Field>
-                      <div className="grid grid-cols-2 gap-1.5">
-                        {([['paddingTop', '↑'], ['paddingRight', '→'], ['paddingBottom', '↓'], ['paddingLeft', '←']] as const).map(([key, icon]) => (
-                          <Field key={key} label={icon} compact>
-                            <input type="number" value={(cs as any)[key] || 0} onChange={(e) => updateCellStyle(rowId, ci, { [key]: +e.target.value })} className="w-full rounded-lg border border-input bg-secondary/50 px-2 py-1 text-xs text-card-foreground focus:outline-none focus:ring-1 focus:ring-primary/50" />
-                          </Field>
-                        ))}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
             </Section>
           );
         })()}
@@ -671,34 +610,19 @@ const ImageFields: React.FC<{ src: string; alt: string; href: string; onUpdate: 
     <>
       <Field label="Изображение">
         <div className="space-y-2">
-          <input type="text" value={src} onChange={(e) => onUpdate({ src: e.target.value })} placeholder="URL изображения" className="w-full rounded-lg border border-input bg-secondary/50 px-3 py-2 text-sm text-card-foreground focus:outline-none focus:ring-1 focus:ring-primary/50 transition-all" />
+          <input type="text" value={src} onChange={(e) => onUpdate({ src: e.target.value })} placeholder="URL изображения" className="w-full rounded-lg border border-input bg-secondary/50 px-3 py-2 text-sm" />
           <div className="flex gap-1.5">
-            <button
-              onClick={() => fileRef.current?.click()}
-              className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-secondary text-secondary-foreground hover:bg-secondary/80 text-xs font-medium transition-colors"
-            >
-              <Upload className="h-3.5 w-3.5" />
-              Загрузить
-            </button>
-            <button
-              onClick={handlePaste}
-              className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-secondary text-secondary-foreground hover:bg-secondary/80 text-xs font-medium transition-colors"
-            >
-              <ClipboardPaste className="h-3.5 w-3.5" />
-              Вставить
-            </button>
+            <button onClick={() => fileRef.current?.click()} className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-secondary text-xs">Загрузить</button>
+            <button onClick={handlePaste} className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-secondary text-xs">Вставить</button>
           </div>
           <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={(e) => { if (e.target.files?.[0]) handleFile(e.target.files[0]); }} />
         </div>
       </Field>
       <Field label="Alt текст">
-        <input type="text" value={alt} onChange={(e) => onUpdate({ alt: e.target.value })} className="w-full rounded-lg border border-input bg-secondary/50 px-3 py-2 text-sm text-card-foreground focus:outline-none focus:ring-1 focus:ring-primary/50 transition-all" />
+        <input type="text" value={alt} onChange={(e) => onUpdate({ alt: e.target.value })} className="w-full rounded-lg border border-input bg-secondary/50 px-3 py-2 text-sm" />
       </Field>
       <Field label="Ссылка при клике">
-        <div className="relative">
-          <Link className="h-3.5 w-3.5 text-muted-foreground absolute left-3 top-1/2 -translate-y-1/2" />
-          <input type="text" value={href} onChange={(e) => onUpdate({ href: e.target.value })} placeholder="https://example.com" className="w-full rounded-lg border border-input bg-secondary/50 pl-8 pr-3 py-2 text-sm text-card-foreground focus:outline-none focus:ring-1 focus:ring-primary/50 transition-all" />
-        </div>
+        <input type="text" value={href} onChange={(e) => onUpdate({ href: e.target.value })} placeholder="https://example.com" className="w-full rounded-lg border border-input bg-secondary/50 px-3 py-2 text-sm" />
       </Field>
     </>
   );
@@ -753,30 +677,17 @@ const ListFields: React.FC<{
         <div className="space-y-1.5">
           {items.map((item, i) => (
             <div key={i} className="flex items-center gap-1">
-              <input
-                type="text"
-                value={item}
-                onChange={(e) => updateItem(i, e.target.value)}
-                className="flex-1 rounded-lg border border-input bg-secondary/50 px-2 py-1.5 text-sm text-card-foreground focus:outline-none focus:ring-1 focus:ring-primary/50"
-              />
-              <button onClick={() => removeItem(i)} className="p-1 rounded hover:bg-destructive hover:text-destructive-foreground text-muted-foreground transition-colors">
-                <X className="h-3.5 w-3.5" />
-              </button>
+              <input type="text" value={item} onChange={(e) => updateItem(i, e.target.value)} className="flex-1 rounded-lg border border-input bg-secondary/50 px-2 py-1.5 text-sm" />
+              <button onClick={() => removeItem(i)} className="p-1 rounded hover:bg-destructive"><X className="h-3.5 w-3.5" /></button>
             </div>
           ))}
-          <button onClick={addItem} className="w-full flex items-center justify-center gap-1.5 py-1.5 rounded-lg bg-secondary text-secondary-foreground hover:bg-secondary/80 text-xs font-medium transition-colors">
-            <Plus className="h-3.5 w-3.5" /> Добавить пункт
-          </button>
+          <button onClick={addItem} className="w-full flex items-center justify-center gap-1.5 py-1.5 rounded-lg bg-secondary text-xs">Добавить пункт</button>
         </div>
       </Section>
 
       <Section title="Маркер">
         <Field label="Тип маркера" compact>
-          <select
-            value={bs.type}
-            onChange={(e) => onUpdateBullet({ ...bs, type: e.target.value as BulletType })}
-            className="w-full rounded-lg border border-input bg-secondary/50 px-2 py-1.5 text-sm text-card-foreground focus:outline-none focus:ring-1 focus:ring-primary/50"
-          >
+          <select value={bs.type} onChange={(e) => onUpdateBullet({ ...bs, type: e.target.value as BulletType })} className="w-full rounded-lg border border-input bg-secondary/50 px-2 py-1.5 text-sm">
             <option value="disc">● Точка</option>
             <option value="check">✓ Галочка</option>
             <option value="number">1. Цифры</option>
@@ -784,44 +695,36 @@ const ListFields: React.FC<{
           </select>
         </Field>
 
-        {bs.type === 'custom' && (
-          <Field label="Иконка маркера" compact>
-            <div className="space-y-1.5">
-              <input type="text" value={bs.customIcon} onChange={(e) => onUpdateBullet({ ...bs, customIcon: e.target.value })} placeholder="URL изображения" className="w-full rounded-lg border border-input bg-secondary/50 px-2 py-1.5 text-sm text-card-foreground focus:outline-none focus:ring-1 focus:ring-primary/50" />
-              <button
-                onClick={() => iconFileRef.current?.click()}
-                className="w-full flex items-center justify-center gap-1.5 py-1.5 rounded-lg bg-secondary text-secondary-foreground hover:bg-secondary/80 text-xs font-medium transition-colors"
-              >
-                <Upload className="h-3.5 w-3.5" /> Загрузить иконку
-              </button>
-              <input ref={iconFileRef} type="file" accept="image/*" className="hidden" onChange={(e) => { if (e.target.files?.[0]) handleIconFile(e.target.files[0]); }} />
-              {bs.customIcon && (
-                <div className="flex items-center gap-2 p-2 rounded-lg bg-secondary/30 border border-border/30">
-                  <img src={bs.customIcon} alt="" className="w-6 h-6 object-contain" />
-                  <span className="text-xs text-muted-foreground flex-1 truncate">Иконка загружена</span>
-                </div>
-              )}
-            </div>
+        <Field label="Font Awesome иконка (для кастомного маркера)" compact>
+          <input
+            type="text"
+            value={bs.fontAwesomeIcon || ''}
+            onChange={(e) => onUpdateBullet({ ...bs, fontAwesomeIcon: e.target.value, type: 'custom' })}
+            placeholder="fa-solid fa-check"
+            className="w-full rounded-lg border border-input bg-secondary/50 px-2 py-1.5 text-sm"
+          />
+          <p className="text-[10px] text-muted-foreground mt-1">Примеры: fa-solid fa-check, fa-regular fa-star, fa-solid fa-arrow-right</p>
+        </Field>
+
+        {bs.type === 'custom' && !bs.fontAwesomeIcon && (
+          <Field label="Иконка (URL)" compact>
+            <input type="text" value={bs.customIcon} onChange={(e) => onUpdateBullet({ ...bs, customIcon: e.target.value })} placeholder="URL изображения" className="w-full rounded-lg border border-input bg-secondary/50 px-2 py-1.5 text-sm" />
+            <button onClick={() => iconFileRef.current?.click()} className="w-full flex items-center justify-center gap-1.5 py-1.5 rounded-lg bg-secondary text-xs mt-1">Загрузить иконку</button>
+            <input ref={iconFileRef} type="file" accept="image/*" className="hidden" onChange={(e) => { if (e.target.files?.[0]) handleIconFile(e.target.files[0]); }} />
           </Field>
         )}
 
         <div className="grid grid-cols-2 gap-2">
           <Field label="Цвет" compact>
-            <div className="relative">
-              <input type="color" value={bs.color} onChange={(e) => onUpdateBullet({ ...bs, color: e.target.value })} className="w-full h-8 rounded-lg border border-input cursor-pointer opacity-0 absolute inset-0" />
-              <div className="w-full h-8 rounded-lg border border-input flex items-center gap-2 px-2">
-                <div className="w-4 h-4 rounded border border-border" style={{ backgroundColor: bs.color }} />
-                <span className="text-xs text-muted-foreground font-mono">{bs.color}</span>
-              </div>
-            </div>
+            <input type="color" value={bs.color} onChange={(e) => onUpdateBullet({ ...bs, color: e.target.value })} className="w-full h-8 rounded border" />
           </Field>
           <Field label="Размер" compact>
-            <input type="number" value={bs.size} onChange={(e) => onUpdateBullet({ ...bs, size: +e.target.value })} className="w-full rounded-lg border border-input bg-secondary/50 px-2 py-1.5 text-sm text-card-foreground focus:outline-none focus:ring-1 focus:ring-primary/50" />
+            <input type="number" value={bs.size} onChange={(e) => onUpdateBullet({ ...bs, size: +e.target.value })} className="w-full rounded-lg border border-input bg-secondary/50 px-2 py-1.5 text-sm" />
           </Field>
         </div>
 
         <Field label="Жирность" compact>
-          <select value={bs.fontWeight} onChange={(e) => onUpdateBullet({ ...bs, fontWeight: e.target.value })} className="w-full rounded-lg border border-input bg-secondary/50 px-2 py-1.5 text-sm text-card-foreground focus:outline-none focus:ring-1 focus:ring-primary/50">
+          <select value={bs.fontWeight} onChange={(e) => onUpdateBullet({ ...bs, fontWeight: e.target.value })} className="w-full rounded-lg border border-input bg-secondary/50 px-2 py-1.5 text-sm">
             <option value="400">Обычный</option>
             <option value="500">Средний</option>
             <option value="600">Полужирный</option>
@@ -831,16 +734,12 @@ const ListFields: React.FC<{
 
         <div className="grid grid-cols-2 gap-2">
           <Field label="Сдвиг X" compact>
-            <div className="flex items-center gap-2">
-              <input type="range" min={-20} max={20} value={bs.offsetX} onChange={(e) => onUpdateBullet({ ...bs, offsetX: +e.target.value })} className="flex-1 h-2 accent-primary" />
-              <span className="text-xs text-muted-foreground font-mono w-8 text-right">{bs.offsetX}</span>
-            </div>
+            <input type="range" min={-20} max={20} value={bs.offsetX} onChange={(e) => onUpdateBullet({ ...bs, offsetX: +e.target.value })} className="w-full h-2 accent-primary" />
+            <span className="text-xs text-muted-foreground">{bs.offsetX}</span>
           </Field>
           <Field label="Сдвиг Y" compact>
-            <div className="flex items-center gap-2">
-              <input type="range" min={-20} max={20} value={bs.offsetY} onChange={(e) => onUpdateBullet({ ...bs, offsetY: +e.target.value })} className="flex-1 h-2 accent-primary" />
-              <span className="text-xs text-muted-foreground font-mono w-8 text-right">{bs.offsetY}</span>
-            </div>
+            <input type="range" min={-20} max={20} value={bs.offsetY} onChange={(e) => onUpdateBullet({ ...bs, offsetY: +e.target.value })} className="w-full h-2 accent-primary" />
+            <span className="text-xs text-muted-foreground">{bs.offsetY}</span>
           </Field>
         </div>
       </Section>
@@ -881,7 +780,7 @@ const MenuFields: React.FC<{
       <Section title="Ориентация">
         <div className="flex gap-1">
           {(['horizontal', 'vertical'] as const).map(l => (
-            <button key={l} onClick={() => onUpdate({ menuLayout: l })} className={`flex-1 py-1.5 text-xs rounded-lg font-medium transition-all ${layout === l ? 'gradient-primary text-primary-foreground shadow-sm' : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'}`}>
+            <button key={l} onClick={() => onUpdate({ menuLayout: l })} className={`flex-1 py-1.5 text-xs rounded ${layout === l ? 'bg-primary text-white' : 'bg-secondary'}`}>
               {l === 'horizontal' ? 'Горизонтально' : 'Вертикально'}
             </button>
           ))}
@@ -891,30 +790,19 @@ const MenuFields: React.FC<{
       <Section title="Логотип">
         <Field label="Изображение" compact>
           <div className="space-y-1.5">
-            <input type="text" value={logoSrc} onChange={(e) => onUpdate({ menuLogoSrc: e.target.value })} placeholder="URL логотипа" className="w-full rounded-lg border border-input bg-secondary/50 px-2 py-1.5 text-sm text-card-foreground focus:outline-none focus:ring-1 focus:ring-primary/50" />
-            <button onClick={() => logoFileRef.current?.click()} className="w-full flex items-center justify-center gap-1.5 py-1.5 rounded-lg bg-secondary text-secondary-foreground hover:bg-secondary/80 text-xs font-medium transition-colors">
-              <Upload className="h-3.5 w-3.5" /> Загрузить
-            </button>
+            <input type="text" value={logoSrc} onChange={(e) => onUpdate({ menuLogoSrc: e.target.value })} placeholder="URL логотипа" className="w-full rounded-lg border border-input bg-secondary/50 px-2 py-1.5 text-sm" />
+            <button onClick={() => logoFileRef.current?.click()} className="w-full flex items-center justify-center gap-1.5 py-1.5 rounded-lg bg-secondary text-xs">Загрузить</button>
             <input ref={logoFileRef} type="file" accept="image/*" className="hidden" onChange={(e) => { if (e.target.files?.[0]) handleLogoFile(e.target.files[0]); }} />
-            {logoSrc && (
-              <div className="flex items-center gap-2 p-2 rounded-lg bg-secondary/30 border border-border/30">
-                <img src={logoSrc} alt="" className="h-6 object-contain" />
-                <span className="text-xs text-muted-foreground flex-1 truncate">Лого загружено</span>
-                <button onClick={() => onUpdate({ menuLogoSrc: '' })} className="text-muted-foreground hover:text-foreground"><X className="h-3 w-3" /></button>
-              </div>
-            )}
           </div>
         </Field>
         {logoSrc && (
           <>
             <Field label="Ширина лого" compact>
-              <div className="flex items-center gap-2">
-                <input type="range" min={30} max={300} value={logoWidth} onChange={(e) => onUpdate({ menuLogoWidth: +e.target.value })} className="flex-1 h-2 accent-primary" />
-                <span className="text-xs text-muted-foreground font-mono w-10 text-right">{logoWidth}px</span>
-              </div>
+              <input type="range" min={30} max={300} value={logoWidth} onChange={(e) => onUpdate({ menuLogoWidth: +e.target.value })} className="w-full h-2 accent-primary" />
+              <span className="text-xs">{logoWidth}px</span>
             </Field>
             <Field label="Ссылка лого" compact>
-              <input type="text" value={logoHref} onChange={(e) => onUpdate({ menuLogoHref: e.target.value })} placeholder="https://" className="w-full rounded-lg border border-input bg-secondary/50 px-2 py-1.5 text-sm text-card-foreground focus:outline-none focus:ring-1 focus:ring-primary/50" />
+              <input type="text" value={logoHref} onChange={(e) => onUpdate({ menuLogoHref: e.target.value })} placeholder="https://" className="w-full rounded-lg border border-input bg-secondary/50 px-2 py-1.5 text-sm" />
             </Field>
           </>
         )}
@@ -923,244 +811,23 @@ const MenuFields: React.FC<{
       <Section title="Пункты меню">
         <div className="space-y-2">
           {items.map((item, i) => (
-            <div key={i} className="space-y-1 p-2 rounded-lg bg-secondary/30 border border-border/30">
+            <div key={i} className="space-y-1 p-2 rounded-lg bg-secondary/30">
               <div className="flex items-center gap-1">
-                <input type="text" value={item.label} onChange={(e) => updateItem(i, 'label', e.target.value)} placeholder="Название" className="flex-1 rounded-lg border border-input bg-secondary/50 px-2 py-1 text-sm text-card-foreground focus:outline-none focus:ring-1 focus:ring-primary/50" />
-                <button onClick={() => removeItem(i)} className="p-1 rounded hover:bg-destructive hover:text-destructive-foreground text-muted-foreground transition-colors">
-                  <X className="h-3.5 w-3.5" />
-                </button>
+                <input type="text" value={item.label} onChange={(e) => updateItem(i, 'label', e.target.value)} placeholder="Название" className="flex-1 rounded-lg border border-input bg-secondary/50 px-2 py-1 text-sm" />
+                <button onClick={() => removeItem(i)} className="p-1 rounded hover:bg-destructive"><X className="h-3.5 w-3.5" /></button>
               </div>
-              <div className="relative">
-                <Link className="h-3 w-3 text-muted-foreground absolute left-2 top-1/2 -translate-y-1/2" />
-                <input type="text" value={item.href} onChange={(e) => updateItem(i, 'href', e.target.value)} placeholder="https://" className="w-full rounded-lg border border-input bg-secondary/50 pl-7 pr-2 py-1 text-xs text-card-foreground focus:outline-none focus:ring-1 focus:ring-primary/50" />
-              </div>
+              <input type="text" value={item.href} onChange={(e) => updateItem(i, 'href', e.target.value)} placeholder="https://" className="w-full rounded-lg border border-input bg-secondary/50 px-2 py-1 text-sm" />
             </div>
           ))}
           {items.length < 5 && (
-            <button onClick={addItem} className="w-full flex items-center justify-center gap-1.5 py-1.5 rounded-lg bg-secondary text-secondary-foreground hover:bg-secondary/80 text-xs font-medium transition-colors">
-              <Plus className="h-3.5 w-3.5" /> Добавить пункт
-            </button>
+            <button onClick={addItem} className="w-full flex items-center justify-center gap-1.5 py-1.5 rounded-lg bg-secondary text-xs">Добавить пункт</button>
           )}
         </div>
       </Section>
 
-
-                {/* Social Links - РЕДАКТОР */}
-        {block.type === 'social' && (
-          <>
-            <Section title="Социальные сети">
-              <div className="space-y-2">
-                {(block.links || []).map((link, i) => (
-                  <div key={i} className="flex items-center gap-2 p-2 rounded-lg bg-secondary/30">
-                    <select
-                      value={link.network}
-                      onChange={(e) => {
-                        const newLinks = [...block.links];
-                        newLinks[i] = { ...newLinks[i], network: e.target.value as any };
-                        updBlock({ links: newLinks });
-                      }}
-                      className="flex-1 rounded-lg border border-input bg-secondary/50 px-2 py-1.5 text-sm"
-                    >
-                      <option value="facebook">Facebook</option>
-                      <option value="instagram">Instagram</option>
-                      <option value="twitter">Twitter</option>
-                      <option value="linkedin">LinkedIn</option>
-                      <option value="youtube">YouTube</option>
-                      <option value="telegram">Telegram</option>
-                      <option value="vk">VK</option>
-                    </select>
-                    <input
-                      type="text"
-                      value={link.url}
-                      onChange={(e) => {
-                        const newLinks = [...block.links];
-                        newLinks[i] = { ...newLinks[i], url: e.target.value };
-                        updBlock({ links: newLinks });
-                      }}
-                      placeholder="https://"
-                      className="flex-1 rounded-lg border border-input bg-secondary/50 px-2 py-1.5 text-sm"
-                    />
-                    <button
-                      onClick={() => {
-                        const newLinks = block.links.filter((_, idx) => idx !== i);
-                        updBlock({ links: newLinks });
-                      }}
-                      className="p-1.5 rounded hover:bg-destructive"
-                    >
-                      <X className="h-4 w-4" />
-                    </button>
-                  </div>
-                ))}
-                <button
-                  onClick={() => updBlock({ links: [...(block.links || []), { network: 'facebook', url: '#' }] })}
-                  className="w-full flex items-center justify-center gap-1.5 py-2 rounded-lg bg-secondary text-sm"
-                >
-                  <Plus className="h-3.5 w-3.5" /> Добавить соцсеть
-                </button>
-              </div>
-            </Section>
-            <Section title="Оформление">
-
-              <Field label="Иконка (Font Awesome класс)" compact>
-  <input
-    type="text"
-    value={link.iconName || ''}
-    onChange={(e) => {
-      const newLinks = [...block.links];
-      newLinks[i] = { ...newLinks[i], iconName: e.target.value };
-      updBlock({ links: newLinks });
-    }}
-    placeholder="fa-brands fa-facebook"
-    className="w-full rounded-lg border border-input bg-secondary/50 px-2 py-1.5 text-sm"
-  />
-  <p className="text-[10px] text-muted-foreground mt-1">
-    Примеры: fa-brands fa-facebook, fa-brands fa-instagram, fa-solid fa-star
-  </p>
-</Field>
-              
-              <Field label="Размер иконок" compact>
-                <div className="flex items-center gap-2">
-                  <input type="range" min={24} max={56} value={block.iconSize} onChange={(e) => updBlock({ iconSize: +e.target.value })} className="flex-1" />
-                  <span className="text-xs w-12">{block.iconSize}px</span>
-                </div>
-              </Field>
-              <Field label="Цвет иконок" compact>
-                <div className="relative">
-                  <input type="color" value={block.iconColor} onChange={(e) => updBlock({ iconColor: e.target.value })} className="w-full h-8 rounded border cursor-pointer" />
-                </div>
-              </Field>
-              <Field label="Цвет фона" compact>
-                <div className="relative">
-                  <input type="color" value={block.iconBgColor} onChange={(e) => updBlock({ iconBgColor: e.target.value })} className="w-full h-8 rounded border cursor-pointer" />
-                </div>
-              </Field>
-              <Field label="Расположение" compact>
-                <div className="flex gap-1">
-                  <button onClick={() => updBlock({ layout: 'horizontal' })} className={`flex-1 py-1.5 text-xs rounded ${block.layout === 'horizontal' ? 'bg-primary text-white' : 'bg-secondary'}`}>Горизонтально</button>
-                  <button onClick={() => updBlock({ layout: 'vertical' })} className={`flex-1 py-1.5 text-xs rounded ${block.layout === 'vertical' ? 'bg-primary text-white' : 'bg-secondary'}`}>Вертикально</button>
-                </div>
-              </Field>
-              <Field label="Отступ" compact>
-                <div className="flex items-center gap-2">
-                  <input type="range" min={4} max={32} value={block.gap} onChange={(e) => updBlock({ gap: +e.target.value })} className="flex-1" />
-                  <span className="text-xs w-12">{block.gap}px</span>
-                </div>
-              </Field>
-            </Section>
-          </>
-        )}
-
-        {/* Testimonial - РЕДАКТОР */}
-        {block.type === 'testimonial' && (
-          <>
-            <Field label="Текст отзыва">
-              <textarea rows={4} value={block.quote} onChange={(e) => updBlock({ quote: e.target.value })} className="w-full rounded-lg border border-input bg-secondary/50 px-3 py-2 text-sm" placeholder="Текст отзыва..." />
-            </Field>
-            <Field label="Имя автора">
-              <input type="text" value={block.authorName} onChange={(e) => updBlock({ authorName: e.target.value })} className="w-full rounded-lg border border-input bg-secondary/50 px-3 py-2 text-sm" placeholder="Анна Иванова" />
-            </Field>
-            <Field label="Должность / Компания">
-              <input type="text" value={block.authorTitle} onChange={(e) => updBlock({ authorTitle: e.target.value })} className="w-full rounded-lg border border-input bg-secondary/50 px-3 py-2 text-sm" placeholder="Менеджер проектов" />
-            </Field>
-            <Field label="Фото (URL)">
-              <input type="text" value={block.avatarUrl} onChange={(e) => updBlock({ avatarUrl: e.target.value })} className="w-full rounded-lg border border-input bg-secondary/50 px-3 py-2 text-sm" placeholder="https://example.com/avatar.jpg" />
-              {block.avatarUrl && (
-                <div className="mt-2 flex justify-center">
-                  <img src={block.avatarUrl} alt="avatar" className="w-12 h-12 rounded-full object-cover" />
-                </div>
-              )}
-            </Field>
-            <Field label="Рейтинг">
-              <div className="flex gap-1">
-                {[1,2,3,4,5].map(star => (
-                  <button key={star} onClick={() => updBlock({ rating: star })} className={`w-8 h-8 rounded text-xl ${block.rating >= star ? 'text-yellow-500' : 'text-gray-500'}`}>★</button>
-                ))}
-              </div>
-            </Field>
-          </>
-        )}
-
-        {/* Speaker - РЕДАКТОР */}
-        {block.type === 'speaker' && (
-          <>
-            <Field label="Имя спикера">
-              <input type="text" value={block.name} onChange={(e) => updBlock({ name: e.target.value })} className="w-full rounded-lg border border-input bg-secondary/50 px-3 py-2 text-sm" />
-            </Field>
-            <Field label="Должность">
-              <input type="text" value={block.title} onChange={(e) => updBlock({ title: e.target.value })} className="w-full rounded-lg border border-input bg-secondary/50 px-3 py-2 text-sm" />
-            </Field>
-            <Field label="Компания">
-              <input type="text" value={block.company} onChange={(e) => updBlock({ company: e.target.value })} className="w-full rounded-lg border border-input bg-secondary/50 px-3 py-2 text-sm" />
-            </Field>
-            <Field label="Фото (URL)">
-              <input type="text" value={block.photoUrl} onChange={(e) => updBlock({ photoUrl: e.target.value })} className="w-full rounded-lg border border-input bg-secondary/50 px-3 py-2 text-sm" />
-              {block.photoUrl && (
-                <div className="mt-2 flex justify-center">
-                  <img src={block.photoUrl} alt="speaker" className="w-16 h-16 rounded-full object-cover" />
-                </div>
-              )}
-            </Field>
-            <Field label="Биография">
-              <textarea rows={3} value={block.bio} onChange={(e) => updBlock({ bio: e.target.value })} className="w-full rounded-lg border border-input bg-secondary/50 px-3 py-2 text-sm" />
-            </Field>
-            <Section title="Социальные сети спикера">
-              <div className="space-y-2">
-                {(block.socialLinks || []).map((link, i) => (
-                  <div key={i} className="flex items-center gap-2 p-2 rounded-lg bg-secondary/30">
-                    <select
-                      value={link.network}
-                      onChange={(e) => {
-                        const newLinks = [...(block.socialLinks || [])];
-                        newLinks[i] = { ...newLinks[i], network: e.target.value as any };
-                        updBlock({ socialLinks: newLinks });
-                      }}
-                      className="flex-1 rounded-lg border border-input bg-secondary/50 px-2 py-1.5 text-sm"
-                    >
-                      <option value="linkedin">LinkedIn</option>
-                      <option value="twitter">Twitter</option>
-                      <option value="facebook">Facebook</option>
-                      <option value="instagram">Instagram</option>
-                    </select>
-                    <input
-                      type="text"
-                      value={link.url}
-                      onChange={(e) => {
-                        const newLinks = [...(block.socialLinks || [])];
-                        newLinks[i] = { ...newLinks[i], url: e.target.value };
-                        updBlock({ socialLinks: newLinks });
-                      }}
-                      placeholder="https://"
-                      className="flex-1 rounded-lg border border-input bg-secondary/50 px-2 py-1.5 text-sm"
-                    />
-                    <button
-                      onClick={() => {
-                        const newLinks = (block.socialLinks || []).filter((_, idx) => idx !== i);
-                        updBlock({ socialLinks: newLinks });
-                      }}
-                      className="p-1.5 rounded hover:bg-destructive"
-                    >
-                      <X className="h-4 w-4" />
-                    </button>
-                  </div>
-                ))}
-                <button
-                  onClick={() => updBlock({ socialLinks: [...(block.socialLinks || []), { network: 'linkedin', url: '#' }] })}
-                  className="w-full flex items-center justify-center gap-1.5 py-2 rounded-lg bg-secondary text-sm"
-                >
-                  <Plus className="h-3.5 w-3.5" /> Добавить соцсеть
-                </button>
-              </div>
-            </Section>
-          </>
-        )}
-
-
-      
       <Field label="Отступ между элементами" compact>
-        <div className="flex items-center gap-2">
-          <input type="range" min={4} max={40} value={gap} onChange={(e) => onUpdate({ menuGap: +e.target.value })} className="flex-1 h-2 accent-primary" />
-          <span className="text-xs text-muted-foreground font-mono w-10 text-right">{gap}px</span>
-        </div>
+        <input type="range" min={4} max={40} value={gap} onChange={(e) => onUpdate({ menuGap: +e.target.value })} className="w-full h-2 accent-primary" />
+        <span className="text-xs">{gap}px</span>
       </Field>
     </>
   );
