@@ -9,6 +9,7 @@ export type MenuLayout = 'horizontal' | 'vertical';
 export interface SocialLink {
   network: 'facebook' | 'instagram' | 'twitter' | 'linkedin' | 'youtube' | 'telegram' | 'tiktok' | 'vk' | 'whatsapp';
   url: string;
+  iconName?: string; // для кастомной иконки из Font Awesome
 }
 
 export interface SocialBlock extends BaseBlock {
