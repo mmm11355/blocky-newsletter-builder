@@ -47,6 +47,7 @@ export interface ListBulletStyle {
   size: number;
   fontWeight: string;
   customIcon: string;
+  fontAwesomeIcon: string; // например, "fa-solid fa-check"
   offsetX: number;
   offsetY: number;
 }
@@ -163,6 +164,7 @@ export const createBlock = (type: BlockType): EmailBlock => {
     color: '#000000',
     fontSize: 16,
     fontWeight: '400',
+    fontAwesomeIcon: 'fa-solid fa-circle',
     fontFamily: 'inherit',
     textAlign: 'left',
     backgroundColor: 'transparent',
