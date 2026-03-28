@@ -192,22 +192,8 @@ const CanvasBlock: React.FC<Props> = ({ block, rowId, cellIndex }) => {
           </div>
         );
       }
-      case 'social': {
+            case 'social': {
         const socialBlock = block as SocialBlock;
-        const iconStyle: React.CSSProperties = {
-          width: socialBlock.iconSize,
-          height: socialBlock.iconSize,
-          backgroundColor: socialBlock.iconBgColor,
-          color: socialBlock.iconColor,
-          borderRadius: '50%',
-          display: 'inline-flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          textDecoration: 'none',
-          fontSize: socialBlock.iconSize * 0.5,
-          fontWeight: 'bold',
-          transition: 'opacity 0.2s',
-        };
         return (
           <div style={{ ...baseStyle, margin: 0, direction: 'ltr' }} onClick={handleClick}>
             <div style={{
@@ -225,11 +211,21 @@ const CanvasBlock: React.FC<Props> = ({ block, rowId, cellIndex }) => {
                   href={link.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  style={iconStyle}
+                  style={{
+                    display: 'inline-flex',
+                    textDecoration: 'none',
+                    backgroundColor: socialBlock.iconBgColor,
+                    borderRadius: '50%',
+                    width: socialBlock.iconSize,
+                    height: socialBlock.iconSize,
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
                   onClick={(e) => e.stopPropagation()}
-                >
-                  {getSocialIcon(link.network, socialBlock.iconSize)}
-                </a>
+                  dangerouslySetInnerHTML={{
+                    __html: getSocialIcon(link.network, socialBlock.iconSize * 0.6, socialBlock.iconColor)
+                  }}
+                />
               ))}
             </div>
           </div>
