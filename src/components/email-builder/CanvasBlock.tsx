@@ -175,7 +175,7 @@ const CanvasBlock: React.FC<Props> = ({ block, rowId, cellIndex }) => {
             </a>
           </div>
         );
-      case 'list': {
+     case 'list': {
   const bs = (block as any).bulletStyle || { type: 'disc', color: '#333333', size: 16, fontWeight: '400', customIcon: '', fontAwesomeIcon: '', offsetX: 0, offsetY: 0 };
   const listItems = (block as any).listItems || [];
   
@@ -187,9 +187,9 @@ const CanvasBlock: React.FC<Props> = ({ block, rowId, cellIndex }) => {
             let bulletContent = null;
             
             if (bs.type === 'custom' && bs.fontAwesomeIcon) {
-              bulletContent = <i className={bs.fontAwesomeIcon} style={{ color: bs.color, fontSize: bs.size, width: bs.size, textAlign: 'center', display: 'inline-block' }} />;
+              bulletContent = <i className={bs.fontAwesomeIcon} style={{ color: bs.color, fontSize: bs.size }} />;
             } else if (bs.type === 'custom' && bs.customIcon) {
-              bulletContent = <img src={bs.customIcon} alt="" style={{ width: bs.size, height: bs.size, display: 'inline-block', verticalAlign: 'middle' }} />;
+              bulletContent = <img src={bs.customIcon} alt="" style={{ width: bs.size, height: bs.size, display: 'block' }} />;
             } else if (bs.type === 'check') {
               bulletContent = <span style={{ color: bs.color, fontSize: bs.size }}>✓</span>;
             } else if (bs.type === 'number') {
@@ -199,11 +199,30 @@ const CanvasBlock: React.FC<Props> = ({ block, rowId, cellIndex }) => {
             }
             
             return (
-              <tr key={i} style={{ verticalAlign: 'middle' }}>
-                <td style={{ width: bs.size + 12, paddingRight: 8, verticalAlign: 'middle', textAlign: 'center' }}>
-                  {bulletContent}
+              <tr key={i} style={{ verticalAlign: 'top' }}>
+                <td style={{ 
+                  width: bs.size + 12, 
+                  paddingRight: 8, 
+                  verticalAlign: 'top',
+                  textAlign: 'left'
+                }}>
+                  <span style={{
+                    display: 'inline-block',
+                    position: 'relative',
+                    left: bs.offsetX,
+                    top: bs.offsetY,
+                    lineHeight: 1,
+                  }}>
+                    {bulletContent}
+                  </span>
                 </td>
-                <td style={{ color: s.color, fontSize: s.fontSize, lineHeight: s.lineHeight, paddingBottom: i < listItems.length - 1 ? 6 : 0, verticalAlign: 'middle' }}>
+                <td style={{ 
+                  color: s.color, 
+                  fontSize: s.fontSize, 
+                  lineHeight: s.lineHeight, 
+                  paddingBottom: i < listItems.length - 1 ? 6 : 0,
+                  verticalAlign: 'top'
+                }}>
                   {item}
                 </td>
               </tr>
